@@ -1,0 +1,17 @@
+---
+import Base from '../layouts/Base.astro';
+import config from '../../site.config.mjs';
+import { listMetricSlugs } from '../lib/metrics';
+
+const slugs = listMetricSlugs();
+---
+<Base>
+  <h1>{config.siteName}</h1>
+  {slugs.length === 0 ? (
+    <p>No metrics published yet.</p>
+  ) : (
+    <ul>
+      {slugs.map((slug) => <li>{slug}</li>)}
+    </ul>
+  )}
+</Base>

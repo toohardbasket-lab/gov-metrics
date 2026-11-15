@@ -1,0 +1,45 @@
+---
+import '../styles/site.css';
+import config from '../../site.config.mjs';
+
+interface Props {
+  title?: string;
+}
+const { title } = Astro.props;
+const pageTitle = title ? `${title} | ${config.siteName}` : config.siteName;
+const nav = [
+  { href: '/', label: 'Home' },
+  { href: '/targets/', label: 'Targets' },
+  { href: '/method/', label: 'Method' },
+  { href: '/inclusion-rule/', label: 'Inclusion rule' },
+  { href: '/corrections/', label: 'Corrections' },
+  { href: '/about/', label: 'About' },
+];
+---
+<!doctype html>
+<html lang="en-AU">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="site-name" href="/">{config.siteName}</a>
+      <nav aria-label="Main">
+        <ul>
+          {nav.map((item) => (
+            <li><a href={item.href}>{item.label}</a></li>
+          ))}
+        </ul>
+      </nav>
+    </header>
+    <main>
+      <slot />
+    </main>
+    <footer class="site-footer">
+      {config.footerText && <p>{config.footerText}</p>}
+      {config.authorisationLine && <p>{config.authorisationLine}</p>}
+    </footer>
+  </body>
+</html>
