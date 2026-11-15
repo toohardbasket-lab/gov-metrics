@@ -15,10 +15,10 @@ You need Node.js version 22 installed (the version used to build this is recorde
 ## What is in each folder
 
 - `site.config.mjs`: the one file holding the site name, publisher, authorisation line, contact email, footer text and web address. Change the name or owner here and nowhere else.
-- `src/`: the pages, the shared page layout and the styling.
-- `metrics/`: one folder per metric, with its data and checking notes. Empty for now. See `metrics/README.md`.
-- `shared/`: lists used on every chart: `governments.csv` (when each government was sworn in) and `events.csv` (the marked events).
-- `scrapers/`: the Python programs that will download official data. None yet. See `scrapers/README.md`.
+- `src/`: the pages, the shared page layout, the chart (`src/components/MetricChart.astro`), the code that reads each metric's files (`src/lib/`) and the styling.
+- `metrics/`: one folder per metric, with its definition (`metric.yml`), data and checking notes. The first is `commonwealth-debt`, built from prototype data. See `metrics/README.md` for what goes in `metric.yml`.
+- `shared/`: lists used on every chart: `governments.csv` (when each government was sworn in), `events.csv` (the marked events) and `cpi_june.csv` (June quarter price index, used for the inflation-adjusted views).
+- `scrapers/`: the Python programs that will download official data. None yet, apart from two one-off converters for the prototype data in `scrapers/tools/`. See `scrapers/README.md`.
 - `public/`: files copied to the site as they are.
 - `dist/`: the built site. Created by `npm run build`. Not kept in version history.
 

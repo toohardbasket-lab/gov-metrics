@@ -1,12 +1,12 @@
 # Scrapers
 
-Scrapers are written in Python. Each one downloads an official source file, saves the raw file under the metric's `sources/` folder, and writes a versioned `data.csv`. There is no scraper code yet.
+Scrapers are written in Python. Each one downloads an official source file, saves the raw file under the metric's `sources/` folder, and writes a versioned `data.csv`. There is no real scraper yet. `tools/` holds two one-off converters (`make_debt_prototype_csv.py` and `make_cpi_june_csv.py`) that turn the prototype's machine-read files into `data.csv` and `shared/cpi_june.csv`. They will be replaced by real scrapers in work package WP2.
 
 Every scraper must follow the nine data rules from the build plan, in plain words:
 
 1. Never type a figure. Every number comes from a file the scraper downloaded. The metric's definition file records the web address, the table, the date retrieved and a checksum of the file.
 2. One folder per metric, holding `metric.yml`, `data.csv`, `sources/` (raw files as downloaded) and `NOTES.md`.
-3. Use the long CSV shape (`date, series, jurisdiction, value, unit, status, period`). Status is `actual`, `estimate` or `forecast`. Dates are real dates, and the source's own period label goes in `period`.
+3. Use the long CSV shape (`date, period, series, jurisdiction, value, unit, status`). Status is `actual`, `estimate` or `forecast`. Dates are real dates, and the source's own period label goes in `period`.
 4. Check the data before publishing, and refuse to publish if a check fails: no missing years inside a series; values inside a stated sensible range; the latest value matches a second official statement of the same figure where one exists; and the row count never falls between runs.
 5. Work out derived figures (inflation-adjusted dollars, per person, straight-line pace) in code, label them as derived, and print the formula on the page.
 6. Keep revisions. When a source revises its history, the old CSV stays in version history and the page notes that figures were revised and when.

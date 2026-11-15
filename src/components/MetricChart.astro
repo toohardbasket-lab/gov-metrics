@@ -1,0 +1,220 @@
+---
+// The shared chart. Everything it shows comes from the `chart` prop (built from
+// metric.yml, data.csv and the shared lists in src/lib/metrics.ts). Nothing here
+// belongs to any one metric.
+import type { ChartData } from '../lib/metrics';
+
+interface Props {
+  chart: ChartData;
+}
+const { chart } = Astro.props;
+const json = JSON.stringify(chart).replace(/</g, '\\u003c');
+const first = chart.views[0];
+---
+<div class="metric-chart" data-metric-chart>
+  <div class="tabs" role="group" aria-label="Choose a view">
+    {chart.views.map((v, i) => (
+      <button type="button" data-view={v.id} aria-pressed={i === 0 ? 'true' : 'false'}>{v.label}</button>
+    ))}
+  </div>
+  <div class="legend">
+    <span class="legend-series" data-legend-series>
+      {first.lines.map((l, i) => (
+        <span><span class="sw" style={`background:var(--series-${i + 1})`}></span>{l.label}</span>
+      ))}
+    </span>
+    <span><span class="sw sw-band"></span>Shading marks a change of governing party</span>
+  </div>
+  <div class="chartwrap" data-chartwrap>
+    <svg viewBox="0 0 900 470" role="img" aria-label={chart.alt}></svg>
+    <div class="tip" data-tip></div>
+  </div>
+  <p class="cap" data-caption>{first.caption} {chart.source}</p>
+  <script type="application/json" data-chart-data set:html={json} />
+</div>
+
+<style is:global>
+  .metric-chart .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+  .metric-chart .tabs button { font: inherit; font-size: 14px; padding: 7px 12px; border-radius: 999px; border: 1px solid var(--rule); background: transparent; color: var(--ink-2); cursor: pointer; }
+  .metric-chart .tabs button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--card); font-weight: 500; }
+  .metric-chart .tabs button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .metric-chart .legend { display: flex; flex-wrap: wrap; gap: 18px; font-size: 14px; color: var(--ink-2); margin-bottom: 4px; }
+  .metric-chart .legend-series { display: contents; }
+  .metric-chart .legend-series > span { margin-right: 0; }
+  .metric-chart .sw { display: inline-block; width: 18px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+  .metric-chart .sw-band { background: var(--band); height: 12px; border: 1px solid var(--rule); }
+  .metric-chart .chartwrap { position: relative; }
+  .metric-chart svg { display: block; width: 100%; height: auto; font-family: var(--body); }
+  .metric-chart .tip { position: absolute; pointer-events: none; background: var(--card); border: 1px solid var(--rule); border-radius: 6px; padding: 8px 10px; font-size: 13px; box-shadow: 0 4px 14px rgba(0, 0, 0, .14); display: none; min-width: 190px; font-variant-numeric: tabular-nums; }
+  .metric-chart .tip b { display: block; margin-bottom: 2px; }
+  .metric-chart .cap { font-size: 13px; color: var(--ink-3); margin-top: 8px; max-width: none; }
+</style>
+
+<script>
+  import { decimalYear, formatAxis, formatDate, formatValue } from '../lib/format';
+
+  const NS = 'http://www.w3.org/2000/svg';
+  // Drawing area, in the SVG's own units.
+  const W = 900, H = 470, L = 62, R = 24, T = 58, B = 40;
+  // The x axis runs from a little before the first point to a little after the last.
+  const PAD_BEFORE = 1.1, PAD_AFTER = 0.7;
+  const BAND_LABEL_MIN_PX = 44; // narrower bands get no party label
+  const EVENT_ROW_PX = 14;      // vertical step when event labels would collide
+  const EVENT_FLIP_FROM = 0.8;  // marks in the last fifth of the plot get their label on the left
+
+  type View = {
+    id: string; label: string; caption: string; unit: string;
+    lines: { label: string }[];
+    points: { date: string; period: string; values: number[] }[];
+  };
+  type Chart = {
+    alt: string; source: string; views: View[];
+    governments: { date: string; party: string }[];
+    events: { date: string; label: string }[];
+  };
+
+  function niceStep(range: number): number {
+    const raw = range / 5, p = Math.pow(10, Math.floor(Math.log10(raw)));
+    for (const m of [1, 2, 2.5, 5, 10]) if (raw <= m * p) return m * p;
+    return 10 * p;
+  }
+
+  function start(root: HTMLElement) {
+    const chart: Chart = JSON.parse(root.querySelector('script[data-chart-data]')!.textContent!);
+    const svg = root.querySelector('svg')!;
+    const tip = root.querySelector<HTMLElement>('[data-tip]')!;
+    const caption = root.querySelector<HTMLElement>('[data-caption]')!;
+    const legend = root.querySelector<HTMLElement>('[data-legend-series]')!;
+    const buttons = [...root.querySelectorAll<HTMLButtonElement>('button[data-view]')];
+
+    const allDates = chart.views.flatMap((v) => v.points.map((p) => decimalYear(p.date)));
+    const X0 = Math.min(...allDates) - PAD_BEFORE;
+    const X1 = Math.max(...allDates) + PAD_AFTER;
+    const plotW = W - L - R;
+
+    function el(name: string, attrs: Record<string, string | number>, text?: string | number) {
+      const e = document.createElementNS(NS, name);
+      for (const k in attrs) e.setAttribute(k, String(attrs[k]));
+      if (text != null) e.textContent = String(text);
+      svg.appendChild(e);
+      return e;
+    }
+
+    function draw(view: View) {
+      svg.innerHTML = '';
+      const rows = view.points.map((p) => ({ ...p, t: decimalYear(p.date) }));
+      const vals = rows.flatMap((r) => r.values);
+      const step = niceStep(Math.max(...vals) - Math.min(0, ...vals));
+      const y0 = Math.floor(Math.min(0, ...vals) / step) * step;
+      const y1 = Math.ceil(Math.max(...vals) / step) * step;
+      const x = (t: number) => L + (t - X0) / (X1 - X0) * plotW;
+      const y = (v: number) => T + (y1 - v) / (y1 - y0) * (H - T - B);
+
+      // Government bands, from shared/governments.csv. The first band shown is unshaded; shading alternates from there.
+      const gov = chart.governments.map((g, i) => {
+        const a = decimalYear(g.date);
+        const b = i + 1 < chart.governments.length ? decimalYear(chart.governments[i + 1].date) : X1;
+        return { party: g.party, a: Math.max(a, X0), b: Math.min(b, X1), raw: a, vis: b > X0 && a < X1 };
+      }).filter((g) => g.vis);
+      gov.forEach((g, j) => {
+        const wpx = x(g.b) - x(g.a);
+        if (j % 2 === 1) el('rect', { x: x(g.a), y: T, width: wpx, height: H - T - B, fill: 'var(--band)' });
+        if (wpx > BAND_LABEL_MIN_PX) el('text', { x: x(g.a) + wpx / 2, y: T - 8, 'text-anchor': 'middle', 'font-size': 12, fill: 'var(--ink-3)' }, g.party);
+        if (j > 0) el('line', { x1: x(g.a), x2: x(g.a), y1: T - 4, y2: T, stroke: 'var(--ink-3)', 'stroke-width': 1 });
+      });
+
+      // Gridlines, zero line and y labels.
+      for (let v = y0; v <= y1 + 1e-9; v += step) {
+        el('line', { x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: v === 0 ? 'var(--ink-3)' : 'var(--rule)', 'stroke-width': 1 });
+        el('text', { x: L - 8, y: y(v) + 4, 'text-anchor': 'end', 'font-size': 12, fill: 'var(--ink-3)' }, formatAxis(view.unit, +v.toFixed(6)));
+      }
+      // x ticks every five years
+      for (let yr = Math.ceil(X0 / 5) * 5; yr <= X1; yr += 5) {
+        el('text', { x: x(yr), y: H - B + 18, 'text-anchor': 'middle', 'font-size': 12, fill: 'var(--ink-3)' }, yr);
+      }
+
+      // Event marks, from shared/events.csv. Placed right to left. A label goes to the right of its mark,
+      // or to the left in the last fifth of the plot. If it would overlap a label already placed, it drops a row.
+      const placed: { x0: number; x1: number; row: number }[] = [];
+      chart.events.filter((e) => { const t = decimalYear(e.date); return t >= X0 && t <= X1; }).reverse().forEach((e) => {
+        const ex = x(decimalYear(e.date));
+        el('line', { x1: ex, x2: ex, y1: T + 14, y2: H - B, stroke: 'var(--ink-3)', 'stroke-width': 1, 'stroke-dasharray': '3 4' });
+        const flip = ex > L + EVENT_FLIP_FROM * plotW;
+        const label = el('text', { x: ex + (flip ? -5 : 5), y: T + 12, 'text-anchor': flip ? 'end' : 'start', 'font-size': 11.5, fill: 'var(--ink-2)' }, e.label);
+        const len = (label as SVGTextContentElement).getComputedTextLength() || e.label.length * 6;
+        const x0 = flip ? ex - 5 - len : ex + 5, x1 = x0 + len;
+        let row = 0;
+        while (placed.some((p) => p.row === row && x0 < p.x1 + 3 && x1 > p.x0 - 3)) row++;
+        placed.push({ x0, x1, row });
+        label.setAttribute('y', String(T + 12 + row * EVENT_ROW_PX));
+      });
+
+      // Lines, end points and end labels (below and to the left of the end point, with a halo).
+      const last = rows[rows.length - 1];
+      let prevLabelY = -Infinity;
+      const order = view.lines.map((_, i) => i).sort((a, b) => last.values[a] - last.values[b]).reverse();
+      view.lines.forEach((_, i) => {
+        el('path', { d: rows.map((r, k) => (k ? 'L' : 'M') + x(r.t).toFixed(1) + ' ' + y(r.values[i]).toFixed(1)).join(''), fill: 'none', stroke: `var(--series-${i + 1})`, 'stroke-width': 2, 'stroke-linejoin': 'round' });
+        el('circle', { cx: x(last.t), cy: y(last.values[i]), r: 4, fill: `var(--series-${i + 1})`, stroke: 'var(--card)', 'stroke-width': 2 });
+      });
+      order.forEach((i) => {
+        let ly = y(last.values[i]) + 22;
+        if (ly - prevLabelY < 16) ly = prevLabelY + 16; // keep two end labels from overlapping
+        prevLabelY = ly;
+        el('text', { x: x(last.t) - 10, y: ly, 'text-anchor': 'end', 'font-size': 12.5, 'font-weight': 600, fill: 'var(--ink)', stroke: 'var(--card)', 'stroke-width': 4, 'paint-order': 'stroke', 'stroke-opacity': 0.85 }, view.lines[i].label + ' ' + formatValue(view.unit, last.values[i]));
+      });
+
+      // Hover read-out
+      const cross = el('line', { y1: T, y2: H - B, stroke: 'var(--ink-2)', 'stroke-width': 1, visibility: 'hidden' });
+      const dots = view.lines.map((_, i) => el('circle', { r: 4.5, fill: `var(--series-${i + 1})`, stroke: 'var(--card)', 'stroke-width': 2, visibility: 'hidden' }));
+      const hit = el('rect', { x: L, y: T, width: plotW, height: H - T - B, fill: 'transparent' });
+      function move(ev: PointerEvent) {
+        const b = svg.getBoundingClientRect(), px = (ev.clientX - b.left) / b.width * W;
+        const t = X0 + (px - L) / plotW * (X1 - X0);
+        let r = rows[0];
+        for (const q of rows) if (Math.abs(q.t - t) < Math.abs(r.t - t)) r = q;
+        const cx = x(r.t);
+        cross.setAttribute('x1', String(cx)); cross.setAttribute('x2', String(cx)); cross.setAttribute('visibility', 'visible');
+        dots.forEach((d, i) => { d.setAttribute('cx', String(cx)); d.setAttribute('cy', String(y(r.values[i]))); d.setAttribute('visibility', 'visible'); });
+        tip.replaceChildren();
+        const head = document.createElement('b');
+        head.textContent = `${formatDate(r.date)} (${r.period})`;
+        tip.appendChild(head);
+        view.lines.forEach((l, i) => {
+          if (i) tip.appendChild(document.createElement('br'));
+          tip.appendChild(document.createTextNode(`${l.label}: ${formatValue(view.unit, r.values[i])}`));
+        });
+        tip.style.display = 'block';
+        const left = cx / W * b.width;
+        tip.style.left = Math.min(Math.max(left + 12, 0), b.width - 200) + 'px';
+        tip.style.top = '64px';
+      }
+      hit.addEventListener('pointermove', move as EventListener);
+      hit.addEventListener('pointerdown', move as EventListener);
+      hit.addEventListener('pointerleave', () => {
+        tip.style.display = 'none';
+        [cross, ...dots].forEach((e) => e.setAttribute('visibility', 'hidden'));
+      });
+
+      caption.textContent = view.caption + ' ' + chart.source;
+      legend.replaceChildren(...view.lines.map((l, i) => {
+        const wrap = document.createElement('span');
+        const sw = document.createElement('span');
+        sw.className = 'sw';
+        sw.style.background = `var(--series-${i + 1})`;
+        wrap.append(sw, l.label);
+        return wrap;
+      }));
+    }
+
+    function select(id: string) {
+      const view = chart.views.find((v) => v.id === id)!;
+      buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.view === id)));
+      draw(view);
+    }
+    buttons.forEach((b) => b.addEventListener('click', () => select(b.dataset.view!)));
+    select(chart.views[0].id);
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-metric-chart]').forEach(start);
+</script>

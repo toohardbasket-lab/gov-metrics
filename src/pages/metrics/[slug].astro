@@ -1,0 +1,87 @@
+---
+import Base from '../../layouts/Base.astro';
+import MetricChart from '../../components/MetricChart.astro';
+import { listMetricSlugs, loadMetric } from '../../lib/metrics';
+
+export function getStaticPaths() {
+  return listMetricSlugs().map((slug) => ({ params: { slug } }));
+}
+
+const { slug } = Astro.params;
+const m = loadMetric(slug!);
+const d = m.def;
+---
+<Base title={d.title} description={d.description}>
+  <div class="metric-page">
+    {d.draft && <div class="draft-banner" set:html={m.rich.banner} />}
+
+    <header>
+      <div class="crumb">{d.theme} · {d.jurisdiction}</div>
+      <h1>{d.title}</h1>
+      <p class="lede">{d.lede}</p>
+    </header>
+
+    <section class="tiles" aria-label="Latest figures">
+      {m.tiles.map((t) => (
+        <div class="tile">
+          <div class="k">{t.key}</div>
+          <div class:list={['v', { text: t.isText }]}>{t.value}</div>
+          {t.sub && <div class="s">{t.sub}</div>}
+        </div>
+      ))}
+    </section>
+
+    <section class="card">
+      <MetricChart chart={m.chart} />
+    </section>
+
+    <section>
+      <h2>What the numbers mean</h2>
+      {m.rich.meaning.map((p) => <p set:html={p} />)}
+    </section>
+
+    <section class="card">
+      <h2>Targets and forecasts</h2>
+      <dl class="ledger">
+        {m.rich.targets.map((r) => (<><dt>{r.label}</dt><dd set:html={r.html} /></>))}
+      </dl>
+    </section>
+
+    <section class="card">
+      <h2>Sources and method</h2>
+      <dl class="ledger">
+        {m.rich.sourcesMethod.map((r) => (<><dt>{r.label}</dt><dd set:html={r.html} /></>))}
+      </dl>
+      <h2 class="sub-h">Read with care</h2>
+      <ul>
+        {m.rich.care.map((li) => <li set:html={li} />)}
+      </ul>
+    </section>
+
+    <section class="card">
+      <details open>
+        <summary>All figures as a table</summary>
+        <div class="scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>{m.table.periodHeader}</th>
+                {m.table.headers.map((h) => <th>{h}</th>)}
+              </tr>
+            </thead>
+            <tbody>
+              {m.table.rows.map((r) => (
+                <tr><td>{r.period}</td>{r.cells.map((c) => <td>{c}</td>)}</tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </section>
+
+    <section>
+      <h2>Corrections</h2>
+      <p set:html={m.rich.corrections} />
+    </section>
+  </div>
+</Base>

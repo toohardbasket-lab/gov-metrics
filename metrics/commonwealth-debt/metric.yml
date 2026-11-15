@@ -1,0 +1,153 @@
+# Definition file for one metric. Everything the page shows, other than the numbers
+# in data.csv, comes from this file. See metrics/README.md for what each field does.
+slug: commonwealth-debt
+title: Commonwealth government debt
+theme: Budget and debt
+jurisdiction: Commonwealth
+description: How much the Australian Government owes at 30 June each year.
+lede: "How much the Australian Government owes, each 30 June since 1971, in three views: dollars of the day, June 2025 prices, and as a share of the economy."
+
+draft: true
+draft_banner: "**Prototype, not for publication.** This page tests the metric-page template against real figures. The figures were read from the source PDF by software and have not yet had the human check the plan requires."
+
+series:
+  - id: gross_debt
+    label: Gross debt
+    definition: Face value of Australian Government Securities on issue, total, end of year.
+    source_table: Final Budget Outcome, Appendix B, Table B.5, "Total AGS on issue"
+  - id: net_debt
+    label: Net debt
+    definition: Interest-bearing liabilities less selected financial assets, general government sector.
+    source_table: Final Budget Outcome, Appendix B, Table B.4
+  - id: gross_debt_pct_gdp
+    label: Gross debt, share of GDP
+    source_table: Final Budget Outcome, Appendix B, Table B.5, "Total AGS on issue"
+  - id: net_debt_pct_gdp
+    label: Net debt, share of GDP
+    source_table: Final Budget Outcome, Appendix B, Table B.4
+
+# The headline figures above the chart. Values are read from data.csv.
+tiles:
+  - label: Gross debt
+    series: gross_debt
+    sub:
+      series: gross_debt_pct_gdp
+      suffix: of GDP
+  - label: Net debt
+    series: net_debt
+    sub:
+      series: net_debt_pct_gdp
+      suffix: of GDP
+  - label: Target status
+    text: No numeric target
+    sub_text: Shown for context only
+
+# The chart. The first view is shown first. Each line is drawn in the series colour
+# for its position (first line blue, second line orange).
+# derive: none uses data.csv as it is. derive: real multiplies each value by
+# (CPI of the latest June in the data / CPI of that row's June), using shared/cpi_june.csv.
+# Rows with no CPI figure are left out of that view.
+views:
+  - id: share_of_gdp
+    label: Share of GDP
+    derive: none
+    lines:
+      - series: gross_debt_pct_gdp
+        label: Gross debt
+      - series: net_debt_pct_gdp
+        label: Net debt
+    caption: Per cent of GDP at 30 June each year.
+  - id: nominal
+    label: Dollars of the day
+    derive: none
+    lines:
+      - series: gross_debt
+        label: Gross debt
+      - series: net_debt
+        label: Net debt
+    caption: Dollars of the day (not adjusted for inflation) at 30 June each year.
+  - id: real
+    label: June 2025 prices
+    derive: real
+    lines:
+      - series: gross_debt
+        label: Gross debt
+      - series: net_debt
+        label: Net debt
+    caption: June 2025 prices, adjusted with the Consumer Price Index. Starts at 1985, where the price index used here begins.
+chart_alt: Line chart of Commonwealth gross and net debt, 1971 to 2025. The full figures are in the table below.
+chart_source: "Source: Final Budget Outcome 2024-25, Appendix B, Tables B.4 and B.5."
+
+# The full table. Newest first. Format follows the series unit.
+table:
+  period_header: Year to 30 June
+  columns:
+    - header: Gross debt $m
+      series: gross_debt
+    - header: "% GDP"
+      series: gross_debt_pct_gdp
+    - header: Net debt $m
+      series: net_debt
+    - header: "% GDP"
+      series: net_debt_pct_gdp
+    - header: Gross, June 2025 $m
+      series: gross_debt
+      derive: real
+    - header: Net, June 2025 $m
+      series: net_debt
+      derive: real
+
+meaning:
+  - "**Gross debt** is the face value of Australian Government Securities on issue: the amount the government must repay to bondholders. **Net debt** subtracts certain financial assets the government holds, such as cash, deposits and loans it has made, so it is lower."
+  - "The share-of-GDP view compares debt with the size of the economy, which is how economists usually judge whether debt is large. The dollar views show the raw amounts."
+
+# Targets and forecasts ledger.
+targets:
+  - label: Target
+    text: No numeric, dated debt target was found, so this page gives no on-track rating. Check the fiscal strategy in the current Budget before publication.
+  - label: Legal limit
+    text: "A Treasurer's Direction of 7 October 2020 caps the face value of securities on issue at $1,200 billion."
+  - label: Government forecast
+    text: "The 2026-27 Budget estimates gross debt of $1,051 billion (34.0% of GDP) at 30 June 2027 and $1,249 billion (35.6% of GDP) at 30 June 2030. Forecasts are not drawn on the chart in this prototype."
+  - label: Not yet loaded
+    text: "The 2025-26 outcome. The Treasurer's release of 28 September 2026 gives gross debt as 33.2% of GDP; the dollar figures need to be taken from the Final Budget Outcome 2025-26 itself."
+
+# Sources and method ledger. {link} is replaced by the link; {update} and {retrieved}
+# by the fields below.
+update: Annually, when the Final Budget Outcome is published (late September).
+retrieved: 2026-11-15
+sources_method:
+  - label: Debt figures
+    link:
+      label: Final Budget Outcome 2024-25, Appendix B
+      url: https://archive.budget.gov.au/2024-25/fbo/download/06_appendix_b.pdf
+    text: "{link}, Table B.4 (net debt) and Table B.5 (total AGS on issue, end of year). Treasury, September 2025."
+  - label: Prices
+    link:
+      label: Australian Taxation Office
+      url: https://www.ato.gov.au/tax-rates-and-codes/consumer-price-index
+    text: "June quarter Consumer Price Index, all groups, weighted average of eight capital cities, 2011-12 base, as reproduced by the {link} from the ABS. Real value = nominal × (141.7 ÷ CPI for that June)."
+  - label: Forecast and limit
+    link:
+      label: "2026-27 Budget Paper No. 1, Statement 7: Debt Statement"
+      url: https://budget.gov.au/content/bp1/download/bp1_bs-7.pdf
+    text: "{link}."
+  - label: Updated
+    text: "{update} Data in this prototype retrieved {retrieved}."
+
+read_with_care:
+  - The June 2025 prices view starts at 1985 because the price index used here starts at June 1985. Extending it to 1971 needs the ABS series.
+  - Net debt is not measured the same way throughout. Before 1999-2000 debt is valued at historic cost, after that at market prices. Accounting changes in 2005-06 and 2019-20 also affect it. Figures before 1987-88 are Treasury estimates.
+  - Gross debt includes securities held on behalf of the states and the Northern Territory.
+  - Shares of GDP are revised whenever the ABS revises GDP, so later budget papers may show slightly different percentages for the same year.
+  - Each point is a 30 June balance. A new government inherits the budget of the year in which it takes office. Labor took office on 23 May 2022, so the 30 June 2022 figure sits in its shading but reflects a year run almost entirely by the Coalition.
+  - Recessions and crises are marked on every chart on this site using the same list. The marks give context and do not assign cause.
+
+corrections_text: None yet. Every correction to this page will be listed here with its date and what changed.
+
+# Fields kept from the worked-example definition file.
+real_method: nominal x (CPI June 2025 / CPI June of that year); June quarter, all groups, eight capitals
+target: none_found   # confirm against the Budget fiscal strategy before publication
+legal_limit: "$1,200 billion face value, Treasurer's Direction of 7 October 2020"
+state_panel: false
+inclusion_tests: {outcome: true, official: true, history: true, ongoing: true, no_editorial_choice: "both standard measures shown"}
