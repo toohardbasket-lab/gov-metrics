@@ -1,42 +1,57 @@
 date,index,base
-1985-06-30,38.8,2011-12=100
-1986-06-30,42.1,2011-12=100
-1987-06-30,46.0,2011-12=100
-1988-06-30,49.3,2011-12=100
-1989-06-30,53.0,2011-12=100
-1990-06-30,57.1,2011-12=100
-1991-06-30,59.0,2011-12=100
-1992-06-30,59.7,2011-12=100
-1993-06-30,60.8,2011-12=100
-1994-06-30,61.9,2011-12=100
-1995-06-30,64.7,2011-12=100
-1996-06-30,66.7,2011-12=100
-1997-06-30,66.9,2011-12=100
-1998-06-30,67.4,2011-12=100
-1999-06-30,68.1,2011-12=100
-2000-06-30,70.2,2011-12=100
-2001-06-30,74.5,2011-12=100
-2002-06-30,76.6,2011-12=100
-2003-06-30,78.6,2011-12=100
-2004-06-30,80.6,2011-12=100
-2005-06-30,82.6,2011-12=100
-2006-06-30,85.9,2011-12=100
-2007-06-30,87.7,2011-12=100
-2008-06-30,91.6,2011-12=100
-2009-06-30,92.9,2011-12=100
-2010-06-30,95.8,2011-12=100
-2011-06-30,99.2,2011-12=100
-2012-06-30,100.4,2011-12=100
-2013-06-30,102.8,2011-12=100
-2014-06-30,105.9,2011-12=100
-2015-06-30,107.5,2011-12=100
-2016-06-30,108.6,2011-12=100
-2017-06-30,110.7,2011-12=100
-2018-06-30,113.0,2011-12=100
-2019-06-30,114.8,2011-12=100
-2020-06-30,114.4,2011-12=100
-2021-06-30,118.8,2011-12=100
-2022-06-30,126.1,2011-12=100
-2023-06-30,133.7,2011-12=100
-2024-06-30,138.8,2011-12=100
-2025-06-30,141.7,2011-12=100
+1971-06-30,7.11,base period 25 as coded by the ABS
+1972-06-30,7.58,base period 25 as coded by the ABS
+1973-06-30,8.2,base period 25 as coded by the ABS
+1974-06-30,9.39,base period 25 as coded by the ABS
+1975-06-30,10.98,base period 25 as coded by the ABS
+1976-06-30,12.29,base period 25 as coded by the ABS
+1977-06-30,13.96,base period 25 as coded by the ABS
+1978-06-30,15.08,base period 25 as coded by the ABS
+1979-06-30,16.39,base period 25 as coded by the ABS
+1980-06-30,18.17,base period 25 as coded by the ABS
+1981-06-30,19.76,base period 25 as coded by the ABS
+1982-06-30,21.88,base period 25 as coded by the ABS
+1983-06-30,24.32,base period 25 as coded by the ABS
+1984-06-30,25.28,base period 25 as coded by the ABS
+1985-06-30,26.95,base period 25 as coded by the ABS
+1986-06-30,29.23,base period 25 as coded by the ABS
+1987-06-30,31.93,base period 25 as coded by the ABS
+1988-06-30,34.21,base period 25 as coded by the ABS
+1989-06-30,36.8,base period 25 as coded by the ABS
+1990-06-30,39.63,base period 25 as coded by the ABS
+1991-06-30,40.98,base period 25 as coded by the ABS
+1992-06-30,41.48,base period 25 as coded by the ABS
+1993-06-30,42.25,base period 25 as coded by the ABS
+1994-06-30,42.99,base period 25 as coded by the ABS
+1995-06-30,44.92,base period 25 as coded by the ABS
+1996-06-30,46.31,base period 25 as coded by the ABS
+1997-06-30,46.47,base period 25 as coded by the ABS
+1998-06-30,46.78,base period 25 as coded by the ABS
+1999-06-30,47.29,base period 25 as coded by the ABS
+2000-06-30,48.77,base period 25 as coded by the ABS
+2001-06-30,51.73,base period 25 as coded by the ABS
+2002-06-30,53.2,base period 25 as coded by the ABS
+2003-06-30,54.62,base period 25 as coded by the ABS
+2004-06-30,55.97,base period 25 as coded by the ABS
+2005-06-30,57.35,base period 25 as coded by the ABS
+2006-06-30,59.65,base period 25 as coded by the ABS
+2007-06-30,60.9,base period 25 as coded by the ABS
+2008-06-30,63.63,base period 25 as coded by the ABS
+2009-06-30,64.55,base period 25 as coded by the ABS
+2010-06-30,66.52,base period 25 as coded by the ABS
+2011-06-30,68.93,base period 25 as coded by the ABS
+2012-06-30,69.74,base period 25 as coded by the ABS
+2013-06-30,71.38,base period 25 as coded by the ABS
+2014-06-30,73.57,base period 25 as coded by the ABS
+2015-06-30,74.69,base period 25 as coded by the ABS
+2016-06-30,75.45,base period 25 as coded by the ABS
+2017-06-30,76.88,base period 25 as coded by the ABS
+2018-06-30,78.49,base period 25 as coded by the ABS
+2019-06-30,79.7,base period 25 as coded by the ABS
+2020-06-30,79.44,base period 25 as coded by the ABS
+2021-06-30,82.47,base period 25 as coded by the ABS
+2022-06-30,87.59,base period 25 as coded by the ABS
+2023-06-30,92.87,base period 25 as coded by the ABS
+2024-06-30,96.41,base period 25 as coded by the ABS
+2025-06-30,98.43,base period 25 as coded by the ABS
+2026-06-30,102.31,base period 25 as coded by the ABS

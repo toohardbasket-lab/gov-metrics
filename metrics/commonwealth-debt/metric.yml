@@ -1,14 +1,15 @@
 # Definition file for one metric. Everything the page shows, other than the numbers
 # in data.csv, comes from this file. See metrics/README.md for what each field does.
+# Words in braces, such as {real_base}, are filled in from the data when the page is built.
 slug: commonwealth-debt
 title: Commonwealth government debt
 theme: Budget and debt
 jurisdiction: Commonwealth
 description: How much the Australian Government owes at 30 June each year.
-lede: "How much the Australian Government owes, each 30 June since 1971, in three views: dollars of the day, June 2025 prices, and as a share of the economy."
+lede: "How much the Australian Government owes, each 30 June since 1971, in three views: dollars of the day, {real_base} prices, and as a share of the economy."
 
 draft: true
-draft_banner: "**Prototype, not for publication.** This page tests the metric-page template against real figures. The figures were read from the source PDF by software and have not yet had the human check the plan requires."
+draft_banner: "Draft, not for publication. The figures are read from the Treasury file by code and have not yet had the human check the plan requires."
 
 series:
   - id: gross_debt
@@ -67,16 +68,16 @@ views:
         label: Net debt
     caption: Dollars of the day (not adjusted for inflation) at 30 June each year.
   - id: real
-    label: June 2025 prices
+    label: "{real_base} prices"
     derive: real
     lines:
       - series: gross_debt
         label: Gross debt
       - series: net_debt
         label: Net debt
-    caption: June 2025 prices, adjusted with the Consumer Price Index. Starts at 1985, where the price index used here begins.
-chart_alt: Line chart of Commonwealth gross and net debt, 1971 to 2025. The full figures are in the table below.
-chart_source: "Source: Final Budget Outcome 2024-25, Appendix B, Tables B.4 and B.5."
+    caption: "{real_base} prices, adjusted with the Consumer Price Index."
+chart_alt: "Line chart of Commonwealth gross and net debt, {first_year} to {last_year}. The full figures are in the table below."
+chart_source: "Source: Final Budget Outcome {latest_period}, Appendix B, Tables B.4 and B.5."
 
 # The full table. Newest first. Format follows the series unit.
 table:
@@ -90,10 +91,10 @@ table:
       series: net_debt
     - header: "% GDP"
       series: net_debt_pct_gdp
-    - header: Gross, June 2025 $m
+    - header: "Gross, {real_base} $m"
       series: gross_debt
       derive: real
-    - header: Net, June 2025 $m
+    - header: "Net, {real_base} $m"
       series: net_debt
       derive: real
 
@@ -104,39 +105,37 @@ meaning:
 # Targets and forecasts ledger.
 targets:
   - label: Target
-    text: No numeric, dated debt target was found, so this page gives no on-track rating. Check the fiscal strategy in the current Budget before publication.
+    text: "No numeric, dated debt target. The 2025-26 Budget's fiscal strategy states a goal of reducing gross debt as a share of the economy over time, with no figure or date. Check the current Budget's wording before publication."
   - label: Legal limit
     text: "A Treasurer's Direction of 7 October 2020 caps the face value of securities on issue at $1,200 billion."
   - label: Government forecast
-    text: "The 2026-27 Budget estimates gross debt of $1,051 billion (34.0% of GDP) at 30 June 2027 and $1,249 billion (35.6% of GDP) at 30 June 2030. Forecasts are not drawn on the chart in this prototype."
-  - label: Not yet loaded
-    text: "The 2025-26 outcome. The Treasurer's release of 28 September 2026 gives gross debt as 33.2% of GDP; the dollar figures need to be taken from the Final Budget Outcome 2025-26 itself."
+    text: "The 2026-27 Budget estimates gross debt of $1,051 billion (34.0% of GDP) at 30 June 2027 and $1,249 billion (35.6% of GDP) at 30 June 2030. Forecasts are not drawn on the chart."
 
 # Sources and method ledger. {link} is replaced by the link; {update} and {retrieved}
 # by the fields below.
 update: Annually, when the Final Budget Outcome is published (late September).
-retrieved: 2026-11-15
+retrieved: 2026-11-16
 sources_method:
   - label: Debt figures
     link:
-      label: Final Budget Outcome 2024-25, Appendix B
-      url: https://archive.budget.gov.au/2024-25/fbo/download/06_appendix_b.pdf
-    text: "{link}, Table B.4 (net debt) and Table B.5 (total AGS on issue, end of year). Treasury, September 2025."
+      label: Final Budget Outcome 2025-26, Appendix B
+      url: https://archive.budget.gov.au/2025-26/fbo/download/06_appendix_b.docx
+    text: "{link}, Table B.4 (net debt) and Table B.5 (total AGS on issue, end of year). Treasury, September 2026."
   - label: Prices
     link:
-      label: Australian Taxation Office
-      url: https://www.ato.gov.au/tax-rates-and-codes/consumer-price-index
-    text: "June quarter Consumer Price Index, all groups, weighted average of eight capital cities, 2011-12 base, as reproduced by the {link} from the ABS. Real value = nominal × (141.7 ÷ CPI for that June)."
+      label: ABS
+      url: https://www.abs.gov.au/statistics/economy/price-indexes-and-inflation/consumer-price-index-australia/latest-release
+    text: "June quarter Consumer Price Index, all groups, weighted average of eight capital cities, from the {link}. Real value = nominal × ({real_base_index} ÷ index for that June)."
   - label: Forecast and limit
     link:
       label: "2026-27 Budget Paper No. 1, Statement 7: Debt Statement"
       url: https://budget.gov.au/content/bp1/download/bp1_bs-7.pdf
     text: "{link}."
   - label: Updated
-    text: "{update} Data in this prototype retrieved {retrieved}."
+    text: "{update} Data retrieved {retrieved}."
 
 read_with_care:
-  - The June 2025 prices view starts at 1985 because the price index used here starts at June 1985. Extending it to 1971 needs the ABS series.
+  - The price index is published to a limited number of digits, so inflation-adjusted figures for the early 1970s are accurate only to about a tenth of one per cent.
   - Net debt is not measured the same way throughout. Before 1999-2000 debt is valued at historic cost, after that at market prices. Accounting changes in 2005-06 and 2019-20 also affect it. Figures before 1987-88 are Treasury estimates.
   - Gross debt includes securities held on behalf of the states and the Northern Territory.
   - Shares of GDP are revised whenever the ABS revises GDP, so later budget papers may show slightly different percentages for the same year.
@@ -146,7 +145,7 @@ read_with_care:
 corrections_text: None yet. Every correction to this page will be listed here with its date and what changed.
 
 # Fields kept from the worked-example definition file.
-real_method: nominal x (CPI June 2025 / CPI June of that year); June quarter, all groups, eight capitals
+real_method: "nominal x (CPI {real_base} / CPI June of that year); June quarter, all groups, eight capitals"
 target: none_found   # confirm against the Budget fiscal strategy before publication
 legal_limit: "$1,200 billion face value, Treasurer's Direction of 7 October 2020"
 state_panel: false

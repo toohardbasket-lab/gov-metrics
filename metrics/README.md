@@ -1,6 +1,6 @@
 # Metrics
 
-Each metric has its own folder here. The folder name is the metric's short name (the "slug"), for example `commonwealth-debt`. The only metric so far is `commonwealth-debt`, built from prototype data.
+Each metric has its own folder here. The folder name is the metric's short name (the "slug"), for example `commonwealth-debt`. The only metric so far is `commonwealth-debt`, built from figures parsed by code from Treasury's Word files (see `scrapers/README.md`). It is still a draft until its owner has checked it.
 
 Every folder that contains a `metric.yml` gets a page at `/metrics/<slug>/` and a link on the home page. The page is drawn entirely from the files in the folder, plus the shared lists in `shared/`. Nothing about any one metric is written into the site code.
 
@@ -36,7 +36,17 @@ Every number must come from a file in `sources/`. Nothing is typed in by hand. T
 
 ## The metric.yml fields
 
-All text on the page comes from here. Plain text only, no HTML. Two small extras are allowed in text: `**bold**`, and in the two ledgers `{link}`, `{update}` and `{retrieved}`, which are filled in from the row's `link` and the `update` and `retrieved` fields.
+All text on the page comes from here. Plain text only, no HTML. Two small extras are allowed in text: `**bold**`, and words in braces that are filled in when the page is built. In the two ledgers `{link}`, `{update}` and `{retrieved}` come from the row's `link` and the `update` and `retrieved` fields. Everywhere (lede, view labels and captions, table headings, the chart description and source line, and every ledger and list) these come from the data:
+
+| Word | Filled in with |
+|---|---|
+| `{real_base}` | The latest June in the data, as month and year, such as June 2026. This is the price base of the inflation-adjusted views. |
+| `{real_base_index}` | The price index for that June, exactly as printed in `shared/cpi_june.csv`. |
+| `{first_real_year}` | The first year that has a price index figure, so the first year of the inflation-adjusted views. |
+| `{first_year}`, `{last_year}` | The calendar years of the earliest and latest dates in `data.csv`. |
+| `{latest_period}` | The period label of the latest row, such as 2025-26. |
+
+An unknown word, or one that cannot be worked out, stops the build. Do not type a year or an index value into the text when one of these will do.
 
 | Field | What it does |
 |---|---|
@@ -58,4 +68,4 @@ All text on the page comes from here. Plain text only, no HTML. Two small extras
 
 ## Shared files used by every chart
 
-`shared/governments.csv` (shaded bands), `shared/events.csv` (event marks) and `shared/cpi_june.csv` (June quarter price index for the real-terms views). Dates in the first two decide where the marks go.
+`shared/governments.csv` (shaded bands), `shared/events.csv` (event marks) and `shared/cpi_june.csv` (June quarter price index for the real-terms views, written by `scrapers/cpi_june.py`). Dates in the first two decide where the marks go.

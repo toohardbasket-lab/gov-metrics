@@ -1,0 +1,14 @@
+{
+  "fbo-2025-26-appendix-b.docx": {
+    "bytes": 370820,
+    "retrieved": "2026-11-16",
+    "sha256": "6861c3963d6713a03a5e355d33541525ce42e6cc06327853f91775bafa3bd287",
+    "url": "https://archive.budget.gov.au/2025-26/fbo/download/06_appendix_b.docx"
+  },
+  "fbo-2025-26-part-1.docx": {
+    "bytes": 184111,
+    "retrieved": "2026-11-16",
+    "sha256": "f52593303231a8f06799ec63f541cf583f79351b2b6871b5df02c0beb706dd37",
+    "url": "https://archive.budget.gov.au/2025-26/fbo/download/01_part_1.docx"
+  }
+}

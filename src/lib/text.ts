@@ -17,3 +17,17 @@ export function richText(text: string, tokens: Record<string, string> = {}): str
     })
     .join('');
 }
+
+// For plain-text fields (headings, captions, labels): fills {name} words from the
+// given values, with no markup. An unknown word stops the build.
+export function fillPlain(text: string, values: Record<string, string>): string {
+  return text
+    .split(/(\{[a-z_]+\})/)
+    .map((part) => {
+      const t = /^\{([a-z_]+)\}$/.exec(part);
+      if (!t) return part;
+      if (!(t[1] in values)) throw new Error(`Unknown or unavailable word {${t[1]}} in: ${text}`);
+      return values[t[1]];
+    })
+    .join('');
+}

@@ -1,6 +1,17 @@
 # Scrapers
 
-Scrapers are written in Python. Each one downloads an official source file, saves the raw file under the metric's `sources/` folder, and writes a versioned `data.csv`. There is no real scraper yet. `tools/` holds two one-off converters (`make_debt_prototype_csv.py` and `make_cpi_june_csv.py`) that turn the prototype's machine-read files into `data.csv` and `shared/cpi_june.csv`. They will be replaced by real scrapers in work package WP2.
+Scrapers are written in Python. Each one downloads an official source file, saves the raw file unchanged, and writes a versioned CSV. They need Python 3 and the two packages in `requirements.txt` (install with `pip install -r scrapers/requirements.txt`). Run them from the project folder.
+
+| Script | What it does |
+|---|---|
+| `commonwealth_debt.py [year]` | Downloads Appendix B and Part 1 of the Final Budget Outcome (Word files) from archive.budget.gov.au, reads Tables B.4 (net debt) and B.5 (total AGS on issue) in code, and writes `metrics/commonwealth-debt/data.csv`. The year is the folder name in the web address and defaults to `2025-26`. Raw files and `sources/manifest.json` go in `metrics/commonwealth-debt/sources/`. |
+| `cpi_june.py` | Downloads the quarterly Consumer Price Index from the ABS Data API, keeps the June quarters from 1971, and writes `shared/cpi_june.csv`. The raw response and `shared/sources/manifest.json` go in `shared/sources/`. |
+
+Both scrapers check everything first and write nothing if a check fails. They print `ERROR:` and exit with code 1. The debt scraper stops if a table is not found, a year is missing or repeated, a value cannot be read (it understands every kind of minus sign and ignores footnote markers), the two tables cover different years, a value is outside a sensible range, the row count falls, or the latest year does not match the Part 1 overview table. The price scraper stops if a June quarter is missing.
+
+The manifest records, for each saved file, the web address, the date retrieved (UTC), a SHA-256 checksum and the size in bytes.
+
+Tests: `python3 scrapers/tests/test_commonwealth_debt.py`. They run without a network. They read a saved copy of the 2024-25 Appendix B file and compare it with the figures a language model once read from the PDF (both in `scrapers/tests/fixtures/`).
 
 Every scraper must follow the nine data rules from the build plan, in plain words:
 

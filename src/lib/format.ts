@@ -38,6 +38,13 @@ export function formatDate(iso: string): string {
   return `${+m[3]} ${MONTHS[+m[2] - 1]} ${m[1]}`;
 }
 
+// "YYYY-MM-DD" -> "June 2026" style (month name and year)
+export function formatMonthYear(iso: string): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  if (!m) throw new Error(`Not a date: ${iso}`);
+  return `${MONTHS[+m[2] - 1]} ${m[1]}`;
+}
+
 // "YYYY-MM-DD" -> the year plus the fraction of the year gone, for placing marks on the x axis.
 export function decimalYear(iso: string): number {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);

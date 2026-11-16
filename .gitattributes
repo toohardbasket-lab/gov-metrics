@@ -1,0 +1,7 @@
+# Downloaded source files are kept byte-for-byte, so their recorded checksums stay true
+# on every computer. Git must not change their line endings.
+metrics/*/sources/** binary
+shared/sources/** binary
+scrapers/tests/fixtures/** binary
+metrics/*/sources/manifest.json text
+shared/sources/manifest.json text

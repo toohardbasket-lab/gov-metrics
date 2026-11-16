@@ -2,8 +2,8 @@ import { readdirSync, statSync, existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parse as parseYaml } from 'yaml';
 import { parseCsv } from './csv';
-import { formatDate, formatTable, formatValue } from './format';
-import { escapeHtml, richText } from './text';
+import { formatDate, formatMonthYear, formatTable, formatValue } from './format';
+import { escapeHtml, fillPlain, richText } from './text';
 
 const ROOT = process.cwd();
 
@@ -124,10 +124,15 @@ function loadData(slug: string): DataRow[] {
   return rows;
 }
 
-function loadCpi(): Map<string, number> {
-  const m = new Map<string, number>();
-  for (const r of readCsv(join(ROOT, 'shared', 'cpi_june.csv'))) m.set(r.date, Number(r.index));
-  return m;
+// The index as a number for the sums, and as printed in the file for the page text.
+function loadCpi(): { values: Map<string, number>; printed: Map<string, string> } {
+  const values = new Map<string, number>();
+  const printed = new Map<string, string>();
+  for (const r of readCsv(join(ROOT, 'shared', 'cpi_june.csv'))) {
+    values.set(r.date, Number(r.index));
+    printed.set(r.date, r.index);
+  }
+  return { values, printed };
 }
 
 export function loadMetric(slug: string): Metric {
@@ -156,7 +161,27 @@ export function loadMetric(slug: string): Metric {
   };
   for (const s of def.series) need(bySeries.has(s.id), slug, `series "${s.id}" is listed but has no rows in data.csv`);
 
-  const cpi = loadCpi();
+  const { values: cpi, printed: cpiPrinted } = loadCpi();
+
+  // Words the metric.yml text may use, filled in from the data (see metrics/README.md).
+  // A token whose value cannot be worked out is left out, so using it stops the build.
+  const dataDates = [...new Set(data.map((r) => r.date))].sort();
+  const juneDates = dataDates.filter((d) => d.slice(5, 7) === '06');
+  const textTokens: Record<string, string> = {
+    first_year: dataDates[0].slice(0, 4),
+    last_year: dataDates.at(-1)!.slice(0, 4),
+    latest_period: data.find((r) => r.date === dataDates.at(-1))!.period,
+  };
+  if (juneDates.length > 0) {
+    const latestJune = juneDates.at(-1)!;
+    textTokens.real_base = formatMonthYear(latestJune);
+    if (cpiPrinted.has(latestJune)) textTokens.real_base_index = cpiPrinted.get(latestJune)!;
+    const withCpi = juneDates.filter((d) => cpi.has(`${d.slice(0, 4)}-06-30`));
+    if (withCpi.length > 0) textTokens.first_real_year = withCpi[0].slice(0, 4);
+  }
+  const fill = (text: string) => fillPlain(text, textTokens);
+  def.lede = fill(def.lede);
+  if (def.description) def.description = fill(def.description);
   // Real value = nominal x (CPI of the latest June in the data / CPI of that row's June).
   // The CPI is looked up by the 30 June of the row's year (shared/cpi_june.csv).
   const realValue = (row: DataRow, latestJune: string): number | undefined => {
@@ -191,7 +216,7 @@ export function loadMetric(slug: string): Metric {
       if (values.some((x) => x === undefined)) continue;
       points.push({ date, period: bySeries.get(ids[0])!.get(date)!.period, values: values as number[] });
     }
-    return { id: v.id, label: v.label, caption: v.caption, unit: [...units][0], lines: v.lines.map((l) => ({ label: l.label })), points };
+    return { id: v.id, label: fill(v.label), caption: fill(v.caption), unit: [...units][0], lines: v.lines.map((l) => ({ label: l.label })), points };
   });
 
   const governments = readCsv(join(ROOT, 'shared', 'governments.csv'))
@@ -239,20 +264,24 @@ export function loadMetric(slug: string): Metric {
   });
 
   const link = (r: LedgerRow) => (r.link ? `<a href="${escapeHtml(r.link.url)}">${escapeHtml(r.link.label)}</a>` : '');
-  const tokens = (r: LedgerRow) => ({ link: link(r), update: escapeHtml(def.update), retrieved: escapeHtml(formatDate(String(def.retrieved))) });
+  const rich = (text: string, row?: LedgerRow) =>
+    richText(text, {
+      ...Object.fromEntries(Object.entries(textTokens).map(([k, v]) => [k, escapeHtml(v)])),
+      ...(row ? { link: link(row), update: escapeHtml(def.update), retrieved: escapeHtml(formatDate(String(def.retrieved))) } : {}),
+    });
 
   return {
     def,
     tiles,
-    chart: { alt: def.chart_alt, source: def.chart_source, views, governments, events },
-    table: { headers: def.table.columns.map((c) => c.header), periodHeader: def.table.period_header, rows },
+    chart: { alt: fill(def.chart_alt), source: fill(def.chart_source), views, governments, events },
+    table: { headers: def.table.columns.map((c) => fill(c.header)), periodHeader: fill(def.table.period_header), rows },
     rich: {
-      banner: def.draft_banner ? richText(def.draft_banner) : '',
-      meaning: def.meaning.map((p) => richText(p)),
-      targets: def.targets.map((r) => ({ label: r.label, html: richText(r.text, tokens(r)) })),
-      sourcesMethod: def.sources_method.map((r) => ({ label: r.label, html: richText(r.text, tokens(r)) })),
-      care: def.read_with_care.map((p) => richText(p)),
-      corrections: richText(def.corrections_text),
+      banner: def.draft_banner ? rich(def.draft_banner) : '',
+      meaning: def.meaning.map((p) => rich(p)),
+      targets: def.targets.map((r) => ({ label: r.label, html: rich(r.text, r) })),
+      sourcesMethod: def.sources_method.map((r) => ({ label: r.label, html: rich(r.text, r) })),
+      care: def.read_with_care.map((p) => rich(p)),
+      corrections: rich(def.corrections_text),
     },
   };
 }
