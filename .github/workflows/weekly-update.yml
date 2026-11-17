@@ -1,0 +1,161 @@
+# Weekly data update.
+#
+# Every Monday (22:00 UTC) this downloads the latest official figures, writes a plain-language
+# "what changed" report, checks the data, and opens a pull request for the owner to review.
+# Nothing is ever pushed to the main branch. The owner merges the pull request, or does not.
+#
+# One repository setting is needed once: Settings > Actions > General > Workflow permissions >
+# "Allow GitHub Actions to create and approve pull requests" must be ticked.
+
+name: Weekly data update
+
+on:
+  schedule:
+    - cron: "0 22 * * 1"
+  workflow_dispatch:
+
+# issues: write is needed so the job can open an issue when something goes wrong.
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+# Two runs can never overlap.
+concurrency:
+  group: weekly-data-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install the Python packages
+        run: pip install -r scrapers/requirements.txt
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install the site's packages
+        run: npm ci
+
+      - name: Keep a copy of the data as it is now
+        run: |
+          mkdir -p "$RUNNER_TEMP/before"
+          cp -R metrics shared "$RUNNER_TEMP/before/"
+
+      - name: Run the scrapers
+        run: python3 scrapers/run_all.py --status "$RUNNER_TEMP/status.json"
+
+      - name: Write the report
+        id: report
+        run: |
+          python3 scrapers/report.py \
+            --before "$RUNNER_TEMP/before" --after . \
+            --status "$RUNNER_TEMP/status.json" \
+            --out "$RUNNER_TEMP/report.md" \
+            --changed-flag "$RUNNER_TEMP/changed.txt"
+          cat "$RUNNER_TEMP/report.md" >> "$GITHUB_STEP_SUMMARY"
+          echo "changed=$(cat "$RUNNER_TEMP/changed.txt")" >> "$GITHUB_OUTPUT"
+          failed=$(python3 -c "import json,sys; s=json.load(open(sys.argv[1])); print('true' if any(not v.get('ok') for v in s.values()) else 'false')" "$RUNNER_TEMP/status.json")
+          echo "failed=$failed" >> "$GITHUB_OUTPUT"
+
+      - name: Validate the new data
+        id: validate
+        if: steps.report.outputs.changed == 'true'
+        continue-on-error: true
+        run: |
+          status=0
+          npm run validate > "$RUNNER_TEMP/validate.txt" 2>&1 || status=$?
+          cat "$RUNNER_TEMP/validate.txt"
+          exit $status
+
+      - name: Accept the data and build the site
+        id: build
+        if: steps.validate.outcome == 'success'
+        continue-on-error: true
+        run: |
+          status=0
+          { npm run accept-data && npm run build; } > "$RUNNER_TEMP/build.txt" 2>&1 || status=$?
+          cat "$RUNNER_TEMP/build.txt"
+          exit $status
+
+      - name: Open a pull request
+        if: steps.validate.outcome == 'success' && steps.build.outcome == 'success'
+        run: |
+          day=$(date -u +%F)
+          branch="data-update/$day"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add metrics shared
+          if git diff --cached --quiet; then
+            echo "Nothing to commit."
+            exit 0
+          fi
+          git commit -m "Data update $day"
+          # The branch is the bot's own. If a run earlier today already made it, replace it.
+          git push --force origin "$branch"
+          head -c 60000 "$RUNNER_TEMP/report.md" > "$RUNNER_TEMP/pr-body.md"
+          existing=$(gh pr list --head "$branch" --state open --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            gh pr edit "$existing" --body-file "$RUNNER_TEMP/pr-body.md"
+          else
+            gh pr create --base main --head "$branch" --title "Data update $day" --body-file "$RUNNER_TEMP/pr-body.md"
+          fi
+
+      - name: Open or update an issue because the checks failed
+        id: blocked
+        if: steps.validate.outcome == 'failure' || steps.build.outcome == 'failure'
+        run: |
+          title="Weekly update blocked: validation failed"
+          {
+            echo "The weekly update found new data, but the checks did not pass, so nothing was committed."
+            echo
+            echo "Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+            echo
+            echo "## Checker output"
+            echo
+            echo '```'
+            if [ -f "$RUNNER_TEMP/validate.txt" ]; then tail -n 150 "$RUNNER_TEMP/validate.txt"; fi
+            if [ -f "$RUNNER_TEMP/build.txt" ]; then echo "--- build step ---"; tail -n 60 "$RUNNER_TEMP/build.txt"; fi
+            echo '```'
+            echo
+            cat "$RUNNER_TEMP/report.md"
+          } | head -c 60000 > "$RUNNER_TEMP/issue-body.md"
+          existing=$(gh issue list --state open --limit 100 --json number,title --jq '.[] | select(.title == "Weekly update blocked: validation failed") | .number' | head -n 1)
+          if [ -n "$existing" ]; then
+            gh issue edit "$existing" --body-file "$RUNNER_TEMP/issue-body.md"
+          else
+            gh issue create --title "$title" --body-file "$RUNNER_TEMP/issue-body.md"
+          fi
+
+      - name: Open or update an issue because a source could not be read
+        if: steps.report.outputs.changed == 'false' && steps.report.outputs.failed == 'true'
+        run: |
+          title="Weekly update: a source could not be read"
+          head -c 60000 "$RUNNER_TEMP/report.md" > "$RUNNER_TEMP/issue-body.md"
+          existing=$(gh issue list --state open --limit 100 --json number,title --jq '.[] | select(.title == "Weekly update: a source could not be read") | .number' | head -n 1)
+          if [ -n "$existing" ]; then
+            gh issue edit "$existing" --body-file "$RUNNER_TEMP/issue-body.md"
+          else
+            gh issue create --title "$title" --body-file "$RUNNER_TEMP/issue-body.md"
+          fi
+
+      - name: Fail the job if the checks failed
+        if: steps.validate.outcome == 'failure' || steps.build.outcome == 'failure'
+        run: |
+          echo "Validation or the build failed. See the issue that was opened." >&2
+          exit 1

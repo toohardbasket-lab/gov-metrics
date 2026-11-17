@@ -5,7 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "validate": "node scripts/validate.mjs",
+    "accept-data": "node scripts/validate.mjs --accept",
+    "test:validate": "node scripts/tests/validate.test.mjs",
+    "build": "npm run validate && astro build",
     "preview": "astro preview"
   },
   "dependencies": {

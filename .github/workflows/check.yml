@@ -1,0 +1,45 @@
+# Runs the project's own tests and a full build on every pull request and every push to main.
+name: Check
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install the packages
+        run: |
+          pip install -r scrapers/requirements.txt
+          npm ci
+
+      - name: Test the validator
+        run: npm run test:validate
+
+      - name: Test the debt scraper
+        run: python3 scrapers/tests/test_commonwealth_debt.py
+
+      - name: Test the weekly report
+        run: python3 scrapers/tests/test_report.py
+
+      - name: Build the site (this also validates the data)
+        run: npm run build

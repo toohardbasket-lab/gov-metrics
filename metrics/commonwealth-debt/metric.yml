@@ -11,21 +11,32 @@ lede: "How much the Australian Government owes, each 30 June since 1971, in thre
 draft: true
 draft_banner: "Draft, not for publication. The figures are read from the Treasury file by code and have not yet had the human check the plan requires."
 
+# Each series needs a frequency (annual) and a plausible range. The validator (npm run validate)
+# stops the build if a year is missing or a value falls outside the range. Optional per series:
+# max_step_pct (largest allowed change between consecutive points, per cent) and max_step_floor.
 series:
   - id: gross_debt
     label: Gross debt
     definition: Face value of Australian Government Securities on issue, total, end of year.
     source_table: Final Budget Outcome, Appendix B, Table B.5, "Total AGS on issue"
+    frequency: annual
+    plausible: {min: 0, max: 3000000}
   - id: net_debt
     label: Net debt
     definition: Interest-bearing liabilities less selected financial assets, general government sector.
     source_table: Final Budget Outcome, Appendix B, Table B.4
+    frequency: annual
+    plausible: {min: -200000, max: 3000000}
   - id: gross_debt_pct_gdp
     label: Gross debt, share of GDP
     source_table: Final Budget Outcome, Appendix B, Table B.5, "Total AGS on issue"
+    frequency: annual
+    plausible: {min: 0, max: 100}
   - id: net_debt_pct_gdp
     label: Net debt, share of GDP
     source_table: Final Budget Outcome, Appendix B, Table B.4
+    frequency: annual
+    plausible: {min: -20, max: 100}
 
 # The headline figures above the chart. Values are read from data.csv.
 tiles:

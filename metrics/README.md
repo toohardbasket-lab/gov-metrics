@@ -64,7 +64,25 @@ An unknown word, or one that cannot be worked out, stops the build. Do not type 
 | `sources_method`, `update`, `retrieved` | Rows of the "Sources and method" ledger, how often the data is updated, and the date it was retrieved. |
 | `read_with_care` | The "Read with care" list. |
 | `corrections_text` | The text of the page's Corrections section. |
+| `targets` (with dates) | The same `targets` list may also hold entries with a `label` and a `due` date (YYYY-MM-DD). The weekly report lists any that are due within 90 days or overdue. An entry with a `due` date still needs its `text`, because the page draws every entry in the list. Entries without `due`, like the ones now in the debt metric, are ignored by the report. Write each one with its keys on separate lines (or as one `{label: ..., due: ...}` line), because the report reads this list without a YAML library. |
 | `real_method`, `target`, `legal_limit`, `state_panel`, `inclusion_tests` | Notes kept in the definition file. Not drawn on the page yet. |
+
+### Fields the checker needs on each series
+
+Each entry in `series` must also carry these, or `npm run validate` fails and the build stops:
+
+| Field | What it does |
+|---|---|
+| `frequency` | How often the series has a point. Only `annual` is supported so far. For `annual`, consecutive points must be exactly one year apart on the same month and day, so a missing year is caught. An unknown word fails with a clear message. |
+| `plausible` | The range a real value must fall inside, for example `{min: 0, max: 100}`. A value outside it stops the build. Choose it wide enough that real data never touches it, and narrow enough that a slipped decimal point or a flipped sign does. |
+| `max_step_pct` (optional) | The largest allowed change between consecutive points, as a per cent of the earlier point. Left out for the debt series. |
+| `max_step_floor` (optional) | With `max_step_pct`, the step limit only applies where the earlier point's size (ignoring its sign) is at least this. It stops a series that passes through zero from failing. Default 0. |
+
+The checker also needs these top-level fields in `metric.yml`: `slug`, `title`, `theme`, `jurisdiction`, `lede`, `draft`, `series`, `tiles`, `views`, `chart_alt`, `chart_source`, `table`, `meaning`, `targets`, `sources_method`, `read_with_care`, `corrections_text`, `update` and `retrieved`. A series must be declared in `series` if it is in `data.csv`, and every series used in a view, tile or table column must have data.
+
+### The lock file
+
+`metrics/<slug>/data.lock.json` is written by `npm run accept-data`. It records, for each series, the number of rows, the first date and the last date, plus a fingerprint of `data.csv`. It is kept in version history with the data. See the main `README.md` for when to run the command.
 
 ## Shared files used by every chart
 

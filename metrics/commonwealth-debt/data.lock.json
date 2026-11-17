@@ -1,0 +1,33 @@
+{
+  "data_sha256": "518d493e7bd04cd849bc0f52db868ebce3c1f43a6bf59b5d89498116826ced2a",
+  "series": [
+    {
+      "series": "gross_debt",
+      "jurisdiction": "Commonwealth",
+      "rows": 56,
+      "first": "1971-06-30",
+      "last": "2026-06-30"
+    },
+    {
+      "series": "gross_debt_pct_gdp",
+      "jurisdiction": "Commonwealth",
+      "rows": 56,
+      "first": "1971-06-30",
+      "last": "2026-06-30"
+    },
+    {
+      "series": "net_debt",
+      "jurisdiction": "Commonwealth",
+      "rows": 56,
+      "first": "1971-06-30",
+      "last": "2026-06-30"
+    },
+    {
+      "series": "net_debt_pct_gdp",
+      "jurisdiction": "Commonwealth",
+      "rows": 56,
+      "first": "1971-06-30",
+      "last": "2026-06-30"
+    }
+  ]
+}
