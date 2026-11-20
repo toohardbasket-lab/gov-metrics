@@ -12,7 +12,9 @@ draft: true
 draft_banner: "Draft, not for publication. The figures are read from the Treasury file by code and have not yet had the human check the plan requires."
 
 # Each series needs a frequency (annual) and a plausible range. The validator (npm run validate)
-# stops the build if a year is missing or a value falls outside the range. Optional per series:
+# stops the build if a year is missing or a value falls outside the range. Each series also needs
+# a "revision" tolerance: how far an already accepted figure may change before the checker blocks it
+# until the owner accepts it (see metrics/README.md). Optional per series:
 # max_step_pct (largest allowed change between consecutive points, per cent) and max_step_floor.
 series:
   - id: gross_debt
@@ -21,22 +23,36 @@ series:
     source_table: Final Budget Outcome, Appendix B, Table B.5, "Total AGS on issue"
     frequency: annual
     plausible: {min: 0, max: 3000000}
+    # Revision tolerance: Treasury's September 2026 revision changed no dollar figure, so any
+    # change of more than $1m to an accepted dollar figure blocks until the owner accepts it.
+    # This catches transposed or dropped digits. Write it on one line: the weekly report reads it without a YAML library.
+    revision: {max_abs: 1}
   - id: net_debt
     label: Net debt
     definition: Interest-bearing liabilities less selected financial assets, general government sector.
     source_table: Final Budget Outcome, Appendix B, Table B.4
     frequency: annual
     plausible: {min: -200000, max: 3000000}
+    # Revision tolerance: Treasury's September 2026 revision changed no dollar figure, so any
+    # change of more than $1m to an accepted dollar figure blocks until the owner accepts it.
+    # This catches transposed or dropped digits. Write it on one line: the weekly report reads it without a YAML library.
+    revision: {max_abs: 1}
   - id: gross_debt_pct_gdp
     label: Gross debt, share of GDP
     source_table: Final Budget Outcome, Appendix B, Table B.5, "Total AGS on issue"
     frequency: annual
     plausible: {min: 0, max: 100}
+    # Revision tolerance: Treasury's September 2026 revision moved shares of GDP by at most
+    # 0.2 points, so up to 0.5 passes with a warning and more blocks. Write it on one line: the weekly report reads it without a YAML library.
+    revision: {max_abs: 0.5}
   - id: net_debt_pct_gdp
     label: Net debt, share of GDP
     source_table: Final Budget Outcome, Appendix B, Table B.4
     frequency: annual
     plausible: {min: -20, max: 100}
+    # Revision tolerance: Treasury's September 2026 revision moved shares of GDP by at most
+    # 0.2 points, so up to 0.5 passes with a warning and more blocks. Write it on one line: the weekly report reads it without a YAML library.
+    revision: {max_abs: 0.5}
 
 # The headline figures above the chart. Values are read from data.csv.
 tiles:

@@ -76,13 +76,26 @@ Each entry in `series` must also carry these, or `npm run validate` fails and th
 | `frequency` | How often the series has a point. Only `annual` is supported so far. For `annual`, consecutive points must be exactly one year apart on the same month and day, so a missing year is caught. An unknown word fails with a clear message. |
 | `plausible` | The range a real value must fall inside, for example `{min: 0, max: 100}`. A value outside it stops the build. Choose it wide enough that real data never touches it, and narrow enough that a slipped decimal point or a flipped sign does. |
 | `max_step_pct` (optional) | The largest allowed change between consecutive points, as a per cent of the earlier point. Left out for the debt series. |
+| `revision` | How far an already accepted figure may change before the checker blocks it. Required on every series. See "Revision tolerance" below. |
 | `max_step_floor` (optional) | With `max_step_pct`, the step limit only applies where the earlier point's size (ignoring its sign) is at least this. It stops a series that passes through zero from failing. Default 0. |
 
 The checker also needs these top-level fields in `metric.yml`: `slug`, `title`, `theme`, `jurisdiction`, `lede`, `draft`, `series`, `tiles`, `views`, `chart_alt`, `chart_source`, `table`, `meaning`, `targets`, `sources_method`, `read_with_care`, `corrections_text`, `update` and `retrieved`. A series must be declared in `series` if it is in `data.csv`, and every series used in a view, tile or table column must have data.
 
+### Revision tolerance
+
+Every series needs a `revision` setting, written on one line, for example `revision: {max_abs: 1}` (any change of more than 1 blocks) or `revision: {max_abs: 500, max_pct: 1, pct_floor: 5000}` (a change blocks only if it is more than 500 and more than 1 per cent). It is the allowed change to a figure that has already been accepted (a date that is in both `data.lock.json` and `data.csv`). New dates are never revisions.
+
+| Field | What it does |
+|---|---|
+| `max_abs` | Required. The largest allowed change, in the series' own units (millions of dollars, or percentage points of GDP). |
+| `max_pct` (optional) | The largest allowed change as a per cent of the old figure's size (ignoring its sign). With it, a change fails only if it is over both `max_abs` and `max_pct`. |
+| `pct_floor` (optional) | `max_pct` only applies where the old figure's size is at least this. Below it, only `max_abs` applies. |
+
+A change over the tolerance stops the build (and `npm run accept-data`) until it is accepted with `npm run accept-data -- --accept-revisions`. A change within it gives only a warning. Also, a change of sign fails whatever its size, if both the old and the new figures are at least `pct_floor` in size (or at least `max_abs` when there is no `pct_floor`). Write the setting on one line: the weekly report (`scrapers/report.py`) has no YAML library and reads only that form to mark large revisions. Keep a comment beside the setting saying why the numbers were chosen.
+
 ### The lock file
 
-`metrics/<slug>/data.lock.json` is written by `npm run accept-data`. It records, for each series, the number of rows, the first date and the last date, plus a fingerprint of `data.csv`. It is kept in version history with the data. See the main `README.md` for when to run the command.
+`metrics/<slug>/data.lock.json` is written by `npm run accept-data`. It records, for each series, the number of rows, the first date and the last date, every accepted value (as written in `data.csv`), and a fingerprint of `data.csv`, plus a `lock_version` number (now 2). A lock file without it is in the old format: the checker fails and `npm run accept-data` upgrades it. The file is kept in version history with the data. See the main `README.md` for when to run the command.
 
 ## Shared files used by every chart
 

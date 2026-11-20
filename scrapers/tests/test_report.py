@@ -37,6 +37,17 @@ targets:
 %s"""
 
 
+# The same toy metric with a revision tolerance on each series, written the way metric.yml writes it.
+METRIC_YML_REV = METRIC_YML.replace(
+    "    frequency: annual\n",
+    "    frequency: annual\n    revision: {max_abs: 500, max_pct: 1, pct_floor: 5000}\n",
+).replace(
+    "    label: Share of GDP\n",
+    "    label: Share of GDP\n    # a comment line between the keys\n    revision: {max_abs: 0.5}   # per cent of GDP\n",
+)
+assert METRIC_YML_REV.count("revision:") == 2
+
+
 def rows(years, gross=None, pct=None):
     """Data rows for two series. gross and pct are dicts year -> value text."""
     gross = gross or {}
@@ -62,10 +73,10 @@ def write(root, rel, text):
 
 
 def make_tree(root, years=(2021, 2022, 2023), gross=None, pct=None, cpi_years=(2021, 2022, 2023), cpi_over=None,
-              targets="", source=b"source bytes", retrieved="2026-11-10", drop=()):
+              targets="", source=b"source bytes", retrieved="2026-11-10", drop=(), yml=METRIC_YML):
     data = [HEADER] + [r for r in rows(years, gross, pct) if not any(r.startswith(d) for d in drop)]
     write(root, "metrics/toy/data.csv", "\n".join(data) + "\n")
-    write(root, "metrics/toy/metric.yml", METRIC_YML % targets)
+    write(root, "metrics/toy/metric.yml", yml % targets)
     (Path(root) / "metrics/toy/sources").mkdir(parents=True, exist_ok=True)
     (Path(root) / "metrics/toy/sources/file.docx").write_bytes(source)
     write(root, "metrics/toy/sources/manifest.json", json.dumps({"file.docx": {"url": "https://x", "retrieved": retrieved, "sha256": "abc", "bytes": len(source)}}))
@@ -147,6 +158,54 @@ def test_three_revised_values():
     assert "2023-06-30 (2022-23): 20.3% of GDP became 23.0% of GDP (difference +2.7 percentage points)" in rev, rev
     assert section(md, "New data points") == "None"
     assert flag == "true"
+
+
+def test_large_revisions_are_marked():
+    before = {"yml": METRIC_YML_REV, "years": (2021, 2022, 2023), "gross": {2021: "100000", 2022: "100000", 2023: "100000"}}
+    after = {"yml": METRIC_YML_REV, "years": (2021, 2022, 2023),
+             # 2021: +400 (under max_abs), 2022: +5000 (over 500 and over 1 per cent), 2023 unchanged
+             "gross": {2021: "100400", 2022: "105000", 2023: "100000"},
+             # 2021: +0.2 (within 0.5), 2023: +1.0 (over 0.5)
+             "pct": {2021: "20.3", 2022: "20.2", 2023: "21.3"}}
+    md, flag = run_report(before, after)
+    check_style(md)
+    rev = section(md, "Revised history")
+    lines = [l for l in rev.split("\n") if l.startswith("- ")]
+    assert any(l.startswith("- **LARGE:** 2022-06-30") and "$100,000m became $105,000m" in l for l in lines), rev
+    assert any(l.startswith("- **LARGE:** 2023-06-30") and "20.3% of GDP became 21.3% of GDP" in l for l in lines), rev
+    assert any(l.startswith("- 2021-06-30") and "$100,000m became $100,400m" in l for l in lines), rev
+    assert any(l.startswith("- 2021-06-30") and "20.1% of GDP became 20.3% of GDP" in l for l in lines), rev
+    assert rev.count("**LARGE:**") == 2, rev
+    assert "could not be read" not in rev, rev
+
+
+def test_sign_change_between_large_figures_is_marked():
+    before = {"yml": METRIC_YML_REV, "gross": {2021: "-39958"}}
+    after = {"yml": METRIC_YML_REV, "gross": {2021: "39958"}}
+    md, flag = run_report(before, after)
+    assert "- **LARGE:** 2021-06-30" in section(md, "Revised history")
+
+
+def test_no_large_mark_when_tolerance_cannot_be_read():
+    # the toy metric without a revision key, and one written over several lines
+    before, after = {"gross": {2021: "100000"}}, {"gross": {2021: "999999"}}
+    md, flag = run_report(before, after)
+    rev = section(md, "Revised history")
+    assert "could not be read from metric.yml" in rev, rev
+    assert not any(l.startswith("- **LARGE:**") for l in rev.split("\n")), rev
+    multi = METRIC_YML_REV.replace("revision: {max_abs: 500, max_pct: 1, pct_floor: 5000}", "revision:\n      max_abs: 500")
+    md, flag = run_report({"yml": multi, "gross": {2021: "100000"}}, {"yml": multi, "gross": {2021: "999999"}})
+    rev = section(md, "Revised history")
+    assert "could not be read from metric.yml" in rev, rev
+    assert not any(l.startswith("- **LARGE:** 2021") for l in rev.split("\n")), rev
+
+
+def test_parse_revision():
+    d = report.parse_revision("{max_abs: 500, max_pct: 1, pct_floor: 5000}")
+    assert d == {"max_abs": 500, "max_pct": 1, "pct_floor": 5000}
+    assert report.parse_revision("{max_abs: 0.5}") == {"max_abs": 0.5}
+    for bad in (None, "", "500", "{max_pct: 1}", "{max_abs: x}", "{max_abs: 5, speed: 1}", "{max_abs: 0}", "{max_abs: 5, max_abs: 6}"):
+        assert report.parse_revision(bad) is None, bad
 
 
 def test_more_than_fifteen_revisions_are_summarised():

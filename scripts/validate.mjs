@@ -3,6 +3,8 @@
 //
 //   npm run validate                  run every check (the build runs this first)
 //   npm run accept-data               run every check, then record the data as accepted
+//   npm run accept-data -- --accept-revisions   the same, and also accept large revisions to past figures
+//   npm run accept-revisions          the same as the line above, as a script of its own
 //   node scripts/validate.mjs --root <folder>   check a copy of the project (used by the tests)
 //
 // Exit code 0 only if every check passes. Every problem is printed, one line each.
@@ -43,6 +45,11 @@ const REQUIRED_FIELDS = [
   'chart_alt', 'chart_source', 'table', 'meaning', 'targets', 'sources_method',
   'read_with_care', 'corrections_text', 'update', 'retrieved',
 ];
+
+// The version of the lock file written by this checker. Version 2 stores every accepted value.
+const LOCK_VERSION = 2;
+const REVISION_KEYS = ['max_abs', 'max_pct', 'pct_floor'];
+const REVISION_HINT = 'If this revision is genuine, check it against the source and accept it with: npm run accept-data -- --accept-revisions';
 
 const CPI_MAX_YEARLY_CHANGE = 0.3;
 const IGNORED_FILES = new Set(['.DS_Store', 'Thumbs.db', 'desktop.ini']);
@@ -113,7 +120,7 @@ function makeReport() {
   const fails = [];
   const warns = [];
   const scoped = (scope) => ({
-    fail: (msg, kind = 'check') => fails.push({ scope, msg, kind }),
+    fail: (msg, kind = 'check', extra = {}) => fails.push({ scope, msg, kind, ...extra }),
     warn: (msg) => warns.push({ scope, msg }),
   });
   return { fails, warns, scoped };
@@ -191,7 +198,7 @@ function loadDataCsv(root, slug, F) {
         good = false;
       } else seen.set(key, line);
     }
-    if (good) rows.push({ line, date, period, series, jurisdiction, value, unit, status });
+    if (good) rows.push({ line, date, period, series, jurisdiction, value, valueText, unit, status });
   });
   return { rows, sha };
 }
@@ -220,6 +227,40 @@ function groupRows(rows) {
   return groups;
 }
 
+// 6a. every series declares how far an accepted figure may be revised
+function revisionProblem(rev) {
+  if (rev === undefined || rev === null) {
+    return 'has no "revision" tolerance. Add for example "revision: {max_abs: 500, max_pct: 1, pct_floor: 5000}" (max_pct and pct_floor are optional). See metrics/README.md.';
+  }
+  if (typeof rev !== 'object' || Array.isArray(rev)) return 'has a "revision" that is not a set of fields. Use for example "revision: {max_abs: 0.5}".';
+  for (const k of Object.keys(rev)) {
+    if (!REVISION_KEYS.includes(k)) return `has a "revision" field "${k}" that the checker does not know. Known: ${REVISION_KEYS.join(', ')}.`;
+  }
+  if (!isNum(rev.max_abs) || rev.max_abs <= 0) return 'needs "revision" to have "max_abs", a number above zero.';
+  if (rev.max_pct !== undefined && (!isNum(rev.max_pct) || rev.max_pct <= 0)) return 'has a "revision" "max_pct" that is not a number above zero.';
+  if (rev.pct_floor !== undefined && (!isNum(rev.pct_floor) || rev.pct_floor < 0)) return 'has a "revision" "pct_floor" that is not a number of zero or more.';
+  return null;
+}
+
+// Does changing a figure from `a` to `b` break the tolerance `rev`? Returns a reason or null.
+function revisionBreach(a, b, rev) {
+  const change = Math.abs(b - a);
+  if (change === 0) return null;
+  // A change of sign between two sizeable figures fails whatever its size.
+  const signLimit = rev.pct_floor !== undefined ? rev.pct_floor : rev.max_abs;
+  if (a * b < 0 && Math.abs(a) >= signLimit && Math.abs(b) >= signLimit) return 'the sign has changed';
+  if (change <= rev.max_abs) return null;
+  if (rev.max_pct === undefined) return `the change is more than ${rev.max_abs}`;
+  const floor = rev.pct_floor === undefined ? 0 : rev.pct_floor;
+  if (Math.abs(a) < floor) return `the change is more than ${rev.max_abs}`;
+  const pct = Math.abs(a) === 0 ? Infinity : (change / Math.abs(a)) * 100;
+  if (pct > rev.max_pct) return `the change is more than ${rev.max_abs} and more than ${rev.max_pct} per cent`;
+  return null;
+}
+
+const tidy = (n) => String(Number(n.toPrecision(12)));
+const signed = (n) => (n > 0 ? '+' : n < 0 ? '-' : '') + tidy(Math.abs(n));
+
 function checkSeries(slug, def, data, groups, F) {
   const path = `metrics/${slug}/data.csv`;
   const yml = `metrics/${slug}/metric.yml`;
@@ -244,6 +285,8 @@ function checkSeries(slug, def, data, groups, F) {
   }
 
   for (const [id, s] of declared) {
+    const problem = revisionProblem(s.revision);
+    if (problem) F.fail(`${yml}: series "${id}" ${problem}`);
     if (!inData.has(id)) continue;
     const seriesGroups = [...groups.entries()].filter(([k]) => k.startsWith(`${id}|`)).map(([, g]) => g);
 
@@ -302,15 +345,22 @@ function checkSeries(slug, def, data, groups, F) {
   }
 }
 
-// 7. rows never fall
+// 7. rows never fall, and accepted figures are not revised by more than their tolerance
 function lockFromGroups(groups, sha) {
   const series = [...groups.values()]
-    .map((g) => ({ series: g[0].series, jurisdiction: g[0].jurisdiction, rows: g.length, first: g[0].date, last: g.at(-1).date }))
+    .map((g) => ({
+      series: g[0].series,
+      jurisdiction: g[0].jurisdiction,
+      rows: g.length,
+      first: g[0].date,
+      last: g.at(-1).date,
+      values: Object.fromEntries(g.map((r) => [r.date, r.valueText])),
+    }))
     .sort((a, b) => (a.series < b.series ? -1 : a.series > b.series ? 1 : a.jurisdiction < b.jurisdiction ? -1 : 1));
-  return { data_sha256: sha, series };
+  return { lock_version: LOCK_VERSION, data_sha256: sha, series };
 }
 
-function checkLock(root, slug, groups, sha, F) {
+function checkLock(root, slug, def, groups, sha, F) {
   const path = `metrics/${slug}/data.lock.json`;
   const full = join(root, path);
   if (!existsSync(full)) {
@@ -338,8 +388,41 @@ function checkLock(root, slug, groups, sha, F) {
     if (g[0].date > l.first) { bad++; F.fail(`${path}: ${l.series} (${l.jurisdiction}) now starts on ${g[0].date}, later than the ${l.first} recorded when the data was last accepted.${hint}`); }
     if (g.at(-1).date < l.last) { bad++; F.fail(`${path}: ${l.series} (${l.jurisdiction}) now ends on ${g.at(-1).date}, earlier than the ${l.last} recorded when the data was last accepted.${hint}`); }
   }
+
+  // The lock must hold every accepted value (version 2).
+  if (lock.lock_version === undefined || lock.lock_version < LOCK_VERSION || lock.series.some((l) => !l || typeof l.values !== 'object' || l.values === null)) {
+    F.fail(`${path}: the lock file is in the old format, which does not record the accepted values, so past figures cannot be protected. Run "npm run accept-data" once to upgrade it.`, 'lock-old');
+    return;
+  }
+  if (lock.lock_version > LOCK_VERSION) {
+    F.fail(`${path}: the lock file is version ${lock.lock_version}, newer than this checker understands (version ${LOCK_VERSION}).`);
+    return;
+  }
+
+  // Revisions to figures that were accepted before.
+  let revised = 0;
+  const csvPath = `metrics/${slug}/data.csv`;
+  const tolerance = new Map((def && Array.isArray(def.series) ? def.series : []).filter((s) => s && typeof s.id === 'string').map((s) => [s.id, s.revision]));
+  for (const l of lock.series) {
+    const g = groups.get(`${l.series}|${l.jurisdiction}`);
+    if (!g) continue;
+    const rev = tolerance.get(l.series);
+    const usable = revisionProblem(rev) === null; // a missing or bad "revision" is reported in checkSeries
+    for (const r of g) {
+      if (!Object.hasOwn(l.values, r.date)) continue; // a new date is not a revision
+      const oldText = String(l.values[r.date]);
+      const a = Number(oldText);
+      if (!Number.isFinite(a) || a === r.value) continue;
+      const why = usable ? revisionBreach(a, r.value, rev) : null;
+      if (!why) revised++;
+      if (why) {
+        const short = `${csvPath}: ${l.series} (${l.jurisdiction}) on ${r.date} (${r.period}) was ${oldText} when last accepted and is now ${r.valueText}, a change of ${signed(r.value - a)} (${why})`;
+        F.fail(`${short}. ${REVISION_HINT}`, 'revision', { short });
+      }
+    }
+  }
   if (bad === 0 && lock.data_sha256 !== sha) {
-    F.warn(`metrics/${slug}/data.csv: data has changed since it was last accepted. If the changes are expected, check them against the source and run "npm run accept-data".`);
+    F.warn(`metrics/${slug}/data.csv: data has changed since it was last accepted${revised ? ` (${revised} accepted figure${revised === 1 ? '' : 's'} revised, within the allowed tolerance)` : ''}. If the changes are expected, check them against the source and run "npm run accept-data".`);
   }
 }
 
@@ -460,7 +543,7 @@ function validateRoot(root) {
     if (data) {
       const groups = groupRows(data.rows);
       if (def) checkSeries(slug, def, data, groups, F);
-      checkLock(root, slug, groups, data.sha, F);
+      checkLock(root, slug, def, groups, data.sha, F);
       locks.set(slug, lockFromGroups(groups, data.sha));
 
       // 10. every date used by an inflation-adjusted view has a price index
@@ -498,17 +581,21 @@ function validateRoot(root) {
 function main(argv) {
   let root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
   let accept = false;
+  let acceptRevisions = false;
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === '--root') {
       if (!argv[i + 1]) { console.error('--root needs a folder.'); return 2; }
       root = resolve(argv[++i]);
     } else if (argv[i] === '--accept') accept = true;
-    else { console.error(`Unknown option ${argv[i]}. Use --root <folder> or --accept.`); return 2; }
+    else if (argv[i] === '--accept-revisions') { accept = true; acceptRevisions = true; }
+    else { console.error(`Unknown option ${argv[i]}. Use --root <folder>, --accept or --accept-revisions.`); return 2; }
   }
 
   const r = validateRoot(root);
-  // When accepting, a missing lock file is not a problem: writing it is the point.
-  const blocking = r.fails.filter((f) => !(accept && f.kind === 'lock-missing'));
+  // When accepting, a missing or old-format lock file is not a problem: writing it is the point.
+  // Large revisions stop being a problem only when --accept-revisions is given. Nothing else is excused.
+  const excused = (f) => accept && (f.kind === 'lock-missing' || f.kind === 'lock-old' || (acceptRevisions && f.kind === 'revision'));
+  const blocking = r.fails.filter((f) => !excused(f));
 
   for (const p of r.passes) console.log(p);
   for (const w of r.warns) console.log(`WARNING: ${w.msg}`);
@@ -521,6 +608,7 @@ function main(argv) {
     return 1;
   }
   if (accept) {
+    for (const f of r.fails.filter((x) => x.kind === 'revision')) console.log(`ACCEPTED REVISION: ${f.short}.`);
     for (const [slug, lock] of r.locks) {
       writeFileSync(join(root, 'metrics', slug, 'data.lock.json'), JSON.stringify(lock, null, 2) + '\n');
       console.log(`Accepted metrics/${slug}/data.csv: wrote metrics/${slug}/data.lock.json (${lock.series.length} series, ${lock.series.reduce((n, s) => n + s.rows, 0)} rows).`);

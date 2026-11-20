@@ -7,6 +7,7 @@
     "dev": "astro dev",
     "validate": "node scripts/validate.mjs",
     "accept-data": "node scripts/validate.mjs --accept",
+    "accept-revisions": "node scripts/validate.mjs --accept --accept-revisions",
     "test:validate": "node scripts/tests/validate.test.mjs",
     "build": "npm run validate && astro build",
     "preview": "astro preview"

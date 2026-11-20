@@ -126,6 +126,10 @@ jobs:
             echo
             echo "Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
             echo
+            if grep -qF -- "--accept-revisions" "$RUNNER_TEMP/validate.txt" 2>/dev/null; then
+              echo "A past figure changed by more than its allowed revision. Check it against the source before accepting."
+              echo
+            fi
             echo "## Checker output"
             echo
             echo '```'

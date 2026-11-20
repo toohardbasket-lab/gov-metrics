@@ -26,6 +26,12 @@ Targets: a metric.yml may carry a list called "targets". Entries that have a "du
 (YYYY-MM-DD) and a "label" are checked. Entries without "due" (the ledger rows the page draws)
 are ignored. This program has no YAML library available, so it reads only the simple layout
 described in metrics/README.md: "key: value" lines, or one {key: value, ...} line per item.
+
+Revision tolerance: each series in metric.yml declares "revision: {max_abs: 500, max_pct: 1,
+pct_floor: 5000}" (max_pct and pct_floor are optional). The report reads it from that one-line
+form only; the same rule as the validator (scripts/validate.mjs) then marks each revised figure
+that is over the tolerance with "**LARGE:** ". A revision written over several lines is valid for
+the validator but cannot be read here: the report then says so and marks nothing for that series.
 """
 import argparse
 import hashlib
@@ -158,16 +164,70 @@ def top_list(text, key):
     return items
 
 
+REVISION_KEYS = ("max_abs", "max_pct", "pct_floor")
+
+
+def parse_revision(text):
+    """Reads "{max_abs: 500, max_pct: 1, pct_floor: 5000}" into a dict of Decimals, or None if it
+    is not exactly that form (a one-line map of the three known keys, max_abs required and above zero)."""
+    if not text:
+        return None
+    text = text.strip()
+    if not (text.startswith("{") and text.endswith("}")):
+        return None
+    out = {}
+    for part in text[1:-1].split(","):
+        if ":" not in part:
+            return None
+        k, v = part.split(":", 1)
+        k, d = k.strip(), to_decimal(v.strip())
+        if k not in REVISION_KEYS or d is None or not d.is_finite() or k in out:
+            return None
+        out[k] = d
+    if "max_abs" not in out or out["max_abs"] <= 0:
+        return None
+    if "max_pct" in out and out["max_pct"] <= 0:
+        return None
+    if "pct_floor" in out and out["pct_floor"] < 0:
+        return None
+    return out
+
+
+def revision_breach(old, new, rev):
+    """True if changing a figure from the text `old` to the text `new` breaks the tolerance `rev`.
+    The same rule as revisionBreach in scripts/validate.mjs."""
+    a, b = to_decimal(old), to_decimal(new)
+    if rev is None or a is None or b is None or a == b:
+        return False
+    change = abs(b - a)
+    sign_limit = rev["pct_floor"] if "pct_floor" in rev else rev["max_abs"]
+    if a * b < 0 and abs(a) >= sign_limit and abs(b) >= sign_limit:
+        return True
+    if change <= rev["max_abs"]:
+        return False
+    if "max_pct" not in rev:
+        return True
+    floor = rev.get("pct_floor", Decimal(0))
+    if abs(a) < floor:
+        return True
+    if a == 0:
+        return True
+    return change / abs(a) * 100 > rev["max_pct"]
+
+
 def read_definition(root, slug):
     path = Path(root) / "metrics" / slug / "metric.yml"
     if not path.exists():
-        return {"title": slug, "labels": {}, "targets": []}
+        return {"title": slug, "labels": {}, "targets": [], "revisions": {}}
     try:
         text = path.read_text(encoding="utf-8-sig")
     except (OSError, UnicodeDecodeError):
-        return {"title": slug, "labels": {}, "targets": []}
-    labels = {s.get("id"): s.get("label") for s in top_list(text, "series") if s.get("id") and s.get("label")}
-    return {"title": top_scalar(text, "title") or slug, "labels": labels, "targets": top_list(text, "targets")}
+        return {"title": slug, "labels": {}, "targets": [], "revisions": {}}
+    series = top_list(text, "series")
+    labels = {s.get("id"): s.get("label") for s in series if s.get("id") and s.get("label")}
+    revisions = {s["id"]: parse_revision(s.get("revision")) for s in series if s.get("id")}
+    return {"title": top_scalar(text, "title") or slug, "labels": labels, "targets": top_list(text, "targets"),
+            "revisions": revisions}
 
 
 # ---------------------------------------------------------------- comparing
@@ -300,15 +360,29 @@ def section_for_table(metric_title, new, revised, removed, before, after, defn, 
     rev_groups = {}
     for item in revised:
         rev_groups.setdefault((item[0][0], item[0][1]), []).append(item)
+    revisions = defn.get("revisions")  # None for files with no series list, such as the price index
     for (series, jur), items in sorted(rev_groups.items()):
         out_rev.append(f"**{metric_title}: {series_name(defn, series)}, {jur}**")
+        tolerance = (revisions or {}).get(series)
+        if revisions is not None and tolerance is None:
+            out_rev.append("- The allowed revision for this series could not be read from metric.yml, so no figure below is marked LARGE. "
+                           "The checks (npm run validate) still apply.")
+
+        def is_large(it):
+            return revision_breach(it[1].get("value"), it[2].get("value"), tolerance)
+
         if len(items) > MAX_SHOWN:
             big = max(items, key=lambda it: numeric_change(it[1], it[2]))
             unit = big[2]["unit"]
+            n_large = sum(1 for it in items if is_large(it))
             out_rev.append(f"- {len(items)} figures changed. The largest change is {big[0][2]}: {describe_change(big[1], big[2], unit)}. The first {MAX_SHOWN} are listed.")
+            if n_large:
+                out_rev.append(f"- **LARGE:** {n_large} of these changed by more than the allowed revision. They are listed first.")
+                items = sorted(items, key=lambda it: not is_large(it))
             items = items[:MAX_SHOWN]
         for k, old, new in items:
-            out_rev.append(f"- {k[2]} ({new['period']}): {describe_change(old, new, new['unit'])}")
+            mark = "**LARGE:** " if is_large((k, old, new)) else ""
+            out_rev.append(f"- {mark}{k[2]} ({new['period']}): {describe_change(old, new, new['unit'])}")
         out_rev.append("")
 
     for (series, jur), keys in sorted(group(removed).items()):

@@ -200,6 +200,155 @@ plainCase('--accept does not hide a fall in rows (the lock is not lowered)', () 
   );
 });
 
+// ---- protection of past figures (revisions to accepted values)
+const HINT = /accept-data -- --accept-revisions/;
+const lockFile = () => p('metrics', SLUG, 'data.lock.json');
+const setTo = (v) => (l) => setValue(l, String(v));
+const revisedBlock = (name, date, series, newValue, mustFail, mustName) =>
+  mustFail
+    ? failCase(name, () => editRows(row(date, series), setTo(newValue)), mustName)
+    : plainCase(name, () => {
+        editRows(row(date, series), setTo(newValue));
+        const r = run();
+        return (
+          check(name, r.code === 0, `expected exit 0, got ${r.code}\n${r.out}`) &&
+          check(name, /WARNING: .*data has changed since it was last accepted/.test(r.out), `no WARNING line\n${r.out}`)
+        );
+      });
+
+failCase('revision: 2007-08 net debt flips sign (-39958 to 39958)', () => editRows(row('2008-06-30', 'net_debt'), setTo(39958)),
+  /net_debt \(Commonwealth\) on 2008-06-30 \(2007-08\) was -39958 when last accepted and is now 39958.*accept-data -- --accept-revisions/);
+revisedBlock('revision: 2024-25 gross debt share moves 0.2 points (passes with a warning)', '2025-06-30', 'gross_debt_pct_gdp', '33.6', false);
+revisedBlock('revision: 2024-25 gross debt share moves 1.0 point (fails)', '2025-06-30', 'gross_debt_pct_gdp', '34.4', true, /gross_debt_pct_gdp \(Commonwealth\) on 2025-06-30 \(2024-25\) was 33\.4 .* is now 34\.4, a change of \+1/);
+revisedBlock('revision: 2024-25 gross debt up $1m (at max_abs, passes with a warning)', '2025-06-30', 'gross_debt', 928640, false);
+revisedBlock('revision: 1990-91 gross debt digits transposed, 48723 to 48732 (fails)', '1991-06-30', 'gross_debt', 48732, true, /gross_debt \(Commonwealth\) on 1991-06-30 \(1990-91\) was 48723 .* is now 48732, a change of \+9/);
+revisedBlock('revision: 2025-26 net debt digits transposed, 549969 to 549696 (fails)', '2026-06-30', 'net_debt', 549696, true, /net_debt \(Commonwealth\) on 2026-06-30 .* a change of -273/);
+revisedBlock('revision: 2024-25 gross debt up $10,000m (fails)', '2025-06-30', 'gross_debt', 938639, true, /gross_debt \(Commonwealth\) on 2025-06-30 .* a change of \+10000/);
+revisedBlock('revision: 2005-06 net debt 331 to -331 (fails)', '2006-06-30', 'net_debt', -331, true, /net_debt \(Commonwealth\) on 2006-06-30 \(2005-06\) was 331 .* is now -331/);
+
+// The max_pct and pct_floor rule, tested with its own tolerance written into the temporary copy.
+const withPctRule = () => editFile(p('metrics', SLUG, 'metric.yml'), (t) => t.replaceAll('revision: {max_abs: 1}', 'revision: {max_abs: 500, max_pct: 1, pct_floor: 5000}'));
+plainCase('max_pct rule: gross debt up $400m passes with a warning', () => {
+  withPctRule();
+  editRows(row('2025-06-30', 'gross_debt'), setTo(929039));
+  const r = run();
+  return check('max_pct pass', r.code === 0 && /WARNING: .*data has changed/.test(r.out), `exit ${r.code}\n${r.out}`);
+});
+plainCase('max_pct rule: gross debt up $10,000m (over 500 and 1 per cent) fails', () => {
+  withPctRule();
+  editRows(row('2025-06-30', 'gross_debt'), setTo(938639));
+  const r = run();
+  return check('max_pct fail', r.code !== 0 && /a change of \+10000/.test(r.out), `exit ${r.code}\n${r.out}`);
+});
+plainCase('max_pct rule: net debt 331 to 200 (under pct_floor, under max_abs) passes with a warning', () => {
+  withPctRule();
+  editRows(row('2006-06-30', 'net_debt'), setTo(200));
+  const r = run();
+  return check('pct_floor pass', r.code === 0, `exit ${r.code}\n${r.out}`);
+});
+
+plainCase('revision failure line names the file, series, jurisdiction, date, period, old, new, change and the way to accept', () => {
+  editRows(row('2008-06-30', 'net_debt'), setTo(39958));
+  const line = run().out.split('\n').find((l) => l.startsWith('FAIL:')) ?? '';
+  return check('revision line', /^FAIL: metrics\/commonwealth-debt\/data\.csv: net_debt \(Commonwealth\) on 2008-06-30 \(2007-08\) was -39958 .* is now 39958, a change of \+79916 \(the sign has changed\)\. If this revision is genuine, check it against the source and accept it with: npm run accept-data -- --accept-revisions$/.test(line), line);
+});
+
+plainCase('plain accept-data refuses on a large revision and leaves the lock file unchanged', () => {
+  editRows(row('2008-06-30', 'net_debt'), setTo(39958));
+  const before = readFileSync(lockFile());
+  const r = run('--accept');
+  return (
+    check('accept refuses revision', r.code !== 0 && HINT.test(r.out) && /Nothing was accepted/.test(r.out), `exit ${r.code}\n${r.out}`) &&
+    check('accept refuses revision', Buffer.compare(before, readFileSync(lockFile())) === 0, 'the lock file changed')
+  );
+});
+
+plainCase('accept-data --accept-revisions writes the lock, prints the revision, and validate then passes with no warning', () => {
+  editRows(row('2008-06-30', 'net_debt'), setTo(39958));
+  const before = readFileSync(lockFile());
+  const a = run('--accept', '--accept-revisions');
+  const v = run();
+  const lock = JSON.parse(readText(lockFile()));
+  const nd = lock.series.find((s) => s.series === 'net_debt');
+  return (
+    check('accept revisions', a.code === 0 && /ACCEPTED REVISION: .*net_debt \(Commonwealth\) on 2008-06-30/.test(a.out), `exit ${a.code}\n${a.out}`) &&
+    check('accept revisions', Buffer.compare(before, readFileSync(lockFile())) !== 0 && nd.values['2008-06-30'] === '39958', 'the lock was not updated') &&
+    check('accept revisions', v.code === 0 && !/WARNING/.test(v.out) && /Validation passed/.test(v.out), `validate after: exit ${v.code}\n${v.out}`)
+  );
+});
+
+plainCase('--accept-revisions does not override a different failure (a value outside the plausible range)', () => {
+  editRows(row('2008-06-30', 'net_debt'), setTo(39958));
+  editRows(row('2000-06-30', 'gross_debt_pct_gdp'), setTo(150));
+  const before = readFileSync(lockFile());
+  const r = run('--accept', '--accept-revisions');
+  return (
+    check('accept revisions refuses', r.code !== 0 && /outside the plausible range 0 to 100/.test(r.out) && /Nothing was accepted/.test(r.out), `exit ${r.code}\n${r.out}`) &&
+    check('accept revisions refuses', !/ACCEPTED REVISION/.test(r.out), 'it printed an accepted revision although it refused') &&
+    check('accept revisions refuses', Buffer.compare(before, readFileSync(lockFile())) === 0, 'the lock file changed')
+  );
+});
+
+plainCase('--accept-revisions does not hide a fall in rows', () => {
+  editRows((l) => l.startsWith('2026-06-30,'), () => null);
+  const before = readFileSync(lockFile());
+  const r = run('--accept-revisions');
+  return (
+    check('revisions rows fall', r.code !== 0 && /Rows must never fall/.test(r.out), `exit ${r.code}\n${r.out}`) &&
+    check('revisions rows fall', Buffer.compare(before, readFileSync(lockFile())) === 0, 'the lock file changed')
+  );
+});
+
+failCase('a series without a revision tolerance fails', () => editFile(p('metrics', SLUG, 'metric.yml'), (t) => t.replace(/^    revision: \{max_abs: 1\}\n/m, '')), /series "(gross_debt|net_debt)" has no "revision" tolerance/);
+failCase('a revision tolerance with an unknown field fails', () => editFile(p('metrics', SLUG, 'metric.yml'), (t) => t.replace('revision: {max_abs: 0.5}', 'revision: {max_abs: 0.5, max_percent: 3}')), /has a "revision" field "max_percent"/);
+failCase('a revision tolerance without max_abs fails', () => editFile(p('metrics', SLUG, 'metric.yml'), (t) => t.replace('revision: {max_abs: 0.5}', 'revision: {max_pct: 3}')), /needs "revision" to have "max_abs"/);
+
+plainCase('an old-format lock fails with the upgrade message; plain accept-data upgrades it; validate then passes', () => {
+  const lock = JSON.parse(readText(lockFile()));
+  delete lock.lock_version;
+  for (const s of lock.series) delete s.values;
+  writeFileSync(lockFile(), JSON.stringify(lock, null, 2) + '\n');
+  const v1 = run();
+  const a = run('--accept');
+  const v2 = run();
+  const upgraded = JSON.parse(readText(lockFile()));
+  return (
+    check('old lock', v1.code !== 0 && /lock file is in the old format.*Run "npm run accept-data" once to upgrade it/.test(v1.out), `validate: exit ${v1.code}\n${v1.out}`) &&
+    check('old lock', a.code === 0 && upgraded.lock_version === 2 && Object.keys(upgraded.series[0].values).length === 56, `accept: exit ${a.code}\n${a.out}`) &&
+    check('old lock', v2.code === 0 && !/WARNING/.test(v2.out), `validate after: exit ${v2.code}\n${v2.out}`)
+  );
+});
+
+plainCase('accept-data does not upgrade an old-format lock when another check fails', () => {
+  const lock = JSON.parse(readText(lockFile()));
+  delete lock.lock_version;
+  for (const s of lock.series) delete s.values;
+  writeFileSync(lockFile(), JSON.stringify(lock, null, 2) + '\n');
+  editRows(row('1990-06-30', 'gross_debt'), (l) => setValue(l, 'abc'));
+  const before = readFileSync(lockFile());
+  const r = run('--accept');
+  return check('old lock refuses', r.code !== 0 && Buffer.compare(before, readFileSync(lockFile())) === 0, `exit ${r.code}\n${r.out}`);
+});
+
+plainCase('appending a new year is not treated as a revision', () => {
+  const lines = readText(dataPath()).split('\n');
+  const add = [];
+  for (const l of lines) {
+    if (l.startsWith('2026-06-30,')) {
+      const c = l.split(',');
+      c[0] = '2027-06-30';
+      c[1] = '2026-27';
+      c[4] = c[2].endsWith('_pct_gdp') ? '34' : String(Number(c[4]) + 100000);
+      add.push(c.join(','));
+    }
+  }
+  // a new year also needs a price index for the inflation-adjusted views
+  editFile(p('shared', 'cpi_june.csv'), (t) => t.trimEnd() + '\n2027-06-30,105.00,base period 25 as coded by the ABS\n');
+  writeFileSync(dataPath(), lines.filter((l) => l !== '').concat(add).join('\n') + '\n');
+  const r = run();
+  return check('new year', r.code === 0 && !/was .* when last accepted/.test(r.out), `exit ${r.code}\n${r.out}`);
+});
+
 plainCase('every problem is printed, not just the first', () => {
   editRows(row('1990-06-30', 'gross_debt'), (l) => setValue(l, 'abc'));
   editRows(row('2000-06-30', 'gross_debt_pct_gdp'), (l) => setValue(l, '150'));
