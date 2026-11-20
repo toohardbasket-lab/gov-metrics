@@ -235,9 +235,15 @@ def test_changed_source_file_and_price_index_revision():
     assert flag == "true"
 
 
-def test_source_change_alone_sets_the_flag():
-    _, flag = run_report({}, {"source": b"different"})
-    assert flag == "true"
+def test_source_change_alone_does_not_set_the_flag():
+    # A re-download with different bytes but the same figures (the ABS reorders its rows from
+    # one day to the next) must be listed, but must not open a pull request.
+    md, flag = run_report({}, {"source": b"different"})
+    assert flag == "false"
+    assert "metrics/toy/sources/file.docx`: CHANGED" in section(md, "Sources")
+    todo = section(md, "What to do")
+    assert "Nothing to do" in todo and "same" in todo, todo
+    assert "merge" not in todo, todo
 
 
 def test_run_all_registry_and_status():

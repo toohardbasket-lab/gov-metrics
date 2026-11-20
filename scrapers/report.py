@@ -12,9 +12,11 @@ Options:
   --changed-flag <file>    write "true" or "false": did any tracked data file change?
 
 What counts as a change (for the flag and the "What to do" line): any file under metrics/ or
-shared/ that was added, removed or altered, EXCEPT data.lock.json, and except that in a
-manifest.json the "retrieved" date is ignored. The scrapers rewrite the retrieved date on every
-run, so counting it would raise a false alarm every week.
+shared/ that was added, removed or altered, EXCEPT data.lock.json and anything inside a sources
+folder (the downloaded files and their manifest). A downloaded file can come back with different
+bytes but the same figures: the ABS, for example, sends the same rows in a different order from
+one day to the next. That is listed in the Sources section but does not open a pull request. When
+the figures do change, the new downloads are committed along with them.
 
 The summary counts include the shared price index. "Problems" are: scrapers that failed,
 data files that could not be read, data points that were removed, a status file that could not
@@ -227,6 +229,8 @@ def trees_differ(before, after):
             if not base.is_dir():
                 continue
             for p in sorted(base.rglob("*")):
+                if "sources" in p.relative_to(base).parts:
+                    continue
                 if p.is_file() and p.name not in IGNORED_NAMES and "__pycache__" not in p.parts:
                     out[p.relative_to(root).as_posix()] = p
         return out
@@ -502,6 +506,9 @@ def build_report(before, after, status_path, today):
             todo += "Otherwise, review the figures above against the source."
     elif changed:
         todo = "Review the figures above against the source, then merge this pull request."
+    elif src_changed:
+        todo = ("Nothing to do. A downloaded source file came back with different bytes, but the "
+                "figures read from it are the same, so nothing on the site changes.")
     else:
         todo = "Nothing to do."
 
