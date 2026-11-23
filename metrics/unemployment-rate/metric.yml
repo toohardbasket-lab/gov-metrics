@@ -8,7 +8,7 @@ jurisdiction: Australia
 description: The share of the labour force that is out of work and looking for a job, each month since 1978.
 lede: "The share of people in the labour force who are out of work, looking for work and able to start, each month since {first_year}. Seasonally adjusted."
 
-draft: true
+draft: false
 draft_banner: "Draft, not for publication. The figures are read from the ABS by code and have not yet had the human check the plan requires."
 
 # The series needs a frequency (monthly) and a plausible range. The validator (npm run validate)

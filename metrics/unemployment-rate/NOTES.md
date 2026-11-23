@@ -22,10 +22,23 @@ The page is a draft until the human check below is done.
 - All 585 values match a separate download of the same ABS series taken earlier the same day, rounded independently. Every date is the last day of its month and matches its period label.
 - This is a machine check, not the human check below.
 
-## Human check (plan rule 8.8): not yet done. Latest value plus five months chosen by Alan, against the ABS release.
+## Human check (plan rule 8.8): done
 
-Checked by:
+Checked by: Alan Hewitt
 
-Date:
+Date: 23 November 2026
 
-Points checked:
+Against: ABS, Labour Force, Australia, October 2026, Table 1 spreadsheet (62020001.xlsx), sheet Data1, series A84423050A (unemployment rate, persons, seasonally adjusted), rounded to one decimal place.
+
+Points checked, all matched the page:
+
+| Month | Page |
+|---|---|
+| 2026-10 (latest) | 4.9 |
+| 2025-11 | 4.3 |
+| 2023-08 | 3.7 |
+| 2021-03 | 5.7 |
+| 2018-05 | 5.4 |
+| 2016-10 | 5.6 |
+
+Still open before publication: the government forecast row in `metric.yml` says "Not yet added".
