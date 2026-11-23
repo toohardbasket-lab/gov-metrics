@@ -1,0 +1,99 @@
+# Definition file for one metric. Everything the page shows, other than the numbers
+# in data.csv, comes from this file. See metrics/README.md for what each field does.
+# Words in braces, such as {first_year}, are filled in from the data when the page is built.
+slug: unemployment-rate
+title: Unemployment rate
+theme: Work and incomes
+jurisdiction: Australia
+description: The share of the labour force that is out of work and looking for a job, each month since 1978.
+lede: "The share of people in the labour force who are out of work, looking for work and able to start, each month since {first_year}. Seasonally adjusted."
+
+draft: true
+draft_banner: "Draft, not for publication. The figures are read from the ABS by code and have not yet had the human check the plan requires."
+
+# The series needs a frequency (monthly) and a plausible range. The validator (npm run validate)
+# stops the build if a month is missing or a value falls outside the range. max_step_pct is the
+# largest allowed change between consecutive months, per cent: the largest since 1978 is 1.1 points,
+# 5.2 to 6.3 per cent from March to April 2020, which is 21 per cent of 5.2.
+series:
+  - id: unemployment_rate
+    label: Unemployment rate
+    definition: Unemployed persons as a share of the labour force, persons aged 15 and over, seasonally adjusted.
+    source_table: ABS Labour Force, Australia, Table 1, series A84423050A
+    frequency: monthly
+    plausible: {min: 0, max: 15}
+    max_step_pct: 35
+    # Revision tolerance: the ABS re-estimates seasonally adjusted figures every month, so a past month can move by a tenth of a point. A move of more than 0.3 points blocks until the owner accepts it.
+    revision: {max_abs: 0.3}
+
+# The headline figures above the chart. Values are read from data.csv.
+# sub_month: true puts the month of the figure beneath it (instead of a date beside the label).
+# months_back: 12 takes the figure for the same month one year before the latest.
+tiles:
+  - label: Unemployment rate
+    series: unemployment_rate
+    sub_month: true
+  - label: A year earlier
+    series: unemployment_rate
+    months_back: 12
+    sub_month: true
+  - label: Target status
+    text: No numeric target
+    sub_text: Shown for context only
+
+# The chart. One line, drawn without a marker on every point (there are about 585 months).
+views:
+  - id: rate
+    label: Rate
+    derive: none
+    lines:
+      - series: unemployment_rate
+        label: Unemployment rate
+    caption: Per cent of the labour force, seasonally adjusted, each month.
+chart_alt: "Line chart of the unemployment rate each month, {first_year} to {last_year}. The full figures are in the table below."
+chart_source: "Source: ABS, Labour Force, Australia. Latest month: {latest_period}."
+
+# The full table. Newest first. Format follows the series unit.
+table:
+  period_header: Month
+  columns:
+    - header: "Unemployment rate %"
+      series: unemployment_rate
+
+meaning:
+  - "The **unemployment rate** is the share of the labour force (people who are working or looking for work) who have no paid work, have looked for work in the past four weeks and could start. The ABS estimates it each month from a survey of households."
+  - "The figures are seasonally adjusted. The ABS removes the swings that happen at the same time every year, such as students looking for summer work, so that one month can be compared with the next."
+
+# Targets and forecasts ledger.
+targets:
+  - label: Target
+    text: "No numeric target. The Reserve Bank's mandate includes full employment, which has no set figure."
+  - label: Government forecast
+    text: "Not yet added. To be taken from the latest Budget or Mid-Year Economic and Fiscal Outlook before publication."
+
+# Sources and method ledger. {link} is replaced by the link; {update} and {retrieved}
+# by the fields below.
+update: Monthly, when the ABS publishes Labour Force, Australia, usually in the middle of the following month.
+retrieved: 2026-11-23
+sources_method:
+  - label: Unemployment rate
+    link:
+      label: ABS, Labour Force, Australia
+      url: https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/latest-release
+    text: "{link}, read from the ABS Data API (series M13.3.1599.20.AUS.M) and checked month by month against Table 1, series A84423050A."
+  - label: Updated
+    text: "{update} Data retrieved {retrieved}."
+
+read_with_care:
+  - "The rate is an estimate from a sample survey, so a small move from one month to the next can be sampling noise. The ABS publishes the margin of error with each release."
+  - "The ABS re-estimates seasonally adjusted figures every month as new data arrives, so earlier months can change slightly after they are first published."
+  - "Anyone who did at least one hour of paid work in the survey week counts as employed. The rate does not show people who have work but want more hours; the ABS publishes that separately as underemployment."
+  - "In 2020 many people who were stood down kept their jobs under JobKeeper and were counted as employed, and many who lost work stopped looking and were not counted as unemployed. The rate therefore understates the loss of work during the COVID-19 lockdowns."
+  - "Figures are the ABS's estimates rounded to one decimal place, as the ABS publishes them."
+  - "Government shading starts on the day each government was sworn in. Recessions and crises are marked on every chart on this site using the same list. The marks give context and do not assign cause."
+
+corrections_text: None yet. Every correction to this page will be listed here with its date and what changed.
+
+# Fields kept from the worked-example definition file.
+state_panel: false
+inclusion_tests: {outcome: true, official: true, history: true, ongoing: true, no_editorial_choice: "one headline series, the ABS's own"}

@@ -24,9 +24,9 @@ const STATUSES = ['actual', 'estimate', 'forecast'];
 // The units the site knows how to format. This is a copy of the list in src/lib/format.ts
 // (formatValue, formatAxis and formatTable). A check below fails if the two lists differ,
 // so a new unit has to be added in both places.
-const KNOWN_UNITS = ['aud_million', 'pct_gdp'];
+const KNOWN_UNITS = ['aud_million', 'pct_gdp', 'pct'];
 
-// How far apart consecutive rows must be. To add quarterly or monthly data, add an entry here
+// How far apart consecutive rows must be. To add another frequency (quarterly, say), add an entry here
 // whose `next` returns the date that should follow the one given (for example three months
 // later, keeping the end of the month). Nothing else in this file needs to change.
 const FREQUENCIES = {
@@ -35,6 +35,23 @@ const FREQUENCIES = {
       const [y, m, d] = iso.split('-');
       return `${String(+y + 1).padStart(4, '0')}-${m}-${d}`;
     },
+  },
+  // Monthly data sits on the last day of each month (28 or 29 February, 30 April, and so on).
+  // `next` gives the last day of the month after the one given. `onSchedule` says whether a
+  // single date is allowed at all for this frequency.
+  monthly: {
+    next(iso) {
+      const [y, m] = iso.split('-').map(Number);
+      const ny = m === 12 ? y + 1 : y;
+      const nm = m === 12 ? 1 : m + 1;
+      const last = new Date(Date.UTC(ny, nm, 0)).getUTCDate(); // day 0 of the month after is its last day
+      return `${String(ny).padStart(4, '0')}-${String(nm).padStart(2, '0')}-${String(last).padStart(2, '0')}`;
+    },
+    onSchedule(iso) {
+      const [y, m, d] = iso.split('-').map(Number);
+      return d === new Date(Date.UTC(y, m, 0)).getUTCDate();
+    },
+    scheduleHint: 'the last day of a month',
   },
 };
 
@@ -297,6 +314,11 @@ function checkSeries(slug, def, data, groups, F) {
     else {
       for (const g of seriesGroups) {
         let reported = 0;
+        if (freq.onSchedule) {
+          for (const r of g) {
+            if (!freq.onSchedule(r.date)) F.fail(`${path}: line ${r.line}, ${id} (${r.jurisdiction}) on ${r.date} is not ${freq.scheduleHint}, as ${s.frequency} data must be.`);
+          }
+        }
         for (let i = 1; i < g.length; i++) {
           const a = g[i - 1].date;
           const b = g[i].date;

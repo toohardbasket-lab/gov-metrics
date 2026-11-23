@@ -16,9 +16,9 @@ You need Node.js version 22 installed (the version used to build this is recorde
 
 - `site.config.mjs`: the one file holding the site name, publisher, authorisation line, contact email, footer text and web address. Change the name or owner here and nowhere else.
 - `src/`: the pages, the shared page layout, the chart (`src/components/MetricChart.astro`), the code that reads each metric's files (`src/lib/`) and the styling.
-- `metrics/`: one folder per metric, with its definition (`metric.yml`), data and checking notes. The first is `commonwealth-debt`. Its `sources/` folder holds the Treasury files as downloaded and a `manifest.json` that records where and when. See `metrics/README.md` for what goes in `metric.yml`.
+- `metrics/`: one folder per metric, with its definition (`metric.yml`), data and checking notes. The first is `commonwealth-debt`; the second is `unemployment-rate`. Its `sources/` folder holds the Treasury files as downloaded and a `manifest.json` that records where and when. See `metrics/README.md` for what goes in `metric.yml`.
 - `shared/`: lists used on every chart: `governments.csv` (when each government was sworn in), `events.csv` (the marked events) and `cpi_june.csv` (June quarter price index, used for the inflation-adjusted views). `shared/sources/` holds the raw ABS download and its manifest.
-- `scrapers/`: the Python programs that download official data and write the CSV files (`commonwealth_debt.py` and `cpi_june.py`), `run_all.py` and `report.py` (the weekly update and its report), their tests, and `requirements.txt`. See `scrapers/README.md`.
+- `scrapers/`: the Python programs that download official data and write the CSV files (`commonwealth_debt.py`, `cpi_june.py` and `unemployment_rate.py`), `run_all.py` and `report.py` (the weekly update and its report), their tests, and `requirements.txt`. See `scrapers/README.md`.
 - `scripts/`: the data checker (`validate.mjs`) and its tests.
 - `.github/workflows/`: the two automatic jobs on GitHub (see below).
 - `public/`: files copied to the site as they are.
@@ -31,7 +31,7 @@ Three commands, all typed in a terminal opened in this folder:
 - `npm run validate` checks every metric and the shared files and prints every problem it finds, one line each. It checks that the file layout is right, every date is real, every number is a number inside the range set for that series, no year is missing, nothing is duplicated, no rows have disappeared since the data was last accepted, the downloaded source files are exactly as recorded, and the price index has no gaps. It passes only if everything is right. The build runs it first, so a bad file can never be published. Use it any time you change a data file by hand.
 - `npm run accept-data` does the same checks and, only if they all pass, records the current data as accepted (in `metrics/<name>/data.lock.json`, which keeps every accepted figure). From then on the checker refuses data with fewer rows, or a shorter date range, than that record, and refuses any large change to a figure that was already accepted (see below). Use it after you have checked new figures against the source and are happy with them. If rows were removed on purpose, delete the `data.lock.json` file first, then run it.
 - `npm run accept-data -- --accept-revisions` (or the shorter `npm run accept-revisions`, which does the same) is the one command that accepts large changes to past figures. It lists each change it accepts. Every other problem still stops it.
-- `npm run test:validate` tests the checker itself, by damaging a temporary copy of the data in about 50 ways and confirming each one is caught. Use it after changing `scripts/validate.mjs`.
+- `npm run test:validate` tests the checker itself, by damaging a temporary copy of the data in about 75 ways and confirming each one is caught. Use it after changing `scripts/validate.mjs`.
 
 If `npm run validate` prints a line starting WARNING, nothing is wrong, but the data differs from what was last accepted. Check the changes, then run `npm run accept-data`.
 

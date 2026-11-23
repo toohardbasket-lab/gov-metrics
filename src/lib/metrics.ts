@@ -37,6 +37,8 @@ export interface MetricDef {
     label: string;
     series?: string;
     sub?: { series: string; suffix: string };
+    months_back?: number;
+    sub_month?: boolean;
     text?: string;
     sub_text?: string;
   }[];
@@ -232,16 +234,33 @@ export function loadMetric(slug: string): Metric {
     const date = [...m.keys()].sort().at(-1)!;
     return m.get(date)!;
   };
+  // A tile with months_back shows the figure for the same calendar month that many months before
+  // the latest (12 = a year earlier). A tile with sub_month puts the month and year beneath the
+  // figure and leaves the label plain; without it the full date goes after the label.
+  const monthsBefore = (iso: string, n: number) => {
+    const total = +iso.slice(0, 4) * 12 + (+iso.slice(5, 7) - 1) - n;
+    return `${Math.floor(total / 12)}-${String((total % 12) + 1).padStart(2, '0')}`;
+  };
   const tiles = def.tiles.map((t) => {
     if (t.series) {
-      const r = latestOf(t.series, 'a tile');
+      let r = latestOf(t.series, 'a tile');
+      if (t.months_back !== undefined) {
+        need(Number.isInteger(t.months_back) && t.months_back > 0, slug, `tile "${t.label}" has a months_back that is not a whole number above zero`);
+        const want = monthsBefore(r.date, t.months_back);
+        const found = [...seriesRows(t.series, 'a tile').values()].find((x) => x.date.slice(0, 7) === want);
+        need(found, slug, `tile "${t.label}" needs a figure for ${want}, ${t.months_back} months before ${r.date}, but data.csv has none`);
+        r = found!;
+      }
+      need(!(t.sub && t.months_back !== undefined), slug, `tile "${t.label}" cannot have both sub and months_back`);
       let sub = '';
       if (t.sub) {
         const s = latestOf(t.sub.series, 'a tile');
         need(s.date === r.date, slug, `tile "${t.label}" and its sub series have different latest dates`);
         sub = `${formatValue(s.unit, s.value)} ${t.sub.suffix}`;
       }
-      return { key: `${t.label}, ${formatDate(r.date)}`, value: formatValue(r.unit, r.value), sub, isText: false };
+      if (t.sub_month) sub = formatMonthYear(r.date);
+      const key = t.sub_month ? t.label : `${t.label}, ${formatDate(r.date)}`;
+      return { key, value: formatValue(r.unit, r.value), sub, isText: false };
     }
     need(t.text !== undefined, slug, `tile "${t.label}" needs either series or text`);
     return { key: t.label, value: t.text!, sub: t.sub_text ?? '', isText: true };

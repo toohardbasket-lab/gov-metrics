@@ -1,8 +1,8 @@
 {
   "abs-cpi-1.10001.10.50.Q.csv": {
     "bytes": 12553,
-    "retrieved": "2026-11-16",
-    "sha256": "50728a851de0f303e266c194bfcb1206d6974c5cf7a8f930f9e9162b718a32be",
+    "retrieved": "2026-11-23",
+    "sha256": "0761908b7ea4f2a5f49b0093673a24501c68fe5db174189f85667c3ac2c87b0c",
     "url": "https://data.api.abs.gov.au/rest/data/ABS,CPI/1.10001.10.50.Q?startPeriod=1970-Q1"
   }
 }

@@ -1,6 +1,6 @@
 # Metrics
 
-Each metric has its own folder here. The folder name is the metric's short name (the "slug"), for example `commonwealth-debt`. The only metric so far is `commonwealth-debt`, built from figures parsed by code from Treasury's Word files (see `scrapers/README.md`). It is still a draft until its owner has checked it.
+Each metric has its own folder here. The folder name is the metric's short name (the "slug"), for example `commonwealth-debt`. The metrics so far are `commonwealth-debt`, built from figures parsed by code from Treasury's Word files, and `unemployment-rate`, read by code from the ABS Data API and checked against the ABS Labour Force spreadsheet (see `scrapers/README.md`). Each is a draft until its owner has checked it.
 
 Every folder that contains a `metric.yml` gets a page at `/metrics/<slug>/` and a link on the home page. The page is drawn entirely from the files in the folder, plus the shared lists in `shared/`. Nothing about any one metric is written into the site code.
 
@@ -29,7 +29,7 @@ The file is in "long" format: one row per date, series and jurisdiction. The hea
 | `series` | The series id from `metric.yml`, such as `gross_debt`. |
 | `jurisdiction` | Who the figure covers, such as `Commonwealth`, or a state or territory. |
 | `value` | The number, as published or computed in code. |
-| `unit` | What the number is measured in. The page knows `aud_million` (dollars, in millions) and `pct_gdp` (per cent of GDP). A new unit needs a line in `src/lib/format.ts`. |
+| `unit` | What the number is measured in. The page knows `aud_million` (dollars, in millions), `pct_gdp` (per cent of GDP) and `pct` (per cent, such as a rate; shown as 4.9%). A new unit needs a line in `src/lib/format.ts`. |
 | `status` | One of `actual`, `estimate` or `forecast`. |
 
 Every number must come from a file in `sources/`. Nothing is typed in by hand. The files must not contain quote marks or commas inside values; the page builder stops with an error if it finds a quote mark.
@@ -55,7 +55,7 @@ An unknown word, or one that cannot be worked out, stops the build. Do not type 
 | `lede` | The one-sentence description under the title. |
 | `draft`, `draft_banner` | If `draft` is true, the banner text is shown at the top and the home page adds "(draft)". |
 | `series` | Each series id, its label, definition and source table. |
-| `tiles` | The boxes above the chart. A tile with a `series` shows that series' latest value, with a `sub` series (and `suffix`) beneath. A tile with `text` and `sub_text` shows fixed words, such as the target status. |
+| `tiles` | The boxes above the chart. A tile with a `series` shows that series' latest value, with a `sub` series (and `suffix`) beneath. A tile with `text` and `sub_text` shows fixed words, such as the target status. A tile with a `series` may also have `sub_month: true` (the label stays plain and the month and year, such as October 2026, go beneath the figure) and `months_back: 12` (the figure for the same month that many months before the latest, so 12 is a year earlier; it cannot be combined with `sub`). |
 | `views` | The chart's view buttons, in order. Each has an `id`, a `label`, a `caption`, and one or two `lines` (a series id and a label). `derive: none` plots data.csv as it is. `derive: real` multiplies each value by the CPI of the latest June in the data divided by the CPI of that row's June, using `shared/cpi_june.csv`. Rows with no CPI figure are left out of that view. All lines in a view share one unit. |
 | `chart_alt`, `chart_source` | The chart's text description for screen readers, and the source line after each caption. |
 | `table` | The column headings of the full table and which series (and whether `derive: real`) each column shows. |
@@ -73,7 +73,7 @@ Each entry in `series` must also carry these, or `npm run validate` fails and th
 
 | Field | What it does |
 |---|---|
-| `frequency` | How often the series has a point. Only `annual` is supported so far. For `annual`, consecutive points must be exactly one year apart on the same month and day, so a missing year is caught. An unknown word fails with a clear message. |
+| `frequency` | How often the series has a point: `annual` or `monthly`. For `annual`, consecutive points must be exactly one year apart on the same month and day, so a missing year is caught. For `monthly`, every date must be the last day of a month (28 or 29 February, 30 April and so on) and consecutive points must be in consecutive months, so a missing month is caught. An unknown word fails with a clear message. |
 | `plausible` | The range a real value must fall inside, for example `{min: 0, max: 100}`. A value outside it stops the build. Choose it wide enough that real data never touches it, and narrow enough that a slipped decimal point or a flipped sign does. |
 | `max_step_pct` (optional) | The largest allowed change between consecutive points, as a per cent of the earlier point. Left out for the debt series. |
 | `revision` | How far an already accepted figure may change before the checker blocks it. Required on every series. See "Revision tolerance" below. |

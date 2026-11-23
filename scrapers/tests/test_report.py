@@ -306,7 +306,7 @@ def test_source_change_alone_does_not_set_the_flag():
 
 
 def test_run_all_registry_and_status():
-    assert [n for n, _ in run_all.REGISTRY] == ["cpi_june", "commonwealth_debt"]
+    assert [n for n, _ in run_all.REGISTRY] == ["cpi_june", "commonwealth_debt", "unemployment_rate"]
     # a script that fails and a script that works, run without touching the network
     with tempfile.TemporaryDirectory() as tmp:
         good = Path(tmp) / "good.py"
@@ -325,6 +325,53 @@ def test_run_all_registry_and_status():
         assert s["bad"]["ok"] is False and s["bad"]["exit_code"] == 3
         assert s["bad"]["output_tail"].split("\n")[-1] == "line 49" and len(s["bad"]["output_tail"].split("\n")) == 30
         assert s["good"] == {"ok": True, "exit_code": 0, "output_tail": "hello"}, s["good"]
+
+
+def test_percent_unit_is_formatted_and_tolerance_read():
+    assert report.fmt_value("4.9", "pct") == "4.9%"
+    assert report.fmt_diff("4.3", "4.9", "pct") == "+0.6 percentage points"
+    assert report.fmt_diff("4.9", "4.3", "pct") == "-0.6 percentage points"
+    rev = report.parse_revision("{max_abs: 0.3}")
+    assert report.revision_breach("4.3", "4.5", rev) is False
+    assert report.revision_breach("4.3", "4.6", rev) is False  # exactly 0.3 passes
+    assert report.revision_breach("4.3", "4.9", rev) is True
+    # the real metric.yml can be read by the report's small reader
+    repo = HERE.parent.parent
+    d = report.read_definition(repo, "unemployment-rate")
+    assert d["revisions"]["unemployment_rate"] == {"max_abs": report.Decimal("0.3")}, d["revisions"]
+    assert d["labels"]["unemployment_rate"] == "Unemployment rate"
+
+
+def test_unemployment_metric_revision_and_source_change_in_a_report():
+    import shutil
+    repo = HERE.parent.parent
+    with tempfile.TemporaryDirectory() as tmp:
+        for side in ("before", "after"):
+            shutil.copytree(repo / "metrics" / "unemployment-rate", Path(tmp) / side / "metrics" / "unemployment-rate")
+            (Path(tmp) / side / "shared").mkdir(parents=True)
+        status = Path(tmp) / "status.json"
+        status.write_text(json.dumps({"unemployment_rate": {"ok": True, "exit_code": 0, "output_tail": ""}}))
+        # only the downloaded file's bytes change: listed, but not a data change
+        src = Path(tmp) / "after" / "metrics" / "unemployment-rate" / "sources" / "abs-lf-M13.3.1599.20.AUS.M.csv"
+        src.write_bytes(src.read_bytes() + b"\n")
+        md, summary, changed = report.build_report(Path(tmp) / "before", Path(tmp) / "after", status, TODAY)
+        assert changed is False and "CHANGED" in md
+        # a past month moves by 0.5 (over the 0.3 allowed), another by 0.2 (within it)
+        data = Path(tmp) / "after" / "metrics" / "unemployment-rate" / "data.csv"
+        lines = data.read_text().split("\n")
+        for i, l in enumerate(lines):
+            c = l.split(",")
+            if c[0] == "2000-06-30":
+                c[4] = str(round(float(c[4]) + 0.5, 1))
+                lines[i] = ",".join(c)
+            if c[0] == "2001-06-30":
+                c[4] = str(round(float(c[4]) + 0.2, 1))
+                lines[i] = ",".join(c)
+        data.write_text("\n".join(lines))
+        md, summary, changed = report.build_report(Path(tmp) / "before", Path(tmp) / "after", status, TODAY)
+        rev = section(md, "Revised history")
+        assert changed is True and "2 revised figures" in summary, summary
+        assert rev.count("**LARGE:**") == 1 and "+0.5 percentage points" in rev and "+0.2 percentage points" in rev, rev
 
 
 def main():

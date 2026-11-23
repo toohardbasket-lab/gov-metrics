@@ -258,6 +258,8 @@ def fmt_value(s, unit):
         return ("-" if d < 0 else "") + f"${abs(d):,}m"
     if unit == "pct_gdp":
         return f"{d}% of GDP"
+    if unit == "pct":
+        return f"{d}%"
     return f"{d} {unit}".strip()
 
 
@@ -270,7 +272,7 @@ def fmt_diff(old, new, unit):
     d = abs(d)
     if unit == "aud_million":
         return f"{sign}${d:,}m"
-    if unit == "pct_gdp":
+    if unit in ("pct_gdp", "pct"):
         return f"{sign}{d} percentage points"
     return f"{sign}{d}"
 

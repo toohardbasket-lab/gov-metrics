@@ -25,6 +25,7 @@ ROOT = HERE.parent
 REGISTRY = [
     ("cpi_june", "cpi_june.py"),
     ("commonwealth_debt", "commonwealth_debt.py"),
+    ("unemployment_rate", "unemployment_rate.py"),
 ]
 
 TAIL_LINES = 30

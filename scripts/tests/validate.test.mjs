@@ -34,13 +34,14 @@ const run = (...args) => {
   return { code: r.status, out: (r.stdout ?? '') + (r.stderr ?? '') };
 };
 const p = (...parts) => join(work, ...parts);
-const dataPath = () => p('metrics', SLUG, 'data.csv');
+const UN = 'unemployment-rate';
+const dataPath = (slug = SLUG) => p('metrics', slug, 'data.csv');
 const readText = (f) => readFileSync(f, 'utf8');
 const sha = (f) => createHash('sha256').update(readFileSync(f)).digest('hex');
 
 // Edit data.csv line by line. `fn(line)` returns the new line, an array of lines, or null to delete.
-function editRows(match, fn) {
-  const lines = readText(dataPath()).split('\n');
+function editRows(match, fn, slug = SLUG) {
+  const lines = readText(dataPath(slug)).split('\n');
   const out = [];
   let hit = 0;
   for (const line of lines) {
@@ -53,7 +54,7 @@ function editRows(match, fn) {
     } else out.push(line);
   }
   if (hit === 0) throw new Error('test set-up: no row matched');
-  writeFileSync(dataPath(), out.join('\n'));
+  writeFileSync(dataPath(slug), out.join('\n'));
 }
 const row = (date, series) => (l) => l.startsWith(`${date},`) && l.includes(`,${series},`);
 const setValue = (line, v) => { const c = line.split(','); c[4] = v; return c.join(','); };
@@ -117,6 +118,43 @@ failCase('put a quote mark in data.csv', () => editRows(row('1980-06-30', 'gross
 failCase('give a row the wrong number of fields', () => editRows(row('1980-06-30', 'gross_debt'), (l) => l + ',extra'), /has 8 fields but must have 7/);
 failCase('change the header', () => editFile(dataPath(), (t) => t.replace('date,period,series', 'date,series,period')), /the header is .* but must be exactly/);
 failCase('delete data.csv', () => rmSync(dataPath()), /data\.csv: the file is missing/);
+
+// ---- monthly data (the unemployment rate) and the pct unit
+const unRow = (date) => (l) => l.startsWith(`${date},`);
+const un = (match, fn) => editRows(match, fn, UN);
+failCase('monthly: delete a middle month', () => un(unRow('2000-06-30'), () => null), /unemployment_rate \(Australia\) is missing 2000-06-30; the rows jump from 2000-05-31 to 2000-07-31/);
+failCase('monthly: delete two months in a row', () => un((l) => l.startsWith('2005-03-31,') || l.startsWith('2005-04-30,'), () => null), /is missing 2005-03-31, 2005-04-30/);
+failCase('monthly: delete a leap-day February', () => un(unRow('2000-02-29'), () => null), /is missing 2000-02-29; the rows jump from 2000-01-31 to 2000-03-31/);
+failCase('monthly: a leap-year February dated the 28th is off schedule', () => un(unRow('2000-02-29'), (l) => l.replace('2000-02-29', '2000-02-28')), /2000-02-28 is not the last day of a month|not on the monthly schedule after 2000-01-31; expected 2000-02-29/);
+failCase('monthly: a non-month-end date', () => un(unRow('2000-06-30'), (l) => l.replace('2000-06-30', '2000-06-29')), /on 2000-06-29 is not the last day of a month, as monthly data must be/);
+failCase('monthly: the first of the month instead of the last', () => un(unRow('1999-04-30'), (l) => l.replace('1999-04-30', '1999-04-01')), /on 1999-04-01 is not the last day of a month/);
+failCase('monthly: a non-leap February dated the 29th is not a real date', () => un(unRow('2001-02-28'), (l) => l.replace('2001-02-28', '2001-02-29')), /"2001-02-29" is not a real date/);
+failCase('monthly: a month repeated', () => un(unRow('1990-10-31'), (l) => [l, l]), /unemployment_rate \(Australia\) on 1990-10-31: duplicate of line \d+/);
+failCase('monthly: the latest month removed (rows fall against the lock)', () => un(unRow('2026-10-31'), () => null), /unemployment-rate\/data\.lock\.json: unemployment_rate \(Australia\) has 584 rows, fewer than the 585/);
+failCase('monthly: a rate outside the plausible range', () => un(unRow('1995-03-31'), (l) => setValue(l, '16.0')), /unemployment_rate \(Australia\) on 1995-03-31 is 16, outside the plausible range 0 to 15/);
+failCase('monthly: a month-to-month jump over the step limit', () => un(unRow('1995-03-31'), (l) => setValue(l, '14.0')), /moves .* per cent from .*, more than the limit of 35 per cent/);
+failCase('monthly: a past month revised by 0.5 is blocked', () => un(unRow('2008-06-30'), (l) => setValue(l, String(Math.round((Number(l.split(',')[4]) + 0.5) * 10) / 10))), /unemployment_rate \(Australia\) on 2008-06-30 \(2008-06\) was [\d.]+ when last accepted and is now [\d.]+, a change of \+0\.5 \(the change is more than 0\.3\)/);
+failCase('the pct unit is refused if format.ts cannot format it', () => editFile(p('src', 'lib', 'format.ts'), (t) => t.replaceAll("unit === 'pct')", "unit === 'pctx')")), /src\/lib\/format\.ts: formats the units .* but scripts\/validate\.mjs lists/);
+failCase('the pct unit is refused on a series if mistyped', () => un(unRow('2008-06-30'), (l) => { const c = l.split(','); c[5] = 'percent'; return c.join(','); }), /the unit "percent" is not one the site can format \(aud_million, pct_gdp, pct\)/);
+plainCase('monthly: a past month revised by 0.2 only warns', () => {
+  un(unRow('2008-06-30'), (l) => setValue(l, String(Math.round((Number(l.split(',')[4]) + 0.2) * 10) / 10)));
+  const r = run();
+  return check('revised 0.2', r.code === 0 && /WARNING: metrics\/unemployment-rate\/data\.csv: data has changed since it was last accepted \(1 accepted figure revised/.test(r.out), `exit ${r.code}\n${r.out}`);
+});
+plainCase('monthly: a new month on the end (28 days after a leap-year February too) passes', () => {
+  const lines = readText(dataPath(UN)).split('\n').filter((l) => l !== '');
+  const last = lines.at(-1).split(',');
+  last[0] = '2026-11-30'; last[1] = '2026-11'; last[4] = '4.8';
+  writeFileSync(dataPath(UN), lines.concat([last.join(',')]).join('\n') + '\n');
+  const r = run();
+  return check('new month', r.code === 0 && !/FAIL/.test(r.out), `exit ${r.code}\n${r.out}`);
+});
+plainCase('monthly: a December to January step crosses the year', () => {
+  // 1999-12-31 and 2000-01-31 are both in the real data; removing both must name both
+  un((l) => l.startsWith('1999-12-31,') || l.startsWith('2000-01-31,'), () => null);
+  const r = run();
+  return check('year end', r.code !== 0 && /is missing 1999-12-31, 2000-01-31; the rows jump from 1999-11-30 to 2000-02-29/.test(r.out), r.out);
+});
 
 // ---- source files
 failCase('change one byte of a source file', () => {

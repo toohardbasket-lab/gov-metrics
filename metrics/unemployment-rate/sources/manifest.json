@@ -1,0 +1,14 @@
+{
+  "abs-lf-62020001.xlsx": {
+    "bytes": 774862,
+    "retrieved": "2026-11-23",
+    "sha256": "452189c344f08466c58c8d61280dffb5375f5a3f469471794580dd4a4112402f",
+    "url": "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/oct-2026/62020001.xlsx"
+  },
+  "abs-lf-M13.3.1599.20.AUS.M.csv": {
+    "bytes": 37537,
+    "retrieved": "2026-11-23",
+    "sha256": "f5b1ac2729af8ae761e601c37487899fc9754a49f58f7b04b649fac3182b2341",
+    "url": "https://data.api.abs.gov.au/rest/data/ABS,LF/M13.3.1599.20.AUS.M"
+  }
+}

@@ -14,6 +14,7 @@ export function formatValue(unit: string, v: number): string {
     return (b < 0 ? '−$' : '$') + Math.abs(b).toFixed(1) + 'b';
   }
   if (unit === 'pct_gdp') return v.toFixed(1) + '%';
+  if (unit === 'pct') return v.toFixed(1) + '%';
   return unknownUnit(unit);
 }
 
@@ -21,6 +22,7 @@ export function formatValue(unit: string, v: number): string {
 export function formatAxis(unit: string, v: number): string {
   if (unit === 'aud_million') return (v < 0 ? '−$' : '$') + +Math.abs(v / 1000).toFixed(3) + 'b';
   if (unit === 'pct_gdp') return v + '%';
+  if (unit === 'pct') return v + '%';
   return unknownUnit(unit);
 }
 
@@ -28,6 +30,7 @@ export function formatAxis(unit: string, v: number): string {
 export function formatTable(unit: string, v: number): string {
   if (unit === 'aud_million') return Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   if (unit === 'pct_gdp') return v.toFixed(1);
+  if (unit === 'pct') return v.toFixed(1);
   return unknownUnit(unit);
 }
 
