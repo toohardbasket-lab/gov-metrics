@@ -10,7 +10,8 @@ of what it printed. scrapers/report.py reads that file.
 The exit code is 0 even when a scraper failed, because the weekly report carries the failure.
 It is non-zero only if this program itself breaks (for example the status file cannot be written).
 
-To add a scraper, add a line to REGISTRY.
+To add a scraper, add a line to REGISTRY. A scraper that depends on another one's output goes after it
+and is listed in DEPENDS_ON; if the earlier one failed, the later one is skipped and reported as failed.
 """
 import argparse
 import json
@@ -27,7 +28,12 @@ REGISTRY = [
     ("commonwealth_debt", "commonwealth_debt.py"),
     ("unemployment_rate", "unemployment_rate.py"),
     ("inflation", "inflation.py"),
+    ("wages_and_prices", "wages_and_prices.py"),  # copies the inflation page's figures: must run after inflation
 ]
+
+# A scraper that copies another scraper's output. If the one it depends on failed in this run, it is
+# not run (its copy could be stale) and is reported as failed, so the weekly job raises an issue.
+DEPENDS_ON = {"wages_and_prices": "inflation"}
 
 TAIL_LINES = 30
 TIMEOUT_SECONDS = 900
@@ -60,6 +66,12 @@ def main(argv=None):
 
     status = {}
     for name, script in REGISTRY:
+        needs = DEPENDS_ON.get(name)
+        if needs is not None and not status.get(needs, {}).get("ok", False):
+            status[name] = {"ok": False, "exit_code": -2, "skipped": True,
+                            "output_tail": f"Skipped: the {needs} scraper did not succeed in this run, and {name} copies its figures. Nothing was written."}
+            print(f"  {name}: SKIPPED because {needs} did not succeed", flush=True)
+            continue
         print(f"Running {name} ...", flush=True)
         status[name] = run_one(name, script, args.root)
         print(f"  {name}: {'ok' if status[name]['ok'] else 'FAILED'} (exit code {status[name]['exit_code']})", flush=True)

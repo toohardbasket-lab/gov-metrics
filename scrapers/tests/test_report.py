@@ -306,7 +306,10 @@ def test_source_change_alone_does_not_set_the_flag():
 
 
 def test_run_all_registry_and_status():
-    assert [n for n, _ in run_all.REGISTRY] == ["cpi_june", "commonwealth_debt", "unemployment_rate", "inflation"]
+    assert [n for n, _ in run_all.REGISTRY] == ["cpi_june", "commonwealth_debt", "unemployment_rate", "inflation", "wages_and_prices"]
+    # the scraper that copies the inflation page's figures must come after the inflation scraper
+    names = [n for n, _ in run_all.REGISTRY]
+    assert run_all.DEPENDS_ON == {"wages_and_prices": "inflation"} and names.index("inflation") < names.index("wages_and_prices")
     # a script that fails and a script that works, run without touching the network
     with tempfile.TemporaryDirectory() as tmp:
         good = Path(tmp) / "good.py"
@@ -325,6 +328,52 @@ def test_run_all_registry_and_status():
         assert s["bad"]["ok"] is False and s["bad"]["exit_code"] == 3
         assert s["bad"]["output_tail"].split("\n")[-1] == "line 49" and len(s["bad"]["output_tail"].split("\n")) == 30
         assert s["good"] == {"ok": True, "exit_code": 0, "output_tail": "hello"}, s["good"]
+
+
+def _run_all_with(registry, depends, scripts):
+    """Runs run_all.main on throwaway scripts; returns (status dict, text printed order is not needed)."""
+    with tempfile.TemporaryDirectory() as tmp:
+        for name, body in scripts.items():
+            (Path(tmp) / name).write_text(body)
+        old = (run_all.HERE, run_all.REGISTRY, run_all.DEPENDS_ON)
+        try:
+            run_all.HERE, run_all.REGISTRY, run_all.DEPENDS_ON = Path(tmp), registry, depends
+            status = Path(tmp) / "status.json"
+            assert run_all.main(["--status", str(status), "--root", tmp]) == 0
+        finally:
+            run_all.HERE, run_all.REGISTRY, run_all.DEPENDS_ON = old
+        return json.loads(status.read_text())
+
+
+def test_run_all_skips_a_scraper_whose_dependency_failed():
+    scripts = {"first.py": "import sys\nsys.exit(1)\n", "second.py": "open('ran.txt', 'w').write('x')\n", "ok.py": "pass\n"}
+    s = _run_all_with([("first", "first.py"), ("second", "second.py"), ("other", "ok.py")], {"second": "first"}, scripts)
+    assert s["first"]["ok"] is False
+    assert s["second"]["ok"] is False and s["second"]["skipped"] is True and "Skipped" in s["second"]["output_tail"] and "first" in s["second"]["output_tail"]
+    assert s["other"]["ok"] is True                      # an unrelated scraper still runs
+    # the weekly report lists the skipped scraper as failed, so the weekly job raises an issue
+    md, _ = run_report({}, {}, status=s)
+    src = section(md, "Sources")
+    assert "**Scraper failed: second**" in src and "Skipped" in src, src
+
+
+def test_run_all_runs_a_scraper_whose_dependency_worked():
+    scripts = {"first.py": "pass\n", "second.py": "print('ran')\n"}
+    s = _run_all_with([("first", "first.py"), ("second", "second.py")], {"second": "first"}, scripts)
+    assert s["first"]["ok"] is True and s["second"] == {"ok": True, "exit_code": 0, "output_tail": "ran"}
+
+
+def test_a_manifest_reference_to_another_metrics_file_has_no_source_line():
+    with tempfile.TemporaryDirectory() as tmp:
+        b, a = Path(tmp) / "before", Path(tmp) / "after"
+        for root in (b, a):
+            make_tree(root)
+            d = root / "metrics" / "toy" / "sources"
+            m = json.loads((d / "manifest.json").read_text())
+            m["copied-from-other"] = {"path": "metrics/other/data.csv", "sha256": "0" * 64, "bytes": 1, "retrieved": "2026-11-24"}
+            (d / "manifest.json").write_text(json.dumps(m))
+        lines, changed = report.source_lines(b, a)
+        assert changed == 0 and not any("copied-from-other" in l for l in lines), lines
 
 
 def test_percent_unit_is_formatted_and_tolerance_read():

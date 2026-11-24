@@ -16,9 +16,9 @@ You need Node.js version 22 installed (the version used to build this is recorde
 
 - `site.config.mjs`: the one file holding the site name, publisher, authorisation line, contact email, footer text and web address. Change the name or owner here and nowhere else.
 - `src/`: the pages, the shared page layout, the chart (`src/components/MetricChart.astro`), the code that reads each metric's files (`src/lib/`) and the styling.
-- `metrics/`: one folder per metric, with its definition (`metric.yml`), data and checking notes. The first is `commonwealth-debt`; the second is `unemployment-rate`; the third is `inflation`. Its `sources/` folder holds the Treasury files as downloaded and a `manifest.json` that records where and when. See `metrics/README.md` for what goes in `metric.yml`.
+- `metrics/`: one folder per metric, with its definition (`metric.yml`), data and checking notes. The first is `commonwealth-debt`; the second is `unemployment-rate`; the third is `inflation`; the fourth is `wages-and-prices`. Its `sources/` folder holds the Treasury files as downloaded and a `manifest.json` that records where and when. See `metrics/README.md` for what goes in `metric.yml`.
 - `shared/`: lists used on every chart: `governments.csv` (when each government was sworn in), `events.csv` (the marked events) and `cpi_june.csv` (June quarter price index, used for the inflation-adjusted views). `shared/sources/` holds the raw ABS download and its manifest.
-- `scrapers/`: the Python programs that download official data and write the CSV files (`commonwealth_debt.py`, `cpi_june.py`, `unemployment_rate.py` and `inflation.py`), `run_all.py` and `report.py` (the weekly update and its report), their tests, and `requirements.txt`. See `scrapers/README.md`.
+- `scrapers/`: the Python programs that download official data and write the CSV files (`commonwealth_debt.py`, `cpi_june.py`, `unemployment_rate.py`, `inflation.py` and `wages_and_prices.py`), `run_all.py` and `report.py` (the weekly update and its report), their tests, and `requirements.txt`. See `scrapers/README.md`.
 - `scripts/`: the data checker (`validate.mjs`) and its tests.
 - `.github/workflows/`: the two automatic jobs on GitHub (see below).
 - `public/`: files copied to the site as they are.

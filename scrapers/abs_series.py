@@ -43,7 +43,8 @@ class ScrapeError(Exception):
 # What parse_sdmx_series returns: pairs is [(period, rounded value text)] sorted by period;
 # decimals maps each period to the DECIMALS figure of its row; raw_values maps each period to the
 # API's own OBS_VALUE text.
-SdmxSeries = namedtuple("SdmxSeries", "pairs decimals raw_values")
+# skipped lists the leading periods that had no figure and were skipped (see skip_leading_blank).
+SdmxSeries = namedtuple("SdmxSeries", "pairs decimals raw_values skipped", defaults=[()])
 
 
 # ---------------------------------------------------------------- downloading
@@ -156,7 +157,7 @@ def require_no_missing_months(periods, label):
 
 # ---------------------------------------------------------------- the Data API
 
-def parse_sdmx_series(raw, expected, label="the ABS Data API response", freq="M", blank_decimals=None):
+def parse_sdmx_series(raw, expected, label="the ABS Data API response", freq="M", blank_decimals=None, skip_leading_blank=False):
     """Reads one series from an SDMX CSV response.
 
     `expected` maps each dimension column (and any other column that must be constant, such as
@@ -174,6 +175,13 @@ def parse_sdmx_series(raw, expected, label="the ABS Data API response", freq="M"
     accepts the figure only if the API's own text already has at most N decimal places, and writes
     it with exactly N (so "4" becomes "4.0"); a figure with more places is refused, never rounded.
     The text "raw" keeps the API's text unchanged (for an index that is used in sums).
+    When `blank_decimals` is an integer or "raw", the DECIMALS column may be absent altogether (the
+    Wage Price Index dataflow has none), and every row is treated as having an empty DECIMALS cell.
+
+    `skip_leading_blank` (default False) says what to do with rows whose OBS_VALUE is empty. False
+    refuses them, as before. True skips them if, and only if, they come before the first figure (the
+    Wage Price Index starts with four blank quarters, marked OBS_STATUS u); an empty value after the
+    first figure is a gap in the series and is refused. Skipped periods are returned in `skipped`.
     """
     if freq not in PERIOD_RES:
         raise ScrapeError(f"unknown frequency {freq!r}")
@@ -183,11 +191,13 @@ def parse_sdmx_series(raw, expected, label="the ABS Data API response", freq="M"
     except UnicodeDecodeError as e:
         raise ScrapeError(f"{label} is not text: {e}") from None
     reader = csv.DictReader(io.StringIO(text))
-    need = {"TIME_PERIOD", "OBS_VALUE", "DECIMALS", *expected}
+    need = {"TIME_PERIOD", "OBS_VALUE", *expected}
+    if blank_decimals is None:
+        need.add("DECIMALS")
     if not reader.fieldnames or not need <= set(reader.fieldnames):
         missing = sorted(need - set(reader.fieldnames or []))
         raise ScrapeError(f"{label} lacks the expected columns {missing}; got {reader.fieldnames}")
-    raw_values, decimals = {}, {}
+    raw_values, decimals, blanks = {}, {}, set()
     for line_no, row in enumerate(reader, start=2):
         if None in row or any(v is None for v in row.values()):
             raise ScrapeError(f"line {line_no}: the row has the wrong number of fields")
@@ -199,12 +209,15 @@ def parse_sdmx_series(raw, expected, label="the ABS Data API response", freq="M"
         period = row["TIME_PERIOD"]
         if not period_re.fullmatch(period):
             raise ScrapeError(f"line {line_no}: unexpected period {period!r}")
-        if period in raw_values:
+        if period in raw_values or period in blanks:
             raise ScrapeError(f"line {line_no}: period {period} appears twice")
         value = row["OBS_VALUE"].strip()
+        if value == "" and skip_leading_blank:
+            blanks.add(period)  # whether it is leading is decided once every row has been read
+            continue
         if not VALUE_RE.fullmatch(value):
             raise ScrapeError(f"line {line_no}: {period} has an unreadable value {value!r}")
-        dec = row["DECIMALS"].strip()
+        dec = row.get("DECIMALS", "").strip()
         if dec == "" and blank_decimals is not None:
             if blank_decimals == "raw":
                 dec = None
@@ -218,9 +231,18 @@ def parse_sdmx_series(raw, expected, label="the ABS Data API response", freq="M"
             raise ScrapeError(f"line {line_no}: {period} has an unreadable DECIMALS {dec!r}")
         raw_values[period] = value
         decimals[period] = None if dec is None else int(dec)
+    if blanks:
+        if not raw_values:
+            raise ScrapeError(f"{label}: every value is blank; there is no figure in the series")
+        first = min(raw_values)
+        late = sorted(p for p in blanks if p > first)
+        if late:
+            shown = ", ".join(late[:10]) + (f" and {len(late) - 10} more" if len(late) > 10 else "")
+            raise ScrapeError(f"{label}: blank value(s) for {shown}, after the first figure ({first}). "
+                              "Only blanks before the first figure are skipped; a blank after it is a gap in the series.")
     (require_no_missing_months if freq == "M" else require_no_missing_quarters)(raw_values.keys(), label)
     pairs = [(p, raw_values[p] if decimals[p] is None else round_half_up(raw_values[p], decimals[p])) for p in sorted(raw_values)]
-    return SdmxSeries(pairs, decimals, raw_values)
+    return SdmxSeries(pairs, decimals, raw_values, tuple(sorted(blanks)))
 
 
 # ---------------------------------------------------------------- the spreadsheet
@@ -253,7 +275,7 @@ def _norm(s):
     return re.sub(r"\s+", " ", str(s)).strip() if s is not None else ""
 
 
-def parse_spreadsheet_series(raw, series_id, sheet="Data1", expected_meta=None, label="the ABS spreadsheet"):
+def parse_spreadsheet_series(raw, series_id, sheet="Data1", expected_meta=None, label="the ABS spreadsheet", freq="M"):
     """Reads the column with series ID `series_id` from an ABS time series spreadsheet.
 
     The sheet has a description on row 1, labelled rows (Unit, Series Type, ... Series ID) in column
@@ -265,7 +287,13 @@ def parse_spreadsheet_series(raw, series_id, sheet="Data1", expected_meta=None, 
     A month with an empty cell is left out. Refuses if the sheet or the column is not found, the
     column is found more than once, a month is not a date, a month appears twice, or a value is
     not a number.
+
+    `freq` is "M" (rows dated the first of each month, periods like 2026-09) or "Q" (rows dated the
+    first of the last month of each quarter, as the ABS does: 2026-09-01 is the September quarter;
+    periods like 2026-Q3). A "Q" row dated in any other month is refused.
     """
+    if freq not in PERIOD_RES:
+        raise ScrapeError(f"unknown frequency {freq!r}")
     import openpyxl  # imported here so the other helpers work without it
 
     try:
@@ -302,7 +330,12 @@ def parse_spreadsheet_series(raw, series_id, sheet="Data1", expected_meta=None, 
         d = r[0]
         if not isinstance(d, datetime) or d.day != 1:
             raise ScrapeError(f"{label}: row {k} has {d!r} where the first day of a month was expected")
-        period = f"{d.year:04d}-{d.month:02d}"
+        if freq == "Q":
+            if d.month % 3 != 0:
+                raise ScrapeError(f"{label}: row {k} has {d.date()}, which is not the first day of the last month of a quarter")
+            period = f"{d.year:04d}-Q{d.month // 3}"
+        else:
+            period = f"{d.year:04d}-{d.month:02d}"
         if period in values:
             raise ScrapeError(f"{label}: month {period} appears twice")
         v = r[col] if len(r) > col else None
@@ -316,7 +349,7 @@ def parse_spreadsheet_series(raw, series_id, sheet="Data1", expected_meta=None, 
         values[period] = text
     if not values:
         raise ScrapeError(f"{label}: column {series_id} holds no values")
-    require_no_missing_months(values.keys(), f"{label} column {series_id}")
+    (require_no_missing_months if freq == "M" else require_no_missing_quarters)(values.keys(), f"{label} column {series_id}")
     return values
 
 
@@ -351,17 +384,18 @@ def find_series_id_by_header(raw, must_contain, sheet="Data1", label="the ABS sp
 
 # ---------------------------------------------------------------- the second-source check
 
-def cross_check(series, sheet_values, log=print):
+def cross_check(series, sheet_values, log=print, noun="month"):
     """Compares the API series with a spreadsheet column. Both are rounded the same way (the API
     row's DECIMALS). Every month in both must agree, and the latest month must be the same in both.
-    Returns (months compared, first month compared, last month compared)."""
+    Returns (months compared, first month compared, last month compared). `noun` ("month" or
+    "quarter") only words the messages."""
     api = dict(series.pairs)
     sheet_latest, api_latest = max(sheet_values), max(api)
     if sheet_latest != api_latest:
-        raise ScrapeError(f"the latest month differs: the API ends at {api_latest}, the spreadsheet at {sheet_latest}")
+        raise ScrapeError(f"the latest {noun} differs: the API ends at {api_latest}, the spreadsheet at {sheet_latest}")
     common = sorted(set(api) & set(sheet_values))
     if not common:
-        raise ScrapeError("the API and the spreadsheet have no month in common")
+        raise ScrapeError(f"the API and the spreadsheet have no {noun} in common")
     bad = []
     for p in common:
         s = round_half_up(sheet_values[p], series.decimals[p])
@@ -369,6 +403,6 @@ def cross_check(series, sheet_values, log=print):
             bad.append(f"{p}: API {api[p]} (from {series.raw_values[p]}), spreadsheet {s} (from {sheet_values[p]})")
     if bad:
         shown = "; ".join(bad[:10]) + (f"; and {len(bad) - 10} more" if len(bad) > 10 else "")
-        raise ScrapeError(f"the API and the spreadsheet disagree in {len(bad)} month(s): {shown}")
-    log(f"Cross-check: {len(common)} months agree ({common[0]} to {common[-1]}); the latest month is {api_latest} in both.")
+        raise ScrapeError(f"the API and the spreadsheet disagree in {len(bad)} {noun}(s): {shown}")
+    log(f"Cross-check: {len(common)} {noun}s agree ({common[0]} to {common[-1]}); the latest {noun} is {api_latest} in both.")
     return len(common), common[0], common[-1]

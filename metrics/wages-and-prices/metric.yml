@@ -1,0 +1,123 @@
+# Definition file for one metric. Everything the page shows, other than the numbers
+# in data.csv, comes from this file. See metrics/README.md for what each field does.
+# Words in braces, such as {first_year}, are filled in from the data when the page is built.
+slug: wages-and-prices
+title: Wages and prices
+theme: Work and incomes
+jurisdiction: Australia
+description: How fast pay rates are rising compared with prices, each quarter since 1998.
+lede: "How fast hourly pay rates rose over the previous twelve months, compared with how fast prices rose, each quarter since {first_year}."
+
+draft: true
+draft_banner: "Draft, not for publication. The figures are read from the ABS and the Reserve Bank by code and have not yet had the human check the plan requires."
+
+# {latest_period} names the period of the latest row of this series. Prices can run one quarter
+# ahead of wages, so the wage series (the one this page is built around) is named.
+latest_period_series: wage_growth
+
+# Two quarterly series. The validator (npm run validate) stops the build if a quarter is missing, a
+# date is not the last day of its quarter, or a value falls outside the plausible range. There is no
+# step check (max_step_pct): growth rates can be near zero, so a step as a per cent of the earlier
+# figure means nothing.
+# price_growth is a copy of the inflation page's headline_quarterly series. copy_of makes the validator
+# check, row by row, that the two stay equal.
+series:
+  - id: wage_growth
+    label: Wage growth
+    definition: Year-ended change in the Wage Price Index, total hourly rates of pay excluding bonuses, private and public sectors, all industries, seasonally adjusted.
+    source_table: ABS, Wage Price Index, Australia, Table 1, series A83895396W
+    frequency: quarterly
+    plausible: {min: 0, max: 10}
+    # Revision tolerance: wage figures are seasonally adjusted and re-estimated, so up to 0.3 points is allowed. Price figures are not revised, so any change over 0.1 points blocks.
+    revision: {max_abs: 0.3}
+  - id: price_growth
+    label: Price growth
+    definition: Year-ended change in the Consumer Price Index, all groups, eight capital cities, quarterly, original. The same figures as the inflation page.
+    source_table: Reserve Bank of Australia, table G1, series GCPIAGYP (via the inflation page)
+    frequency: quarterly
+    plausible: {min: -5, max: 30}
+    revision: {max_abs: 0.1}
+    copy_of: {metric: inflation, series: headline_quarterly}
+
+# The headline figures above the chart. Values are read from data.csv.
+# sub_quarter: true puts the quarter of the figure beneath it ("September quarter 2026").
+tiles:
+  - label: Wage growth
+    series: wage_growth
+    sub_quarter: true
+  - label: Price growth
+    series: price_growth
+    sub_quarter: true
+  - label: Target status
+    text: No numeric target
+    sub_text: Shown for context only
+
+# The chart: two lines, each keeping its own colour, no target band.
+views:
+  - id: growth
+    label: Wages and prices
+    derive: none
+    lines:
+      - series: wage_growth
+        label: Wage growth
+        color: 1
+      - series: price_growth
+        label: Price growth
+        color: 2
+    caption: Per cent change over twelve months, each quarter. Wages are seasonally adjusted; prices are not.
+chart_alt: "Line chart of wage growth and price growth over twelve months, each quarter, {first_year} to {last_year}. The full figures are in the table below."
+chart_source: "Sources: ABS, Wage Price Index, Australia; ABS, Consumer Price Index, via Reserve Bank table G1. Latest quarter: {latest_period}."
+
+# The full table. Newest first, one row for each date that has a figure in either series.
+# period_format: month_year shows the date as "September 2026"; missing: "" leaves a cell blank where a series has no figure.
+table:
+  period_header: Quarter ending
+  period_format: month_year
+  missing: ""
+  columns:
+    - header: "Wage growth %"
+      series: wage_growth
+    - header: "Price growth %"
+      series: price_growth
+
+meaning:
+  - "**Wage growth** is the rise in hourly pay rates over the previous twelve months, measured by the ABS Wage Price Index. It follows the pay for a fixed set of jobs, so it shows how fast pay rates are rising, not changes in the mix of jobs people hold."
+  - "**Price growth** is the rise in the Consumer Price Index over the same twelve months. When the wage line is above the price line, pay rates are rising faster than prices; when it is below, prices are rising faster."
+
+# Targets and forecasts ledger.
+targets:
+  - label: Target
+    text: "No numeric target."
+  - label: Government forecast
+    text: "Not yet added. To be taken from the latest Budget or Mid-Year Economic and Fiscal Outlook before publication."
+
+# Sources and method ledger. {link} is replaced by the link; {update} and {retrieved}
+# by the fields below.
+update: "Each quarter: wages when the ABS publishes the Wage Price Index, usually about seven weeks after the quarter ends; prices when the quarterly CPI is published."
+retrieved: 2026-11-24
+sources_method:
+  - label: Wage growth
+    link:
+      label: ABS, Wage Price Index, Australia
+      url: https://www.abs.gov.au/statistics/economy/price-indexes-and-inflation/wage-price-index-australia/latest-release
+    text: "{link}, read from the ABS Data API (WPI 3.THRPEB.7.TOT.20.AUS.Q) and checked quarter by quarter against Table 1, series A83895396W."
+  - label: Price growth
+    link:
+      label: the inflation page
+      url: /metrics/inflation/
+    text: "The same figures as {link}: Reserve Bank table G1, series GCPIAGYP, each quarter checked against the ABS quarterly CPI index."
+  - label: Updated
+    text: "{update} Data retrieved {retrieved}."
+
+read_with_care:
+  - "The Wage Price Index measures the change in pay rates for the same jobs. It does not rise when people change jobs, are promoted or work more hours, so it is not the same as growth in average earnings, which the ABS publishes separately."
+  - "This page does not calculate a single \"real wages\" figure. Commentators get different answers depending on which wage and price measures they use and how they combine them. The two lines show the gap directly."
+  - "Wage figures are seasonally adjusted and the ABS re-estimates them, so past figures can change slightly. Price figures are not seasonally adjusted."
+  - "Price growth uses the quarterly CPI because wages are measured quarterly. Since late 2025 the official inflation target uses the monthly CPI; see the inflation page."
+  - "Government shading starts on the day each government was sworn in. Recessions and crises are marked on every chart on this site using the same list. The marks give context and do not assign cause."
+
+corrections_text: None yet. Every correction to this page will be listed here with its date and what changed.
+
+# Fields kept from the worked-example definition file.
+state_panel: false
+inclusion_tests: {outcome: true, official: true, history: true, ongoing: true, no_editorial_choice: "two standard official series side by side, with no combined figure"}

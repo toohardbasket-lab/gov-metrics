@@ -1,0 +1,21 @@
+{
+  "abs-wpi-3.THRPEB.7.TOT.20.AUS.Q.csv": {
+    "bytes": 6995,
+    "retrieved": "2026-11-24",
+    "sha256": "8ca2e9c82d7c3b59b12149cbef48e185722d65e1488df9c511d8ebda7b6c8768",
+    "url": "https://data.api.abs.gov.au/rest/data/ABS,WPI/3.THRPEB.7.TOT.20.AUS.Q"
+  },
+  "abs-wpi-634501.xlsx": {
+    "bytes": 66547,
+    "retrieved": "2026-11-24",
+    "sha256": "4b52b3686838ddfdaeeb0c78becd63d0ddd385579f50cd298282772755afd6f2",
+    "url": "https://www.abs.gov.au/statistics/economy/price-indexes-and-inflation/wage-price-index-australia/sep-2026/634501.xlsx"
+  },
+  "copied-from-metrics-inflation-data.csv": {
+    "bytes": 32257,
+    "path": "metrics/inflation/data.csv",
+    "retrieved": "2026-11-24",
+    "series": "headline_quarterly",
+    "sha256": "7afc4da775b7c29ee72bfdaf3fb6e92ac48f34944732b457edfba216598e5ab3"
+  }
+}

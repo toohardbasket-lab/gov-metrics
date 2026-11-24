@@ -179,6 +179,8 @@ failCase('quarterly: an unknown frequency names quarterly among the known ones',
 failCase('quarterly: a series with no frequency at all is refused', () => editFile(p('metrics', INF, 'metric.yml'), (t) => t.replace('    frequency: quarterly\n    plausible: {min: -5, max: 30}', '    plausible: {min: -5, max: 30}')), /series "headline_quarterly" has no "frequency"/);
 plainCase('quarterly: a past headline quarter revised by exactly 0.1 only warns', () => {
   inf(row('2008-06-30', 'headline_quarterly'), bump(0.1));
+  // the wages page holds a copy of this series, which must be revised in step
+  editRows(row('2008-06-30', 'price_growth'), bump(0.1), 'wages-and-prices');
   const r = run();
   return check('revised 0.1', r.code === 0 && /WARNING: metrics\/inflation\/data\.csv: data has changed since it was last accepted \(1 accepted figure revised/.test(r.out), `exit ${r.code}\n${r.out}`);
 });
@@ -442,6 +444,41 @@ plainCase('every problem is printed, not just the first', () => {
   editRows(row('2000-06-30', 'gross_debt_pct_gdp'), (l) => setValue(l, '150'));
   const r = run();
   return check('all problems', /the value "abc"/.test(r.out) && /outside the plausible range 0 to 100/.test(r.out), r.out);
+});
+
+// ---- a series that is a copy of another metric's series (copy_of in metric.yml)
+const WP = 'wages-and-prices';
+const INFL = 'inflation';
+const ymlPath = (slug) => p('metrics', slug, 'metric.yml');
+failCase('copy_of: a copied row differs from the other page', () => editRows(row('2026-09-30', 'price_growth'), (l) => setValue(l, '4.0'), WP),
+  /wages-and-prices\/data\.csv: line \d+, price_growth \(Australia\) on 2026-09-30 is 4\.0 \(pct\), but the inflation page's headline_quarterly for that date is 3\.9\. price_growth must equal headline_quarterly on the inflation page/);
+failCase('copy_of: the other page changes and the copy does not', () => editRows(row('2010-06-30', 'headline_quarterly'), (l) => setValue(l, '9.9'), INFL),
+  /price_growth \(Australia\) on 2010-06-30 is .*but the inflation page's headline_quarterly for that date is 9\.9/);
+failCase('copy_of: a copied row has no row on the other page', () => editRows(row('2005-03-31', 'headline_quarterly'), () => null, INFL),
+  /price_growth \(Australia\) on 2005-03-31 .*but metrics\/inflation\/data\.csv has no headline_quarterly row for 2005-03-31/);
+failCase('copy_of: the other metric names a series that does not exist', () => editFile(ymlPath(WP), (t) => t.replace('series: headline_quarterly}', 'series: headline_nothing}')),
+  /series "price_growth" is a copy of headline_nothing in inflation, but metrics\/inflation\/data\.csv has no rows for that series/);
+failCase('copy_of: the other metric has no data.csv', () => rmSync(p('metrics', INFL, 'data.csv')), /series "price_growth" is a copy of inflation \(headline_quarterly\), but metrics\/inflation\/data\.csv is missing/);
+failCase('copy_of: written the wrong way', () => editFile(ymlPath(WP), (t) => t.replace('copy_of: {metric: inflation, series: headline_quarterly}', 'copy_of: inflation')),
+  /series "price_growth" has a "copy_of" that is not \{metric: <another metric's folder name>, series: <its series id>\}/);
+failCase('copy_of: a copy of itself', () => editFile(ymlPath(WP), (t) => t.replace('copy_of: {metric: inflation,', 'copy_of: {metric: wages-and-prices,')), /has a "copy_of" that is not/);
+failCase('changing one past wage figure by 0.5 blocks (revision tolerance 0.3)', () => editRows(row('2012-06-30', 'wage_growth'), (l) => setValue(l, String(Number(l.split(',')[4]) + 0.5)), WP),
+  /wage_growth \(Australia\) on 2012-06-30 \(2012-Q2\) was .* when last accepted and is now .*, a change of \+0\.5 \(the change is more than 0\.3\)/);
+failCase('a manifest reference with a bad path is refused', () => editFile(p('metrics', WP, 'sources', 'manifest.json'), (t) => t.replace('"path": "metrics/inflation/data.csv"', '"path": "../../etc/passwd"')),
+  /the entry for "copied-from-metrics-inflation-data\.csv" has a "path" that is not a file inside a metrics folder/);
+failCase('a manifest reference with a bad checksum is refused', () => editFile(p('metrics', WP, 'sources', 'manifest.json'), (t) => {
+  const m = JSON.parse(t);
+  m['copied-from-metrics-inflation-data.csv'].sha256 = 'abc';
+  return JSON.stringify(m, null, 2) + '\n';
+}), /the entry for "copied-from-metrics-inflation-data\.csv" has no valid sha256 and bytes/);
+plainCase('a manifest reference is not looked for in the sources folder, and the other file may change after the copy', () => {
+  // the inflation page gets a new quarter and its file changes; the copy's recorded checksum is then out of date, which is not an error
+  const lines = readText(dataPath(INFL)).split('\n').filter((l) => l !== '');
+  const last = lines.filter((l) => l.includes(',headline_quarterly,')).at(-1).split(',');
+  last[0] = '2026-12-31'; last[1] = '2026-Q4'; last[4] = '4.0';
+  writeFileSync(dataPath(INFL), lines.concat([last.join(',')]).join('\n') + '\n');
+  const r = run();
+  return check('reference', r.code === 0 && /PASS wages-and-prices/.test(r.out), `exit ${r.code}\n${r.out}`);
 });
 
 rmSync(base, { recursive: true, force: true });

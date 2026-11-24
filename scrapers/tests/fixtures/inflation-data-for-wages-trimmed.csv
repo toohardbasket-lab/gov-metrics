@@ -1,0 +1,12 @@
+date,period,series,jurisdiction,value,unit,status
+2025-04-30,2025-04,headline_monthly,Australia,2.4,pct,actual
+1997-12-31,1997-Q4,headline_quarterly,Australia,-0.3,pct,actual
+1998-03-31,1998-Q1,headline_quarterly,Australia,-0.2,pct,actual
+1998-06-30,1998-Q2,headline_quarterly,Australia,0.7,pct,actual
+1998-09-30,1998-Q3,headline_quarterly,Australia,1.4,pct,actual
+1998-12-31,1998-Q4,headline_quarterly,Australia,1.6,pct,actual
+1999-03-31,1999-Q1,headline_quarterly,Australia,1.2,pct,actual
+1999-06-30,1999-Q2,headline_quarterly,Australia,1.1,pct,actual
+1999-09-30,1999-Q3,headline_quarterly,Australia,1.7,pct,actual
+1999-12-31,1999-Q4,headline_quarterly,Australia,1.8,pct,actual
+1999-12-31,1999-Q4,trimmed_mean_quarterly,Australia,2.4,pct,actual

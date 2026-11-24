@@ -412,8 +412,11 @@ def source_lines(before, after):
             mp = Path(root) / d / "manifest.json"
             if mp.exists():
                 try:
-                    names |= set(json.loads(mp.read_text(encoding="utf-8")).keys())
-                except (OSError, ValueError):
+                    entries = json.loads(mp.read_text(encoding="utf-8"))
+                    # an entry with a "path" refers to another metric's file (a copied series); it is
+                    # not a download kept in this folder, so it has no line here
+                    names |= {k for k, v in entries.items() if not (isinstance(v, dict) and "path" in v)}
+                except (OSError, ValueError, AttributeError):
                     pass
         for name in sorted(names):
             pb, pa = Path(before) / d / name, Path(after) / d / name

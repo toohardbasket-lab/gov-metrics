@@ -384,6 +384,54 @@ function checkSeries(slug, def, data, groups, F) {
   }
 }
 
+// 6b. a series that is a copy of another metric's series must equal it, row for row.
+// metric.yml: copy_of: {metric: inflation, series: headline_quarterly}. Every row of the copy must
+// have a row in the other metric's data.csv with the same date, series and jurisdiction, and the
+// same value and unit. (The other metric reports its own problems; here only its rows are read.)
+function checkCopies(root, slug, def, data, F) {
+  const yml = `metrics/${slug}/metric.yml`;
+  const path = `metrics/${slug}/data.csv`;
+  const others = new Map(); // metric slug -> Map("date|series|jurisdiction" -> row), or null if unreadable
+  for (const s of Array.isArray(def.series) ? def.series : []) {
+    if (!s || s.copy_of === undefined) continue;
+    const c = s.copy_of;
+    if (!c || typeof c !== 'object' || Array.isArray(c) || typeof c.metric !== 'string' || typeof c.series !== 'string'
+        || Object.keys(c).some((k) => k !== 'metric' && k !== 'series') || !/^[a-z0-9-]+$/.test(c.metric) || c.metric === slug) {
+      F.fail(`${yml}: series "${s.id}" has a "copy_of" that is not {metric: <another metric's folder name>, series: <its series id>}.`);
+      continue;
+    }
+    const otherPath = `metrics/${c.metric}/data.csv`;
+    if (!others.has(c.metric)) {
+      const full = join(root, otherPath);
+      if (!existsSync(full)) others.set(c.metric, null);
+      else {
+        const rows = loadDataCsv(root, c.metric, { fail: () => {}, warn: () => {} })?.rows ?? [];
+        others.set(c.metric, new Map(rows.map((r) => [`${r.date}|${r.series}|${r.jurisdiction}`, r])));
+      }
+    }
+    const other = others.get(c.metric);
+    if (!other) {
+      F.fail(`${yml}: series "${s.id}" is a copy of ${c.metric} (${c.series}), but ${otherPath} is missing.`);
+      continue;
+    }
+    if (![...other.values()].some((r) => r.series === c.series)) {
+      F.fail(`${yml}: series "${s.id}" is a copy of ${c.series} in ${c.metric}, but ${otherPath} has no rows for that series.`);
+      continue;
+    }
+    let reported = 0;
+    for (const r of data.rows.filter((x) => x.series === s.id)) {
+      const o = other.get(`${r.date}|${c.series}|${r.jurisdiction}`);
+      let problem = null;
+      if (!o) problem = `${otherPath} has no ${c.series} row for ${r.date}`;
+      else if (o.value !== r.value) problem = `the ${c.metric} page's ${c.series} for that date is ${o.valueText}`;
+      else if (o.unit !== r.unit) problem = `the ${c.metric} page's ${c.series} for that date is in ${o.unit}`;
+      if (!problem) continue;
+      if (++reported > 10) { F.fail(`${path}: more rows of ${s.id} differ from ${c.metric} (${c.series}); only the first 10 are listed.`); break; }
+      F.fail(`${path}: line ${r.line}, ${s.id} (${r.jurisdiction}) on ${r.date} is ${r.valueText} (${r.unit}), but ${problem}. ${s.id} must equal ${c.series} on the ${c.metric} page (copy_of in metric.yml).`);
+    }
+  }
+}
+
 // 7. rows never fall, and accepted figures are not revised by more than their tolerance
 function lockFromGroups(groups, sha) {
   const series = [...groups.values()]
@@ -487,6 +535,15 @@ function checkSources(root, dirRel, F) {
       F.fail(`${manifestRel}: the entry "${name}" is not a plain file name in this folder.`);
       continue;
     }
+    // An entry with a "path" is a reference to a file elsewhere in the project (a series copied from
+    // another metric, with the file's checksum at the time of copying). It is not a file in this
+    // folder, and the other file may legitimately change later, so only its shape is checked.
+    if (info && typeof info === 'object' && info.path !== undefined) {
+      const okPath = typeof info.path === 'string' && /^metrics\/[a-z0-9-]+\/[A-Za-z0-9._-]+$/.test(info.path);
+      if (!okPath) F.fail(`${manifestRel}: the entry for "${name}" has a "path" that is not a file inside a metrics folder.`);
+      else if (typeof info.sha256 !== 'string' || !/^[0-9a-f]{64}$/.test(info.sha256) || !isNum(info.bytes)) F.fail(`${manifestRel}: the entry for "${name}" has no valid sha256 and bytes.`);
+      continue;
+    }
     const file = join(dir, name);
     if (!existsSync(file)) { F.fail(`${rel}: listed in the manifest but the file is missing.`); continue; }
     if (!info || typeof info.sha256 !== 'string' || !isNum(info.bytes)) { F.fail(`${manifestRel}: the entry for "${name}" has no sha256 and bytes.`); continue; }
@@ -582,6 +639,7 @@ function validateRoot(root) {
     if (data) {
       const groups = groupRows(data.rows);
       if (def) checkSeries(slug, def, data, groups, F);
+      if (def) checkCopies(root, slug, def, data, F);
       checkLock(root, slug, def, groups, data.sha, F);
       locks.set(slug, lockFromGroups(groups, data.sha));
 
