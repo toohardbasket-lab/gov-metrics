@@ -31,6 +31,7 @@ REGISTRY = [
     ("wages_and_prices", "wages_and_prices.py"),  # copies the inflation page's figures: must run after inflation
     ("rents", "rents.py"),  # downloads everything it needs itself: no dependency on another scraper
     ("social_housing", "social_housing.py"),  # RoGS section 18 and ABS population; downloads everything itself
+    ("hospital_waits", "hospital_waits.py"),  # RoGS section 12; downloads everything itself
 ]
 
 # A scraper that copies another scraper's output. If the one it depends on failed in this run, it is

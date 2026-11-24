@@ -194,6 +194,54 @@ def test_a_workbook_that_disagrees_with_the_csv_is_refused():
     assert "workbook has the years" in raises(rogs.cross_check, sel, rogs.read_workbook(XLSX, "18A.3"), ("Public housing", "Other"))
 
 
+# ---------------------------------------------------------------- the section 12 layout (hospitals)
+# rogs-hospitals-trimmed.xlsx has the layout of RoGS section 12: the year is a row of its own above its figures
+# (not the figure row's label), two figure rows can differ only by Unit, 12A.23 has two sets of jurisdiction columns
+# (50th and 90th percentile) side by side, and each sheet is declared as the single cell A1.
+HXLSX = (FX / "rogs-hospitals-trimmed.xlsx").read_bytes()
+
+
+def test_a_year_row_above_its_figures_is_the_year_and_is_left_out_of_the_path():
+    wb = rogs.read_workbook(HXLSX, "12A.13", unit_in_path=True)
+    paths = {p for p, _, _ in wb}
+    assert ("All public hospitals", "Emergency department", "Patients seen on time", "Total", "%") in paths  # footnote marks removed, year left out
+    assert ("All public hospitals", "Emergency department", "Patients seen on time", "1 – Resuscitation", "%") in paths
+    assert {y for _, y, _ in wb} == {"2022-23", "2023-24", "2024-25"}
+    got = next(c for p, y, c in wb if y == "2024-25" and p[-2:] == ("Total", "%") and p[2] == "Patients seen on time")
+    assert got["WA"] == "46" and got["Aust"] == "67"
+    # the old layout (the year as the figure row's own label) still reads as before
+    assert {y for _, y, _ in rogs.read_workbook(XLSX, "18A.3")} == {"2016", "2024", "2025"}
+
+
+def test_the_unit_can_be_part_of_the_path_for_rows_that_differ_only_by_unit():
+    plain = rogs.read_workbook(HXLSX, "12A.18")
+    assert len([1 for p, y, _ in plain if p == ("Emergency department", "Presentations", "ED stay length is within four hours") and y == "2024-25"]) == 2  # a count and a per cent
+    sel = {"2024-25": {c: "0" for c in rogs.JURISDICTIONS}}
+    assert "appear more than once" in raises(rogs.cross_check, sel, plain, ("Emergency department", "Presentations", "ED stay length is within four hours"))
+    with_unit = rogs.read_workbook(HXLSX, "12A.18", unit_in_path=True)
+    pct = {y: c for p, y, c in with_unit if p == ("Emergency department", "Presentations", "ED stay length is within four hours", "%")}
+    assert pct["2024-25"]["Aust"] == "53.4" and pct["2022-23"]["NSW"] == "58.6"
+    num = {y: c for p, y, c in with_unit if p == ("Emergency department", "Presentations", "ED stay length is within four hours", "no.")}
+    assert num["2024-25"]["NSW"] == "1778090"
+
+
+def test_two_sets_of_jurisdiction_columns_are_read_by_their_heading():
+    path = ("All public hospitals", "Total", "days")
+    med = {y: c for p, y, c in rogs.read_workbook(HXLSX, "12A.23", group="50th percentile", unit_in_path=True) if p == path}
+    p90 = {y: c for p, y, c in rogs.read_workbook(HXLSX, "12A.23", group="90th percentile", unit_in_path=True) if p == path}
+    assert (med["2024-25"]["Aust"], med["2024-25"]["WA"]) == ("45", "45") and (p90["2024-25"]["Aust"], p90["2024-25"]["Vic"]) == ("329", "205")
+    assert med["2023-24"]["NT"] == "na"
+    assert "appears twice" in raises(rogs.read_workbook, HXLSX, "12A.23")  # without naming the set the repeated column is refused
+    assert "0 column headings" in raises(rogs.read_workbook, HXLSX, "12A.23", group="75th percentile")
+
+
+def test_a_sheet_declared_as_one_cell_is_still_read_in_full():
+    import zipfile
+    z = zipfile.ZipFile(io.BytesIO(HXLSX))
+    assert all(b'<dimension ref="A1"/>' in z.read(n) for n in z.namelist() if n.startswith("xl/worksheets/sheet"))
+    assert len(rogs.read_workbook(HXLSX, "12A.13")) > 5
+
+
 # ---------------------------------------------------------------- keeping history
 
 def test_history_is_kept_for_years_the_new_edition_drops_and_the_edition_is_recorded():

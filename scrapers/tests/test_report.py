@@ -319,7 +319,7 @@ def test_source_change_alone_does_not_set_the_flag():
 
 
 def test_run_all_registry_and_status():
-    assert [n for n, _ in run_all.REGISTRY] == ["cpi_june", "commonwealth_debt", "unemployment_rate", "inflation", "wages_and_prices", "rents", "social_housing"]
+    assert [n for n, _ in run_all.REGISTRY] == ["cpi_june", "commonwealth_debt", "unemployment_rate", "inflation", "wages_and_prices", "rents", "social_housing", "hospital_waits"]
     # the scraper that copies the inflation page's figures must come after the inflation scraper
     names = [n for n, _ in run_all.REGISTRY]
     assert run_all.DEPENDS_ON == {"wages_and_prices": "inflation"} and names.index("inflation") < names.index("wages_and_prices")

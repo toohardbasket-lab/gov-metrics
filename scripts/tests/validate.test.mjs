@@ -136,7 +136,7 @@ failCase('monthly: a rate outside the plausible range', () => un(unRow('1995-03-
 failCase('monthly: a month-to-month jump over the step limit', () => un(unRow('1995-03-31'), (l) => setValue(l, '14.0')), /moves .* per cent from .*, more than the limit of 35 per cent/);
 failCase('monthly: a past month revised by 0.5 is blocked', () => un(unRow('2008-06-30'), (l) => setValue(l, String(Math.round((Number(l.split(',')[4]) + 0.5) * 10) / 10))), /unemployment_rate \(Australia\) on 2008-06-30 \(2008-06\) was [\d.]+ when last accepted and is now [\d.]+, a change of \+0\.5 \(the change is more than 0\.3\)/);
 failCase('the pct unit is refused if format.ts cannot format it', () => editFile(p('src', 'lib', 'format.ts'), (t) => t.replaceAll("unit === 'pct')", "unit === 'pctx')")), /src\/lib\/format\.ts: formats the units .* but scripts\/validate\.mjs lists/);
-failCase('the pct unit is refused on a series if mistyped', () => un(unRow('2008-06-30'), (l) => { const c = l.split(','); c[5] = 'percent'; return c.join(','); }), /the unit "percent" is not one the site can format \(aud_million, pct_gdp, pct, index, count, rate\)/);
+failCase('the pct unit is refused on a series if mistyped', () => un(unRow('2008-06-30'), (l) => { const c = l.split(','); c[5] = 'percent'; return c.join(','); }), /the unit "percent" is not one the site can format \(aud_million, pct_gdp, pct, index, count, rate, days\)/);
 plainCase('monthly: a past month revised by 0.2 only warns', () => {
   un(unRow('2008-06-30'), (l) => setValue(l, String(Math.round((Number(l.split(',')[4]) + 0.2) * 10) / 10)));
   const r = run();
@@ -495,7 +495,7 @@ plainCase('the index unit is known to the checker and the site', () => {
   return check('index unit', r.code === 0 && /PASS rents: 568 rows, 2 series, 1972-09-30 to 2026-09-30/.test(r.out) && /format\.ts/.test(readText(join(REPO, 'src', 'lib', 'format.ts'))) && /unit === 'index'/.test(readText(p('src', 'lib', 'format.ts'))), `exit ${r.code}\n${r.out}`);
 });
 failCase('the index unit is not formatted by the site (format.ts lacks it)', () => editFile(p('src', 'lib', 'format.ts'), (t) => t.replaceAll("  if (unit === 'index') return indexText(v);\n", '').replace("  if (unit === 'index') return String(+v.toFixed(2));\n", '')),
-  /src\/lib\/format\.ts: formats the units \[aud_million, count, pct, pct_gdp, rate\] but scripts\/validate\.mjs lists \[aud_million, count, index, pct, pct_gdp, rate\]/);
+  /src\/lib\/format\.ts: formats the units \[aud_million, count, days, pct, pct_gdp, rate\] but scripts\/validate\.mjs lists \[aud_million, count, days, index, pct, pct_gdp, rate\]/);
 failCase('an index figure outside its plausible range', () => rents(rentsRow('2020-12-31', 'rents_index_quarterly', 'Australia'), (l) => setValue(l, '650.00')), /rents_index_quarterly \(Australia\) on 2020-12-31 is 650, outside the plausible range 1 to 500/);
 failCase('an index figure given another unit (a series has one unit)', () => rents(rentsRow('2020-12-31', 'rents_index_quarterly', 'Australia'), (l) => { const c = l.split(','); c[5] = 'pct'; return c.join(','); }), /series "rents_index_quarterly" has more than one unit \(index, pct\)/);
 failCase('quarterly: delete a middle quarter of the index', () => rents(rentsRow('1990-03-31', 'rents_index_quarterly', 'Australia'), () => null), /rents_index_quarterly \(Australia\) is missing 1990-03-31; the rows jump from 1989-12-31 to 1990-06-30/);
@@ -647,6 +647,47 @@ failCase('manifest: the edition note is not a map of period to edition', () => e
 plainCase('manifest: the edition note is accepted and is not treated as a file', () => {
   const r = shRun();
   return check('editions note', r.code === 0 && !/rogs-editions/.test(r.out) && /"rogs-editions"/.test(readText(join(work, 'metrics', SH, 'sources', 'manifest.json'))), r.out);
+});
+
+// ---- hospital waits: the days unit, the per-series decimals setting, a fixed panel scale, an extra column after the figure
+const HW = 'hospital-waits';
+const hwRow = (date, series, jur) => (l) => l.startsWith(`${date},`) && l.includes(`,${series},${jur},`);
+const hw = (match, fn) => editRows(match, fn, HW);
+const hwYml = () => ymlPath(HW);
+plainCase('hospital waits: the clean copy passes, with na codes and the days unit', () => {
+  const r = run();
+  const t = readText(dataPath(HW));
+  return check('hw clean', r.code === 0 && /PASS hospital-waits: 360 rows, 4 series, 2016-06-30 to 2025-06-30/.test(r.out)
+    && /2016-06-30,2015-16,ed_seen_on_time,Australian Capital Territory,na,pct,actual/.test(t) && /,surgery_median_days,Australia,45,days,actual/.test(t), `exit ${r.code}\n${r.out}`);
+});
+failCase('hospital waits: one past Australian seen-on-time figure changed by 2 points blocks', () => hw(hwRow('2020-06-30', 'ed_seen_on_time', 'Australia'), (l) => setValue(l, '76')),
+  /ed_seen_on_time \(Australia\) on 2020-06-30 \(2019-20\) was 74 when last accepted and is now 76, a change of \+2 \(the change is more than 1\)/);
+plainCase('hospital waits: a change of 1 point passes with a warning', () => {
+  hw(hwRow('2020-06-30', 'ed_seen_on_time', 'Australia'), (l) => setValue(l, '75'));
+  const r = run();
+  return check('1 point', r.code === 0 && /WARNING: metrics\/hospital-waits\/data\.csv: data has changed since it was last accepted \(1 accepted figure revised/.test(r.out), `exit ${r.code}\n${r.out}`);
+});
+failCase('hospital waits: a median wait changed by 3 days blocks (tolerance 2 days)', () => hw(hwRow('2021-06-30', 'surgery_median_days', 'Australia'), (l) => setValue(l, '51')), /surgery_median_days \(Australia\) on 2021-06-30 \(2020-21\) was 48 when last accepted and is now 51, a change of \+3 \(the change is more than 2\)/);
+plainCase('hospital waits: a change of 2 days passes with a warning', () => {
+  hw(hwRow('2021-06-30', 'surgery_median_days', 'Australia'), (l) => setValue(l, '50'));
+  const r = run();
+  return check('2 days', r.code === 0 && /WARNING: metrics\/hospital-waits\/data\.csv: data has changed since it was last accepted/.test(r.out), `exit ${r.code}\n${r.out}`);
+});
+failCase('hospital waits: a figure turning into a code is a revision that blocks', () => hw(hwRow('2024-06-30', 'surgery_median_days', 'Northern Territory'), (l) => setValue(l, '30')), /surgery_median_days \(Northern Territory\) on 2024-06-30 \(2023-24\) was na when last accepted and is now 30/);
+failCase('hospital waits: days outside the plausible range', () => hw(hwRow('2025-06-30', 'surgery_90th_days', 'Tasmania'), (l) => setValue(l, '1200')), /surgery_90th_days \(Tasmania\) on 2025-06-30 is 1200, outside the plausible range 0 to 1000/);
+failCase('hospital waits: a per cent over 100', () => hw(hwRow('2025-06-30', 'ed_within_4_hours', 'Victoria'), (l) => setValue(l, '152.7')), /ed_within_4_hours \(Victoria\) on 2025-06-30 is 152\.7, outside the plausible range 0 to 100/);
+failCase('hospital waits: a series with two units (one row in days)', () => hw(hwRow('2025-06-30', 'surgery_median_days', 'Victoria'), (l) => { const c = l.split(','); c[5] = 'count'; return c.join(','); }), /series "surgery_median_days" has more than one unit \(days, count\)/);
+failCase('hospital waits: a missing financial year', () => hw(hwRow('2022-06-30', 'surgery_90th_days', 'Australia'), () => null), /surgery_90th_days \(Australia\) is missing 2022-06-30; the rows jump from 2021-06-30 to 2023-06-30/);
+failCase('decimals: a stored figure with a decimal the page would not show', () => hw(hwRow('2025-06-30', 'ed_seen_on_time', 'Australia'), (l) => setValue(l, '67.4')), /ed_seen_on_time \(Australia\) on 2025-06-30 is 67\.4, which has more decimal places than the 0 the page shows for this series \("decimals" in metric\.yml\)/);
+failCase('decimals: two decimals where the page shows one', () => hw(hwRow('2025-06-30', 'ed_within_4_hours', 'Australia'), (l) => setValue(l, '53.45')), /ed_within_4_hours \(Australia\) on 2025-06-30 is 53\.45, which has more decimal places than the 1 the page shows/);
+failCase('decimals: a setting that is not a whole number from 0 to 3', () => editFile(hwYml(), (t) => t.replace('decimals: 1', 'decimals: 5')), /series "ed_within_4_hours" has a "decimals" that is not a whole number from 0 to 3/);
+failCase('decimals: a setting that is text', () => editFile(hwYml(), (t) => t.replace('decimals: 0', 'decimals: none')), /series "ed_seen_on_time" has a "decimals" that is not a whole number from 0 to 3/);
+failCase('panel: a fixed scale that is not min below max', () => editFile(hwYml(), (t) => t.replace('y_range: {min: 0, max: 100}', 'y_range: {min: 100, max: 0}')), /"state_panel_config" has a "y_range" that is not \{min: <number>, max: <larger number>\}/);
+failCase('panel: a figure outside the fixed scale', () => editFile(hwYml(), (t) => t.replace('y_range: {min: 0, max: 100}', 'y_range: {min: 0, max: 70}')), /the state panel scale is fixed at 0 to 70 \("y_range"\), but ed_seen_on_time for "[A-Za-z ]+" on 20\d\d-06-30 is \d+, outside it/);
+failCase('panel: an extra column whose "after" is not true or false', () => editFile(hwYml(), (t) => t.replace('after: true}', 'after: later}')), /"extra_columns" that is not a list of \{header, series\} \(and optionally after: true\)/);
+plainCase('panel: the fixed scale and the extra column after the figure are accepted', () => {
+  const r = run();
+  return check('scale and after', r.code === 0 && /y_range/.test(readText(hwYml())) && /after: true/.test(readText(hwYml())), r.out);
 });
 
 // ---- derive.mjs directly: sums, ratios, codes, chained series

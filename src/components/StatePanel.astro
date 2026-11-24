@@ -25,7 +25,7 @@ const json = JSON.stringify(panel).replace(/</g, '\\u003c');
       <figure class="panel-cell" data-place={p.label}>
         <figcaption>{p.label}</figcaption>
         <div class="panel-wrap">
-          <svg viewBox="0 0 300 200" role="img" aria-label={`${p.label}: ${panel.table.headers[panel.table.headers.length - 1]}, ${p.points[0].period} to ${p.points[p.points.length - 1].period}`}></svg>
+          <svg viewBox="0 0 300 200" role="img" aria-label={`${p.label}: ${panel.figureHeader}, ${p.points[0].period} to ${p.points[p.points.length - 1].period}`}></svg>
           <div class="panel-tip"></div>
         </div>
       </figure>
@@ -38,7 +38,7 @@ const json = JSON.stringify(panel).replace(/</g, '\\u003c');
       </thead>
       <tbody>
         {panel.table.rows.map((r) => (
-          <tr><td>{r.place}</td><td>{r.month}</td>{r.extras.map((x) => <td>{x}</td>)}<td>{r.value}</td></tr>
+          <tr><td>{r.place}</td><td>{r.month}</td>{r.extras.map((x) => <td>{x}</td>)}<td>{r.value}</td>{r.extrasAfter.map((x) => <td>{x}</td>)}</tr>
         ))}
       </tbody>
     </table>
@@ -53,9 +53,11 @@ const json = JSON.stringify(panel).replace(/</g, '\\u003c');
   .state-panel .sw-national { background: var(--ink-3); height: 2px; }
   .state-panel .sw-band { background: var(--band); height: 12px; border: 1px solid var(--rule); }
   .state-panel .panel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px 12px; margin: 6px 0 14px; }
-  .state-panel .panel-cell { margin: 0; }
+  /* Cells in a row are as tall as the tallest; the chart sits at the bottom, so a title that wraps (Australian Capital
+     Territory (ACT)) does not push its chart out of line with the others. */
+  .state-panel .panel-cell { margin: 0; display: flex; flex-direction: column; }
   .state-panel figcaption { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
-  .state-panel .panel-wrap { position: relative; }
+  .state-panel .panel-wrap { position: relative; margin-top: auto; }
   .state-panel svg { display: block; width: 100%; height: auto; font-family: var(--body); }
   .state-panel .panel-tip { position: absolute; pointer-events: none; background: var(--card); border: 1px solid var(--rule); border-radius: 6px; padding: 5px 8px; font-size: 12px; box-shadow: 0 4px 14px rgba(0, 0, 0, .14); display: none; white-space: nowrap; font-variant-numeric: tabular-nums; top: 20px; }
   .state-panel .panel-tip b { display: block; }
@@ -72,7 +74,7 @@ const json = JSON.stringify(panel).replace(/</g, '\\u003c');
 
   type Pt = { date: string; period: string; value: number };
   type Panel = {
-    unit: string; frequency: string; nationalLabel: string; national: Pt[];
+    unit: string; decimals?: number; yRange?: { min: number; max: number }; frequency: string; nationalLabel: string; national: Pt[];
     places: { label: string; name: string; abbreviation: string; points: Pt[] }[];
     governments: { date: string; party: string }[];
     events: { date: string; label: string }[];
@@ -91,9 +93,10 @@ const json = JSON.stringify(panel).replace(/</g, '\\u003c');
     // One scale for every chart: it has to fit every place and the national line.
     const all = [...panel.national, ...panel.places.flatMap((p) => p.points)];
     const vals = all.map((p) => p.value);
-    const lo = Math.min(0, ...vals), hi = Math.max(...vals);
+    // A metric may fix the scale (state_panel_config y_range, for example 0 to 100 for a share); otherwise it fits the data.
+    const lo = panel.yRange ? panel.yRange.min : Math.min(0, ...vals), hi = panel.yRange ? panel.yRange.max : Math.max(...vals);
     const step = niceStep(hi - lo);
-    const y0 = Math.floor(lo / step) * step, y1 = Math.ceil(hi / step) * step;
+    const y0 = panel.yRange ? lo : Math.floor(lo / step) * step, y1 = panel.yRange ? hi : Math.ceil(hi / step) * step;
     const times = all.map((p) => decimalYear(p.date));
     const xa = Math.min(...times) - PAD, xb = Math.max(...times) + PAD;
     const x = (t: number) => L + (t - xa) / (xb - xa) * plotW;
@@ -145,7 +148,7 @@ const json = JSON.stringify(panel).replace(/</g, '\\u003c');
       el('path', { d: path(place.points), fill: 'none', stroke: 'var(--series-1)', 'stroke-width': 2, 'stroke-linejoin': 'round' });
       const last = place.points[place.points.length - 1];
       el('circle', { cx: x(decimalYear(last.date)), cy: y(last.value), r: 3.5, fill: 'var(--series-1)', stroke: 'var(--card)', 'stroke-width': 1.5 });
-      el('text', { x: x(decimalYear(last.date)) + 7, y: y(last.value) + 4, 'font-size': 11.5, 'font-weight': 600, fill: 'var(--ink)' }, formatValue(panel.unit, last.value));
+      el('text', { x: x(decimalYear(last.date)) + 7, y: y(last.value) + 4, 'font-size': 11.5, 'font-weight': 600, fill: 'var(--ink)' }, formatValue(panel.unit, last.value, panel.decimals));
 
       // Hover read-out: the month, this place and the national figure.
       const cross = el('line', { y1: T, y2: H - B, stroke: 'var(--ink-2)', 'stroke-width': 1, visibility: 'hidden' });
@@ -163,9 +166,9 @@ const json = JSON.stringify(panel).replace(/</g, '\\u003c');
         const head = document.createElement('b');
         head.textContent = panel.frequency === 'annual' ? formatDate(r.date) : formatMonthYear(r.date);
         tip.appendChild(head);
-        tip.appendChild(document.createTextNode(`${place.name}: ${formatValue(panel.unit, r.value)}`));
+        tip.appendChild(document.createTextNode(`${place.name}: ${formatValue(panel.unit, r.value, panel.decimals)}`));
         tip.appendChild(document.createElement('br'));
-        tip.appendChild(document.createTextNode(`${panel.nationalLabel}: ${nat ? formatValue(panel.unit, nat.value) : 'no figure'}`));
+        tip.appendChild(document.createTextNode(`${panel.nationalLabel}: ${nat ? formatValue(panel.unit, nat.value, panel.decimals) : 'no figure'}`));
         tip.style.display = 'block';
         const left = cx / W * b.width;
         tip.style.left = Math.min(Math.max(left + 8, 0), Math.max(b.width - 150, 0)) + 'px';

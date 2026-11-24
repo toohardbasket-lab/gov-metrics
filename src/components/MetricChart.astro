@@ -66,7 +66,7 @@ const first = chart.views[0];
   const EVENT_FLIP_FROM = 0.8;  // marks in the last fifth of the plot get their label on the left
 
   type Pt = { date: string; period: string; value: number };
-  type Line = { label: string; color: number; points: Pt[] };
+  type Line = { label: string; color: number; decimals?: number; points: Pt[] };
   type View = {
     id: string; label: string; caption: string; unit: string;
     from?: number; band?: { min: number; max: number; label: string };
@@ -226,16 +226,17 @@ const first = chart.views[0];
       offsets.sort((a, b) => Math.abs(a) - Math.abs(b));
       order.forEach((i) => {
         const [ex, ey] = pix[i][pix[i].length - 1];
-        const text = view.lines[i].label + ' ' + formatValue(view.unit, lastVal(i));
+        const text = view.lines[i].label + ' ' + formatValue(view.unit, lastVal(i), view.lines[i].decimals);
         const lab = el('text', { x: ex - 10, y: ey + 22, 'text-anchor': 'end', 'font-size': 12.5, 'font-weight': 600, fill: 'var(--ink)', stroke: 'var(--card)', 'stroke-width': 4, 'paint-order': 'stroke', 'stroke-opacity': 0.85 }, text);
         const len = measure(lab, text, 7);
         const boxAt = (ly: number): Box => ({ x0: ex - 10 - len, x1: ex - 10, y0: ly - 12, y1: ly + 3 });
-        const inPlot = (ly: number) => ly - 12 >= T && ly + 3 <= H - B + 10;
+        // A label stays inside the plot, above the year labels of the x axis, so a line near zero does not crowd them.
+        const inPlot = (ly: number) => ly - 12 >= T && ly + 3 <= H - B - 2;
         const onLabel = (ly: number) => placedLabels.some((b) => boxesOverlap(b, boxAt(ly), 0));
         const clear = (ly: number) => inPlot(ly) && !hitsLines(boxAt(ly), () => true) && !onLabel(ly);
         let ly = ey + 22, moved = false;
         if (ly - prevLabelY < 16) ly = prevLabelY + 16; // keep two end labels from overlapping
-        const onOther = hitsLines(boxAt(ly), (k) => k !== i) || onLabel(ly);
+        const onOther = !inPlot(ly) || hitsLines(boxAt(ly), (k) => k !== i) || onLabel(ly); // below the axis counts as in the way
         const onOwn = !onOther && hitsLines(boxAt(ly), (k) => k === i);
         let found: number | undefined;
         if (onOther) found = offsets.map((d) => ey + d).find(clear);
@@ -284,7 +285,7 @@ const first = chart.views[0];
             dots[i].setAttribute('visibility', 'hidden');
             return;
           }
-          tip.appendChild(document.createTextNode(`${l.label}: ${formatValue(view.unit, r.value)}${r.date === r0.date ? '' : ` (${r.period})`}`));
+          tip.appendChild(document.createTextNode(`${l.label}: ${formatValue(view.unit, r.value, l.decimals)}${r.date === r0.date ? '' : ` (${r.period})`}`));
           dots[i].setAttribute('cx', String(x(r.t))); dots[i].setAttribute('cy', String(y(r.value))); dots[i].setAttribute('visibility', 'visible');
         });
         tip.style.display = 'block';

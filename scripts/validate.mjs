@@ -26,7 +26,7 @@ const STATUSES = ['actual', 'estimate', 'forecast'];
 // The units the site knows how to format. This is a copy of the list in src/lib/format.ts
 // (formatValue, formatAxis and formatTable). A check below fails if the two lists differ,
 // so a new unit has to be added in both places.
-const KNOWN_UNITS = ['aud_million', 'pct_gdp', 'pct', 'index', 'count', 'rate'];
+const KNOWN_UNITS = ['aud_million', 'pct_gdp', 'pct', 'index', 'count', 'rate', 'days'];
 
 // How far apart consecutive rows must be. To add another frequency, add an entry here
 // whose `next` returns the date that should follow the one given (for example three months
@@ -388,6 +388,19 @@ function checkSeries(slug, def, data, groups, F) {
     // but have no value to range-check
     const numericGroups = seriesGroups.map((g) => g.filter((r) => !r.isCode));
 
+    // 4b. `decimals` is a display setting (the places shown for a per cent or a rate). It must be a whole number
+    // from 0 to 3, and no stored figure may have more places than it shows, so the page never hides part of a figure.
+    if (s.decimals !== undefined) {
+      if (!Number.isInteger(s.decimals) || s.decimals < 0 || s.decimals > 3) F.fail(`${yml}: series "${id}" has a "decimals" that is not a whole number from 0 to 3.`);
+      else if (!isDerived(s)) {
+        let reported = 0;
+        for (const r of numericGroups.flat()) {
+          const places = r.valueText.includes('.') ? r.valueText.split('.')[1].length : 0;
+          if (places > s.decimals && ++reported <= 10) F.fail(`${path}: line ${r.line}, ${id} (${r.jurisdiction}) on ${r.date} is ${r.valueText}, which has more decimal places than the ${s.decimals} the page shows for this series ("decimals" in metric.yml).`);
+        }
+      }
+    }
+
     // 5. frequency and gaps (a derived series takes its dates from the stored series, which is checked itself)
     const freq = FREQUENCIES[s.frequency];
     if (isDerived(s)) { /* its frequency is checked in 3a; its dates come from the stored series */ }
@@ -521,7 +534,7 @@ function checkStatePanel(slug, def, data, derivedGroups, F) {
     return;
   }
   for (const k of Object.keys(c)) {
-    if (!['series', 'national', 'national_label', 'heading', 'note', 'headers', 'places', 'date_format', 'extra_columns'].includes(k)) F.fail(`${yml}: "state_panel_config" has a field "${k}" that the checker does not know.`);
+    if (!['series', 'national', 'national_label', 'heading', 'note', 'headers', 'places', 'date_format', 'extra_columns', 'y_range'].includes(k)) F.fail(`${yml}: "state_panel_config" has a field "${k}" that the checker does not know.`);
   }
   for (const k of ['series', 'national', 'national_label', 'heading', 'note']) {
     if (typeof c[k] !== 'string' || c[k].trim() === '') F.fail(`${yml}: "state_panel_config" needs "${k}", as text.`);
@@ -543,8 +556,14 @@ function checkStatePanel(slug, def, data, derivedGroups, F) {
   if (c.date_format !== undefined && !['period', 'month_year'].includes(c.date_format)) F.fail(`${yml}: "state_panel_config" has a "date_format" that is not period or month_year.`);
   const declaredIds = new Set((Array.isArray(def.series) ? def.series : []).map((x) => x?.id));
   if (c.extra_columns !== undefined) {
-    if (!Array.isArray(c.extra_columns) || c.extra_columns.some((x) => !x || typeof x.header !== 'string' || x.header.trim() === '' || typeof x.series !== 'string' || !declaredIds.has(x.series))) {
-      F.fail(`${yml}: "state_panel_config" has "extra_columns" that is not a list of {header, series} with a series from the "series" list.`);
+    if (!Array.isArray(c.extra_columns) || c.extra_columns.some((x) => !x || typeof x.header !== 'string' || x.header.trim() === '' || typeof x.series !== 'string' || !declaredIds.has(x.series) || (x.after !== undefined && typeof x.after !== 'boolean') || Object.keys(x).some((k) => !['header', 'series', 'after'].includes(k)))) {
+      F.fail(`${yml}: "state_panel_config" has "extra_columns" that is not a list of {header, series} (and optionally after: true) with a series from the "series" list.`);
+    }
+  }
+  if (c.y_range !== undefined) {
+    const r = c.y_range;
+    if (!r || typeof r !== 'object' || Array.isArray(r) || Object.keys(r).some((k) => k !== 'min' && k !== 'max') || !isNum(r.min) || !isNum(r.max) || r.min >= r.max) {
+      F.fail(`${yml}: "state_panel_config" has a "y_range" that is not {min: <number>, max: <larger number>}.`);
     }
   }
   // the series is stored (rows in data.csv) or derived (worked out, same code as the page)
@@ -559,6 +578,11 @@ function checkStatePanel(slug, def, data, derivedGroups, F) {
     const rows = rowsFor(j);
     if (rows.length === 0) F.fail(`${yml}: the state panel needs ${c.series} for "${j}", but data.csv has no rows for it.`);
     else latest.set(j, rows.map((r) => r.date).sort().at(-1));
+    const yr = c.y_range;
+    if (yr && isNum(yr.min) && isNum(yr.max) && yr.min < yr.max) {
+      const out = rows.find((r) => r.value < yr.min || r.value > yr.max);
+      if (out) F.fail(`${yml}: the state panel scale is fixed at ${yr.min} to ${yr.max} ("y_range"), but ${c.series} for "${j}" on ${out.date} is ${out.value}, outside it.`);
+    }
   }
   const states = places.map((x) => x?.jurisdiction).filter((j) => latest.has(j));
   const ends = new Set(states.map((j) => latest.get(j)));

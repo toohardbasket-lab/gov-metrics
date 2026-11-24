@@ -1,0 +1,178 @@
+# Definition file for one metric. Everything the page shows, other than the numbers
+# in data.csv, comes from this file. See metrics/README.md for what each field does.
+# Words in braces, such as {last_year}, are filled in from the data when the page is built.
+slug: hospital-waits
+title: Hospital waits
+theme: Health
+jurisdiction: Australia
+description: "How quickly public hospital emergency departments see patients, and how long people wait for elective surgery, each year since 2015-16."
+lede: "How quickly public hospital emergency departments see patients, and how long people wait for planned surgery, each financial year since {first_period}."
+
+draft: true
+draft_banner: "Draft, not for publication. The figures are read from the Productivity Commission by code and have not yet had the human check the plan requires."
+
+# Four series, all stored in data.csv, one row per financial year and jurisdiction (Australia and each state and
+# territory). The date is 30 June of the second year of the financial year (2024-25 is 2025-06-30); the period column
+# keeps the Commission's label. A figure may be a code the Commission uses instead of a number (.. not applicable,
+# na not available, np not published, - nil); it is stored as the code and the page draws no point for it.
+# `decimals` is the number of decimal places the Commission prints and the page shows (12A.13 has none, 12A.18 one).
+series:
+  - id: ed_seen_on_time
+    label: Emergency patients seen on time
+    definition: The share of emergency department patients seen within the time set for their triage category, all public hospitals, all triage categories (patients with no triage category are left out). Per cent, whole numbers as published.
+    source_table: Productivity Commission, Report on Government Services, table 12A.13 (Emergency department waiting times), Patients seen on time, Total excluding unknown triage category
+    frequency: annual
+    decimals: 0
+    plausible: {min: 0, max: 100}
+    # Revision tolerance: the Commission occasionally revises past hospital figures slightly. A change of more than 1 percentage point, or 2 days, blocks until the owner accepts it.
+    revision: {max_abs: 1}
+  - id: ed_within_4_hours
+    label: Emergency department stay of four hours or less
+    definition: The share of emergency department presentations that ended, by admission, discharge or transfer, within four hours of the patient arriving. Per cent, one decimal place as published.
+    source_table: Productivity Commission, Report on Government Services, table 12A.18 (Length of stay for emergency department presentations), ED stay length is within four hours, per cent
+    frequency: annual
+    decimals: 1
+    plausible: {min: 0, max: 100}
+    revision: {max_abs: 1}
+  - id: surgery_median_days
+    label: Elective surgery, median wait
+    definition: The number of days within which half of the patients admitted from the elective surgery waiting list in the year were admitted (the 50th percentile), all procedures, all public hospitals. Whole days.
+    source_table: Productivity Commission, Report on Government Services, table 12A.23 (Waiting times for elective surgery), All public hospitals, Total, 50th percentile
+    frequency: annual
+    plausible: {min: 0, max: 1000}
+    revision: {max_abs: 2}
+  - id: surgery_90th_days
+    label: Elective surgery, 90th percentile wait
+    definition: The number of days within which nine in ten of the patients admitted from the elective surgery waiting list in the year were admitted (the 90th percentile), all procedures, all public hospitals. Whole days.
+    source_table: Productivity Commission, Report on Government Services, table 12A.23 (Waiting times for elective surgery), All public hospitals, Total, 90th percentile
+    frequency: annual
+    plausible: {min: 0, max: 1000}
+    revision: {max_abs: 2}
+
+# The headline figures above the chart. Values are read from data.csv. sub_period puts the financial year beneath.
+tiles:
+  - label: Emergency patients seen on time
+    series: ed_seen_on_time
+    jurisdiction: Australia
+    sub_period: true
+  - label: Elective surgery, median wait
+    series: surgery_median_days
+    jurisdiction: Australia
+    sub_period: true
+  - label: Target status
+    text: No national target
+    sub_text: States set their own
+
+# The chart. color keeps a series the same colour in every view (1 blue, 2 orange, 3 plum, 4 green, 5 violet).
+views:
+  - id: emergency
+    label: Emergency departments
+    derive: none
+    lines:
+      - series: ed_seen_on_time
+        jurisdiction: Australia
+        label: Seen on time
+        color: 1
+      - series: ed_within_4_hours
+        jurisdiction: Australia
+        label: Stay of four hours or less
+        color: 2
+    caption: Per cent of emergency department patients, public hospitals, each financial year.
+  - id: surgery
+    label: Elective surgery
+    derive: none
+    lines:
+      - series: surgery_median_days
+        jurisdiction: Australia
+        label: Median wait (half wait longer)
+        color: 3
+      - series: surgery_90th_days
+        jurisdiction: Australia
+        label: 90th percentile (one in ten wait longer)
+        color: 4
+    caption: Days waited by patients admitted from elective surgery waiting lists, public hospitals, each financial year.
+chart_alt: "Line chart of public hospital waiting measures each financial year, {first_period} to {latest_period}. The full figures are in the table below."
+chart_source: "Source: Productivity Commission, Report on Government Services, Public hospitals, tables 12A.13, 12A.18 and 12A.23."
+
+# The full table. Newest first. Australia only: the states and territories are in the panel under the targets.
+table:
+  period_header: Financial year
+  columns:
+    - header: "Seen on time %"
+      series: ed_seen_on_time
+      jurisdiction: Australia
+    - header: "Stay of 4 hours or less %"
+      series: ed_within_4_hours
+      jurisdiction: Australia
+    - header: "Surgery median wait (days)"
+      series: surgery_median_days
+      jurisdiction: Australia
+    - header: "Surgery 90th percentile (days)"
+      series: surgery_90th_days
+      jurisdiction: Australia
+
+meaning:
+  - "Emergency patients are given a triage category from 1 (resuscitation, seen immediately) to 5 (non-urgent, within two hours). **Seen on time** is the share seen within the time set for their category. **Stay of four hours or less** is the share who left the emergency department, admitted, sent home or transferred, within four hours of arriving."
+  - "For **elective surgery**, the median is the wait within which half of patients were admitted; the 90th percentile is the wait within which nine in ten were admitted, so one in ten waited longer. Both count patients admitted from the waiting list during the year."
+
+# Targets and forecasts ledger.
+targets:
+  - label: Target
+    text: "No current national target. States and territories set their own targets for their hospitals."
+
+# The state and territory panel (plan section 3), in the fixed order NSW, Vic, Qld, WA, SA, Tas, ACT, NT.
+# The charts show emergency patients seen on time on one fixed scale, 0 to 100 (y_range). The extra column
+# beside the figure is the elective surgery median wait for the same year (after: true puts it after the figure).
+state_panel: true
+state_panel_config:
+  series: ed_seen_on_time
+  national: Australia
+  national_label: Australia
+  heading: States and territories
+  note: "Each chart uses the same scale and shows the share of emergency patients seen on time. The grey line is Australia. Hospitals in each state differ in size and in the patients they treat, so read differences between states with care."
+  headers: ["State or territory", "Financial year", "Seen on time %"]
+  date_format: period
+  y_range: {min: 0, max: 100}
+  extra_columns:
+    - {header: "Surgery median wait (days)", series: surgery_median_days, after: true}
+  places:
+    - {jurisdiction: New South Wales, abbreviation: NSW, name: New South Wales}
+    - {jurisdiction: Victoria, abbreviation: Vic, name: Victoria}
+    - {jurisdiction: Queensland, abbreviation: Qld, name: Queensland}
+    - {jurisdiction: Western Australia, abbreviation: WA, name: Western Australia}
+    - {jurisdiction: South Australia, abbreviation: SA, name: South Australia}
+    - {jurisdiction: Tasmania, abbreviation: Tas, name: Tasmania}
+    - {jurisdiction: Australian Capital Territory, abbreviation: ACT, name: Australian Capital Territory}
+    - {jurisdiction: Northern Territory, abbreviation: NT, name: Northern Territory}
+
+# Sources and method ledger. {link} is replaced by the link; {update} and {retrieved}
+# by the fields below.
+update: "Each year, when the Productivity Commission publishes the public hospitals section of the Report on Government Services (recently in January)."
+retrieved: 2026-11-24
+sources_method:
+  - label: Emergency departments
+    link:
+      label: Productivity Commission, Report on Government Services, Public hospitals
+      url: https://www.pc.gov.au/ongoing/report-on-government-services/health/public-hospitals/
+    text: "{link}, tables 12A.13 (seen on time, all triage categories, excluding unknown) and 12A.18 (stay of four hours or less), read from the Commission's CSV dataset and checked against its Excel tables."
+  - label: Elective surgery
+    link:
+      label: Productivity Commission, Report on Government Services, Public hospitals
+      url: https://www.pc.gov.au/ongoing/report-on-government-services/health/public-hospitals/
+    text: "{link}, table 12A.23 (all procedures, all public hospitals), read from the CSV dataset and checked against the Excel tables."
+  - label: Updated
+    text: "{update} Data retrieved {retrieved}."
+
+read_with_care:
+  - "These measures cover public hospitals only. Waits in private hospitals are not included."
+  - "Elective surgery waits count only patients who were admitted. People still on the list, or removed without surgery, are not counted, so long waits can be understated when lists grow."
+  - "Elective surgery waits start when a surgeon adds the patient to the list. The time spent waiting to see the specialist first is not counted."
+  - "The mix of procedures and patients differs between states, which affects their median waits."
+  - "COVID-19 led to elective surgery being postponed in 2020 and 2022, which shows in the waiting times for those years."
+  - "Each edition of the Report on Government Services carries only recent years. Older years stay on this page when a new edition drops them, and a revised past figure is checked before it is accepted."
+  - "Government shading starts on the day each government was sworn in. Recessions and crises are marked on every chart on this site using the same list. The marks give context and do not assign cause."
+
+corrections_text: None yet. Every correction to this page will be listed here with its date and what changed.
+
+# Fields kept from the worked-example definition file.
+inclusion_tests: {outcome: true, official: true, history: true, ongoing: true, no_editorial_choice: "the Productivity Commission's standard measures for emergency departments and elective surgery"}

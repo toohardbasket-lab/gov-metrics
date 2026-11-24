@@ -1,0 +1,28 @@
+{
+  "rogs-2026-parte-section12-public-hospitals-data-tables_0.xlsx": {
+    "bytes": 1022327,
+    "retrieved": "2026-11-24",
+    "sha256": "2f408bdaedc8a672119fe02e2aca6dc60ce7a5a830f72b22db74f94be8dc4ad0",
+    "url": "https://assets.pc.gov.au/2026-01/rogs-2026-parte-section12-public-hospitals-data-tables_0.xlsx?VersionId=pLHy2VkM3lw2Y69pK2Ogj15_a5XCdQ3O"
+  },
+  "rogs-2026-parte-section12-public-hospitals-dataset_0.csv": {
+    "bytes": 3898002,
+    "retrieved": "2026-11-24",
+    "sha256": "07852bd7986a380a377ff5ca21adcef2a43c15f5f52ebac4792e7bd7b8cb733f",
+    "url": "https://assets.pc.gov.au/2026-01/rogs-2026-parte-section12-public-hospitals-dataset_0.csv?VersionId=orWdM_Bmd55MYtts.IPogG9IhAhHK2DC"
+  },
+  "rogs-editions": {
+    "editions": {
+      "2015-16": "2026",
+      "2016-17": "2026",
+      "2017-18": "2026",
+      "2018-19": "2026",
+      "2019-20": "2026",
+      "2020-21": "2026",
+      "2021-22": "2026",
+      "2022-23": "2026",
+      "2023-24": "2026",
+      "2024-25": "2026"
+    }
+  }
+}

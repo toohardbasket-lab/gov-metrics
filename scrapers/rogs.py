@@ -192,11 +192,20 @@ def clean_label(value):
     return FOOTNOTE_RE.sub("", re.sub(r"\s+", " ", str(value).replace(" ", " ")).strip()).strip()
 
 
-def read_workbook(raw, table_number, label="the RoGS workbook"):
+def read_workbook(raw, table_number, label="the RoGS workbook", group=None, unit_in_path=False):
     """Reads the sheet for `table_number` (the sheet whose name is 'Table <number>') into a list of
-    (path, year, {column: cell}). `path` is the tuple of row labels above the figure (a block label, and a
-    sub-block label if there is one). The layout: row labels in the first columns, the year in the last
-    label column, then Unit, then one column per jurisdiction headed by its name (with footnote marks)."""
+    (path, year, {column: cell}). `path` is the tuple of row labels above the figure. The row labels are in
+    the first columns, then Unit, then one column per jurisdiction headed by its name (with footnote marks).
+    The year is found in either of the two layouts the Commission uses:
+      - the year is the figure row's own label (the last label column), as in housing: the path is the
+        labels above it;
+      - the year is a label row of its own (for example '2024-25' above its figures): the year is then
+        left out of the path, and the figure row's own label is the last element of the path.
+    group: some sheets hold two sets of jurisdiction columns side by side, each under a heading above the
+    header row (for example '50th percentile' and '90th percentile'). Name the heading to read that set;
+    without it, a repeated jurisdiction column is refused.
+    unit_in_path: add the row's Unit to the end of the path, for sheets where two rows differ only by unit
+    (a count and a per cent)."""
     import openpyxl
 
     try:
@@ -208,7 +217,9 @@ def read_workbook(raw, table_number, label="the RoGS workbook"):
         names = [n for n in wb.sheetnames if re.sub(r"\s+", " ", n).strip().lower() == want]
         if len(names) != 1:
             raise ScrapeError(f"{label} has {len(names)} sheets named 'Table {table_number}'; it has {wb.sheetnames[:8]}...")
-        rows = list(wb[names[0]].iter_rows(values_only=True))
+        ws = wb[names[0]]
+        ws.reset_dimensions()  # some workbooks declare the sheet as one cell (A1); read what is really there
+        rows = list(ws.iter_rows(values_only=True))
     finally:
         wb.close()
     head = [i for i, r in enumerate(rows[:10]) if r and "Unit" in [clean_label(v) for v in r]]
@@ -217,9 +228,17 @@ def read_workbook(raw, table_number, label="the RoGS workbook"):
     h = rows[head[0]]
     labels = [clean_label(v) for v in h]
     unit_col = labels.index("Unit")
+    # headings above the header row, to the right of Unit, mark column groups; a group runs to the next heading
+    starts = sorted((j, clean_label(v)) for r in rows[: head[0]] for j, v in enumerate(r) if j > unit_col and clean_label(v) != "")
+    span = (unit_col + 1, len(h))
+    if group is not None:
+        mine = [k for k, (_, g) in enumerate(starts) if g == group]
+        if len(mine) != 1:
+            raise ScrapeError(f"{label}: sheet {names[0]} has {len(mine)} column headings {group!r} above the header row; it has {[g for _, g in starts]}")
+        span = (starts[mine[0]][0], starts[mine[0] + 1][0] if mine[0] + 1 < len(starts) else len(h))
     cols = {}
     for j, name in enumerate(labels):
-        if j > unit_col and name in JURISDICTIONS:
+        if span[0] <= j < span[1] and j > unit_col and name in JURISDICTIONS:
             if name in cols:
                 raise ScrapeError(f"{label}: the column {name} appears twice in sheet {names[0]}")
             cols[name] = j
@@ -227,6 +246,7 @@ def read_workbook(raw, table_number, label="the RoGS workbook"):
     if absent:
         raise ScrapeError(f"{label}: sheet {names[0]} has no column for {absent}")
     current = [None] * unit_col
+    year_level, block_year = None, None  # a year label row: the level it sits at, and the year
     out, seen_data = [], False
     for k, r in enumerate(rows[head[0] + 1:], start=head[0] + 2):
         r = list(r) + [None] * (len(h) - len(r))
@@ -239,16 +259,30 @@ def read_workbook(raw, table_number, label="the RoGS workbook"):
         if not has_unit:
             if lab:  # a label row: it sets its level and clears the deeper ones
                 i = lab[0]
-                current[i] = clean_label(r[i])
+                text = clean_label(r[i])
+                if year_level is not None and i <= year_level:
+                    year_level, block_year = None, None
+                if YEAR_RE.fullmatch(text):
+                    year_level, block_year = i, text
+                    current[i] = None  # the year is not part of the path
+                else:
+                    current[i] = text
                 for d in range(i + 1, unit_col):
                     current[d] = None
             continue
         if len(lab) != 1:
-            raise ScrapeError(f"{label}: sheet {names[0]} row {k} has a figure but {len(lab)} label cells; expected the year only")
-        year = clean_label(r[lab[0]])
-        if not YEAR_RE.fullmatch(year):
-            raise ScrapeError(f"{label}: sheet {names[0]} row {k} has {year!r} where a year was expected")
-        path = tuple(c for c in current[: lab[0]] if c)
+            raise ScrapeError(f"{label}: sheet {names[0]} row {k} has a figure but {len(lab)} label cells; expected one")
+        own = clean_label(r[lab[0]])
+        if YEAR_RE.fullmatch(own):  # the year is the row's own label
+            year = own
+            path = tuple(c for c in current[: lab[0]] if c)
+        else:  # the year is a label row above; the row's own label ends the path
+            if block_year is None:
+                raise ScrapeError(f"{label}: sheet {names[0]} row {k} has {own!r} where a year was expected, and no year row above it")
+            year = block_year
+            path = tuple(c for c in current[: lab[0]] if c) + (own,)
+        if unit_in_path:
+            path = path + (clean_label(r[unit_col]),)
         cells = {}
         for c, j in cols.items():
             v = r[j]

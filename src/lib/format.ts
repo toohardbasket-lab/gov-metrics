@@ -19,17 +19,32 @@ function countText(v: number): string {
   return Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
+// A number of days, whole: "45 days" (the singular for one).
+function daysText(v: number): string {
+  const n = Math.round(v);
+  return `${countText(n)} ${n === 1 ? 'day' : 'days'}`;
+}
+
+// `decimals` is an optional display setting for one series (metric.yml, `decimals` on the series): the number of
+// decimal places to show for a per cent or a rate. Without it the unit's usual one decimal is shown.
+// It never adds a decimal the source does not have: the checker refuses stored figures with more decimals than
+// the setting, and a series that sets it is written with exactly that many.
+function places(v: number, decimals: number | undefined, usual: number): string {
+  return v.toFixed(decimals ?? usual);
+}
+
 // Read-outs, tiles and chart end labels.
-export function formatValue(unit: string, v: number): string {
+export function formatValue(unit: string, v: number, decimals?: number): string {
   if (unit === 'aud_million') {
     const b = v / 1000;
     return (b < 0 ? '−$' : '$') + Math.abs(b).toFixed(1) + 'b';
   }
-  if (unit === 'pct_gdp') return v.toFixed(1) + '%';
-  if (unit === 'pct') return v.toFixed(1) + '%';
+  if (unit === 'pct_gdp') return places(v, decimals, 1) + '%';
+  if (unit === 'pct') return places(v, decimals, 1) + '%';
   if (unit === 'index') return indexText(v);
   if (unit === 'count') return countText(v);
-  if (unit === 'rate') return v.toFixed(1);
+  if (unit === 'rate') return places(v, decimals, 1);
+  if (unit === 'days') return daysText(v);
   return unknownUnit(unit);
 }
 
@@ -41,17 +56,19 @@ export function formatAxis(unit: string, v: number): string {
   if (unit === 'index') return String(+v.toFixed(2));
   if (unit === 'count') return Math.abs(v) >= 1000 ? +(v / 1000).toFixed(1) + 'k' : String(v);
   if (unit === 'rate') return String(+v.toFixed(1));
+  if (unit === 'days') return countText(v) + ' days';
   return unknownUnit(unit);
 }
 
 // Cells in the full table.
-export function formatTable(unit: string, v: number): string {
+export function formatTable(unit: string, v: number, decimals?: number): string {
   if (unit === 'aud_million') return Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  if (unit === 'pct_gdp') return v.toFixed(1);
-  if (unit === 'pct') return v.toFixed(1);
+  if (unit === 'pct_gdp') return places(v, decimals, 1);
+  if (unit === 'pct') return places(v, decimals, 1);
   if (unit === 'index') return indexText(v);
   if (unit === 'count') return countText(v);
-  if (unit === 'rate') return v.toFixed(1);
+  if (unit === 'rate') return places(v, decimals, 1);
+  if (unit === 'days') return countText(Math.round(v));
   return unknownUnit(unit);
 }
 

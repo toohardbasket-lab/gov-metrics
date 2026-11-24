@@ -1,0 +1,361 @@
+date,period,series,jurisdiction,value,unit,status
+2016-06-30,2015-16,ed_seen_on_time,Australia,74,pct,actual
+2017-06-30,2016-17,ed_seen_on_time,Australia,73,pct,actual
+2018-06-30,2017-18,ed_seen_on_time,Australia,72,pct,actual
+2019-06-30,2018-19,ed_seen_on_time,Australia,71,pct,actual
+2020-06-30,2019-20,ed_seen_on_time,Australia,74,pct,actual
+2021-06-30,2020-21,ed_seen_on_time,Australia,71,pct,actual
+2022-06-30,2021-22,ed_seen_on_time,Australia,67,pct,actual
+2023-06-30,2022-23,ed_seen_on_time,Australia,65,pct,actual
+2024-06-30,2023-24,ed_seen_on_time,Australia,67,pct,actual
+2025-06-30,2024-25,ed_seen_on_time,Australia,67,pct,actual
+2016-06-30,2015-16,ed_seen_on_time,Australian Capital Territory,na,pct,actual
+2017-06-30,2016-17,ed_seen_on_time,Australian Capital Territory,62,pct,actual
+2018-06-30,2017-18,ed_seen_on_time,Australian Capital Territory,49,pct,actual
+2019-06-30,2018-19,ed_seen_on_time,Australian Capital Territory,46,pct,actual
+2020-06-30,2019-20,ed_seen_on_time,Australian Capital Territory,48,pct,actual
+2021-06-30,2020-21,ed_seen_on_time,Australian Capital Territory,48,pct,actual
+2022-06-30,2021-22,ed_seen_on_time,Australian Capital Territory,48,pct,actual
+2023-06-30,2022-23,ed_seen_on_time,Australian Capital Territory,51,pct,actual
+2024-06-30,2023-24,ed_seen_on_time,Australian Capital Territory,62,pct,actual
+2025-06-30,2024-25,ed_seen_on_time,Australian Capital Territory,62,pct,actual
+2016-06-30,2015-16,ed_seen_on_time,New South Wales,81,pct,actual
+2017-06-30,2016-17,ed_seen_on_time,New South Wales,81,pct,actual
+2018-06-30,2017-18,ed_seen_on_time,New South Wales,80,pct,actual
+2019-06-30,2018-19,ed_seen_on_time,New South Wales,78,pct,actual
+2020-06-30,2019-20,ed_seen_on_time,New South Wales,81,pct,actual
+2021-06-30,2020-21,ed_seen_on_time,New South Wales,79,pct,actual
+2022-06-30,2021-22,ed_seen_on_time,New South Wales,77,pct,actual
+2023-06-30,2022-23,ed_seen_on_time,New South Wales,74,pct,actual
+2024-06-30,2023-24,ed_seen_on_time,New South Wales,74,pct,actual
+2025-06-30,2024-25,ed_seen_on_time,New South Wales,73,pct,actual
+2016-06-30,2015-16,ed_seen_on_time,Northern Territory,61,pct,actual
+2017-06-30,2016-17,ed_seen_on_time,Northern Territory,61,pct,actual
+2018-06-30,2017-18,ed_seen_on_time,Northern Territory,57,pct,actual
+2019-06-30,2018-19,ed_seen_on_time,Northern Territory,64,pct,actual
+2020-06-30,2019-20,ed_seen_on_time,Northern Territory,68,pct,actual
+2021-06-30,2020-21,ed_seen_on_time,Northern Territory,61,pct,actual
+2022-06-30,2021-22,ed_seen_on_time,Northern Territory,57,pct,actual
+2023-06-30,2022-23,ed_seen_on_time,Northern Territory,50,pct,actual
+2024-06-30,2023-24,ed_seen_on_time,Northern Territory,47,pct,actual
+2025-06-30,2024-25,ed_seen_on_time,Northern Territory,48,pct,actual
+2016-06-30,2015-16,ed_seen_on_time,Queensland,70,pct,actual
+2017-06-30,2016-17,ed_seen_on_time,Queensland,69,pct,actual
+2018-06-30,2017-18,ed_seen_on_time,Queensland,68,pct,actual
+2019-06-30,2018-19,ed_seen_on_time,Queensland,69,pct,actual
+2020-06-30,2019-20,ed_seen_on_time,Queensland,76,pct,actual
+2021-06-30,2020-21,ed_seen_on_time,Queensland,74,pct,actual
+2022-06-30,2021-22,ed_seen_on_time,Queensland,68,pct,actual
+2023-06-30,2022-23,ed_seen_on_time,Queensland,67,pct,actual
+2024-06-30,2023-24,ed_seen_on_time,Queensland,70,pct,actual
+2025-06-30,2024-25,ed_seen_on_time,Queensland,72,pct,actual
+2016-06-30,2015-16,ed_seen_on_time,South Australia,66,pct,actual
+2017-06-30,2016-17,ed_seen_on_time,South Australia,64,pct,actual
+2018-06-30,2017-18,ed_seen_on_time,South Australia,60,pct,actual
+2019-06-30,2018-19,ed_seen_on_time,South Australia,58,pct,actual
+2020-06-30,2019-20,ed_seen_on_time,South Australia,65,pct,actual
+2021-06-30,2020-21,ed_seen_on_time,South Australia,61,pct,actual
+2022-06-30,2021-22,ed_seen_on_time,South Australia,55,pct,actual
+2023-06-30,2022-23,ed_seen_on_time,South Australia,50,pct,actual
+2024-06-30,2023-24,ed_seen_on_time,South Australia,49,pct,actual
+2025-06-30,2024-25,ed_seen_on_time,South Australia,53,pct,actual
+2016-06-30,2015-16,ed_seen_on_time,Tasmania,66,pct,actual
+2017-06-30,2016-17,ed_seen_on_time,Tasmania,65,pct,actual
+2018-06-30,2017-18,ed_seen_on_time,Tasmania,66,pct,actual
+2019-06-30,2018-19,ed_seen_on_time,Tasmania,64,pct,actual
+2020-06-30,2019-20,ed_seen_on_time,Tasmania,65,pct,actual
+2021-06-30,2020-21,ed_seen_on_time,Tasmania,58,pct,actual
+2022-06-30,2021-22,ed_seen_on_time,Tasmania,53,pct,actual
+2023-06-30,2022-23,ed_seen_on_time,Tasmania,52,pct,actual
+2024-06-30,2023-24,ed_seen_on_time,Tasmania,51,pct,actual
+2025-06-30,2024-25,ed_seen_on_time,Tasmania,46,pct,actual
+2016-06-30,2015-16,ed_seen_on_time,Victoria,74,pct,actual
+2017-06-30,2016-17,ed_seen_on_time,Victoria,73,pct,actual
+2018-06-30,2017-18,ed_seen_on_time,Victoria,72,pct,actual
+2019-06-30,2018-19,ed_seen_on_time,Victoria,71,pct,actual
+2020-06-30,2019-20,ed_seen_on_time,Victoria,70,pct,actual
+2021-06-30,2020-21,ed_seen_on_time,Victoria,68,pct,actual
+2022-06-30,2021-22,ed_seen_on_time,Victoria,63,pct,actual
+2023-06-30,2022-23,ed_seen_on_time,Victoria,65,pct,actual
+2024-06-30,2023-24,ed_seen_on_time,Victoria,71,pct,actual
+2025-06-30,2024-25,ed_seen_on_time,Victoria,72,pct,actual
+2016-06-30,2015-16,ed_seen_on_time,Western Australia,65,pct,actual
+2017-06-30,2016-17,ed_seen_on_time,Western Australia,64,pct,actual
+2018-06-30,2017-18,ed_seen_on_time,Western Australia,64,pct,actual
+2019-06-30,2018-19,ed_seen_on_time,Western Australia,63,pct,actual
+2020-06-30,2019-20,ed_seen_on_time,Western Australia,66,pct,actual
+2021-06-30,2020-21,ed_seen_on_time,Western Australia,58,pct,actual
+2022-06-30,2021-22,ed_seen_on_time,Western Australia,50,pct,actual
+2023-06-30,2022-23,ed_seen_on_time,Western Australia,48,pct,actual
+2024-06-30,2023-24,ed_seen_on_time,Western Australia,48,pct,actual
+2025-06-30,2024-25,ed_seen_on_time,Western Australia,46,pct,actual
+2016-06-30,2015-16,ed_within_4_hours,Australia,73.2,pct,actual
+2017-06-30,2016-17,ed_within_4_hours,Australia,72.3,pct,actual
+2018-06-30,2017-18,ed_within_4_hours,Australia,71.1,pct,actual
+2019-06-30,2018-19,ed_within_4_hours,Australia,69.6,pct,actual
+2020-06-30,2019-20,ed_within_4_hours,Australia,69.2,pct,actual
+2021-06-30,2020-21,ed_within_4_hours,Australia,67.0,pct,actual
+2022-06-30,2021-22,ed_within_4_hours,Australia,60.9,pct,actual
+2023-06-30,2022-23,ed_within_4_hours,Australia,55.8,pct,actual
+2024-06-30,2023-24,ed_within_4_hours,Australia,55.0,pct,actual
+2025-06-30,2024-25,ed_within_4_hours,Australia,53.4,pct,actual
+2016-06-30,2015-16,ed_within_4_hours,Australian Capital Territory,na,pct,actual
+2017-06-30,2016-17,ed_within_4_hours,Australian Capital Territory,73.0,pct,actual
+2018-06-30,2017-18,ed_within_4_hours,Australian Capital Territory,64.0,pct,actual
+2019-06-30,2018-19,ed_within_4_hours,Australian Capital Territory,59.5,pct,actual
+2020-06-30,2019-20,ed_within_4_hours,Australian Capital Territory,57.6,pct,actual
+2021-06-30,2020-21,ed_within_4_hours,Australian Capital Territory,57.0,pct,actual
+2022-06-30,2021-22,ed_within_4_hours,Australian Capital Territory,52.4,pct,actual
+2023-06-30,2022-23,ed_within_4_hours,Australian Capital Territory,47.9,pct,actual
+2024-06-30,2023-24,ed_within_4_hours,Australian Capital Territory,56.2,pct,actual
+2025-06-30,2024-25,ed_within_4_hours,Australian Capital Territory,60.8,pct,actual
+2016-06-30,2015-16,ed_within_4_hours,New South Wales,74.8,pct,actual
+2017-06-30,2016-17,ed_within_4_hours,New South Wales,74.7,pct,actual
+2018-06-30,2017-18,ed_within_4_hours,New South Wales,73.5,pct,actual
+2019-06-30,2018-19,ed_within_4_hours,New South Wales,71.7,pct,actual
+2020-06-30,2019-20,ed_within_4_hours,New South Wales,71.3,pct,actual
+2021-06-30,2020-21,ed_within_4_hours,New South Wales,69.0,pct,actual
+2022-06-30,2021-22,ed_within_4_hours,New South Wales,64.2,pct,actual
+2023-06-30,2022-23,ed_within_4_hours,New South Wales,58.6,pct,actual
+2024-06-30,2023-24,ed_within_4_hours,New South Wales,57.4,pct,actual
+2025-06-30,2024-25,ed_within_4_hours,New South Wales,56.3,pct,actual
+2016-06-30,2015-16,ed_within_4_hours,Northern Territory,63.6,pct,actual
+2017-06-30,2016-17,ed_within_4_hours,Northern Territory,64.2,pct,actual
+2018-06-30,2017-18,ed_within_4_hours,Northern Territory,62.7,pct,actual
+2019-06-30,2018-19,ed_within_4_hours,Northern Territory,66.8,pct,actual
+2020-06-30,2019-20,ed_within_4_hours,Northern Territory,67.1,pct,actual
+2021-06-30,2020-21,ed_within_4_hours,Northern Territory,64.0,pct,actual
+2022-06-30,2021-22,ed_within_4_hours,Northern Territory,58.8,pct,actual
+2023-06-30,2022-23,ed_within_4_hours,Northern Territory,60.6,pct,actual
+2024-06-30,2023-24,ed_within_4_hours,Northern Territory,55.3,pct,actual
+2025-06-30,2024-25,ed_within_4_hours,Northern Territory,53.6,pct,actual
+2016-06-30,2015-16,ed_within_4_hours,Queensland,75.2,pct,actual
+2017-06-30,2016-17,ed_within_4_hours,Queensland,72.7,pct,actual
+2018-06-30,2017-18,ed_within_4_hours,Queensland,72.1,pct,actual
+2019-06-30,2018-19,ed_within_4_hours,Queensland,70.2,pct,actual
+2020-06-30,2019-20,ed_within_4_hours,Queensland,70.8,pct,actual
+2021-06-30,2020-21,ed_within_4_hours,Queensland,69.0,pct,actual
+2022-06-30,2021-22,ed_within_4_hours,Queensland,61.4,pct,actual
+2023-06-30,2022-23,ed_within_4_hours,Queensland,54.0,pct,actual
+2024-06-30,2023-24,ed_within_4_hours,Queensland,51.9,pct,actual
+2025-06-30,2024-25,ed_within_4_hours,Queensland,49.9,pct,actual
+2016-06-30,2015-16,ed_within_4_hours,South Australia,66.0,pct,actual
+2017-06-30,2016-17,ed_within_4_hours,South Australia,63.7,pct,actual
+2018-06-30,2017-18,ed_within_4_hours,South Australia,60.8,pct,actual
+2019-06-30,2018-19,ed_within_4_hours,South Australia,59.4,pct,actual
+2020-06-30,2019-20,ed_within_4_hours,South Australia,62.4,pct,actual
+2021-06-30,2020-21,ed_within_4_hours,South Australia,61.0,pct,actual
+2022-06-30,2021-22,ed_within_4_hours,South Australia,57.6,pct,actual
+2023-06-30,2022-23,ed_within_4_hours,South Australia,52.0,pct,actual
+2024-06-30,2023-24,ed_within_4_hours,South Australia,50.8,pct,actual
+2025-06-30,2024-25,ed_within_4_hours,South Australia,49.6,pct,actual
+2016-06-30,2015-16,ed_within_4_hours,Tasmania,66.3,pct,actual
+2017-06-30,2016-17,ed_within_4_hours,Tasmania,64.7,pct,actual
+2018-06-30,2017-18,ed_within_4_hours,Tasmania,64.4,pct,actual
+2019-06-30,2018-19,ed_within_4_hours,Tasmania,62.0,pct,actual
+2020-06-30,2019-20,ed_within_4_hours,Tasmania,60.0,pct,actual
+2021-06-30,2020-21,ed_within_4_hours,Tasmania,58.0,pct,actual
+2022-06-30,2021-22,ed_within_4_hours,Tasmania,55.2,pct,actual
+2023-06-30,2022-23,ed_within_4_hours,Tasmania,51.4,pct,actual
+2024-06-30,2023-24,ed_within_4_hours,Tasmania,50.4,pct,actual
+2025-06-30,2024-25,ed_within_4_hours,Tasmania,47.5,pct,actual
+2016-06-30,2015-16,ed_within_4_hours,Victoria,71.2,pct,actual
+2017-06-30,2016-17,ed_within_4_hours,Victoria,71.3,pct,actual
+2018-06-30,2017-18,ed_within_4_hours,Victoria,69.2,pct,actual
+2019-06-30,2018-19,ed_within_4_hours,Victoria,67.5,pct,actual
+2020-06-30,2019-20,ed_within_4_hours,Victoria,64.9,pct,actual
+2021-06-30,2020-21,ed_within_4_hours,Victoria,62.0,pct,actual
+2022-06-30,2021-22,ed_within_4_hours,Victoria,55.3,pct,actual
+2023-06-30,2022-23,ed_within_4_hours,Victoria,52.0,pct,actual
+2024-06-30,2023-24,ed_within_4_hours,Victoria,53.2,pct,actual
+2025-06-30,2024-25,ed_within_4_hours,Victoria,52.7,pct,actual
+2016-06-30,2015-16,ed_within_4_hours,Western Australia,76.0,pct,actual
+2017-06-30,2016-17,ed_within_4_hours,Western Australia,73.8,pct,actual
+2018-06-30,2017-18,ed_within_4_hours,Western Australia,75.7,pct,actual
+2019-06-30,2018-19,ed_within_4_hours,Western Australia,74.9,pct,actual
+2020-06-30,2019-20,ed_within_4_hours,Western Australia,75.4,pct,actual
+2021-06-30,2020-21,ed_within_4_hours,Western Australia,71.0,pct,actual
+2022-06-30,2021-22,ed_within_4_hours,Western Australia,64.6,pct,actual
+2023-06-30,2022-23,ed_within_4_hours,Western Australia,60.4,pct,actual
+2024-06-30,2023-24,ed_within_4_hours,Western Australia,59.1,pct,actual
+2025-06-30,2024-25,ed_within_4_hours,Western Australia,53.9,pct,actual
+2016-06-30,2015-16,surgery_90th_days,Australia,263,days,actual
+2017-06-30,2016-17,surgery_90th_days,Australia,261,days,actual
+2018-06-30,2017-18,surgery_90th_days,Australia,270,days,actual
+2019-06-30,2018-19,surgery_90th_days,Australia,279,days,actual
+2020-06-30,2019-20,surgery_90th_days,Australia,281,days,actual
+2021-06-30,2020-21,surgery_90th_days,Australia,348,days,actual
+2022-06-30,2021-22,surgery_90th_days,Australia,323,days,actual
+2023-06-30,2022-23,surgery_90th_days,Australia,361,days,actual
+2024-06-30,2023-24,surgery_90th_days,Australia,329,days,actual
+2025-06-30,2024-25,surgery_90th_days,Australia,329,days,actual
+2016-06-30,2015-16,surgery_90th_days,Australian Capital Territory,na,days,actual
+2017-06-30,2016-17,surgery_90th_days,Australian Capital Territory,276,days,actual
+2018-06-30,2017-18,surgery_90th_days,Australian Capital Territory,343,days,actual
+2019-06-30,2018-19,surgery_90th_days,Australian Capital Territory,309,days,actual
+2020-06-30,2019-20,surgery_90th_days,Australian Capital Territory,304,days,actual
+2021-06-30,2020-21,surgery_90th_days,Australian Capital Territory,353,days,actual
+2022-06-30,2021-22,surgery_90th_days,Australian Capital Territory,281,days,actual
+2023-06-30,2022-23,surgery_90th_days,Australian Capital Territory,328,days,actual
+2024-06-30,2023-24,surgery_90th_days,Australian Capital Territory,351,days,actual
+2025-06-30,2024-25,surgery_90th_days,Australian Capital Territory,352,days,actual
+2016-06-30,2015-16,surgery_90th_days,New South Wales,329,days,actual
+2017-06-30,2016-17,surgery_90th_days,New South Wales,328,days,actual
+2018-06-30,2017-18,surgery_90th_days,New South Wales,328,days,actual
+2019-06-30,2018-19,surgery_90th_days,New South Wales,330,days,actual
+2020-06-30,2019-20,surgery_90th_days,New South Wales,339,days,actual
+2021-06-30,2020-21,surgery_90th_days,New South Wales,375,days,actual
+2022-06-30,2021-22,surgery_90th_days,New South Wales,363,days,actual
+2023-06-30,2022-23,surgery_90th_days,New South Wales,400,days,actual
+2024-06-30,2023-24,surgery_90th_days,New South Wales,356,days,actual
+2025-06-30,2024-25,surgery_90th_days,New South Wales,363,days,actual
+2016-06-30,2015-16,surgery_90th_days,Northern Territory,233,days,actual
+2017-06-30,2016-17,surgery_90th_days,Northern Territory,219,days,actual
+2018-06-30,2017-18,surgery_90th_days,Northern Territory,172,days,actual
+2019-06-30,2018-19,surgery_90th_days,Northern Territory,240,days,actual
+2020-06-30,2019-20,surgery_90th_days,Northern Territory,237,days,actual
+2021-06-30,2020-21,surgery_90th_days,Northern Territory,276,days,actual
+2022-06-30,2021-22,surgery_90th_days,Northern Territory,288,days,actual
+2023-06-30,2022-23,surgery_90th_days,Northern Territory,321,days,actual
+2024-06-30,2023-24,surgery_90th_days,Northern Territory,na,days,actual
+2025-06-30,2024-25,surgery_90th_days,Northern Territory,328,days,actual
+2016-06-30,2015-16,surgery_90th_days,Queensland,174,days,actual
+2017-06-30,2016-17,surgery_90th_days,Queensland,220,days,actual
+2018-06-30,2017-18,surgery_90th_days,Queensland,286,days,actual
+2019-06-30,2018-19,surgery_90th_days,Queensland,290,days,actual
+2020-06-30,2019-20,surgery_90th_days,Queensland,279,days,actual
+2021-06-30,2020-21,surgery_90th_days,Queensland,310,days,actual
+2022-06-30,2021-22,surgery_90th_days,Queensland,268,days,actual
+2023-06-30,2022-23,surgery_90th_days,Queensland,307,days,actual
+2024-06-30,2023-24,surgery_90th_days,Queensland,262,days,actual
+2025-06-30,2024-25,surgery_90th_days,Queensland,273,days,actual
+2016-06-30,2015-16,surgery_90th_days,South Australia,235,days,actual
+2017-06-30,2016-17,surgery_90th_days,South Australia,238,days,actual
+2018-06-30,2017-18,surgery_90th_days,South Australia,264,days,actual
+2019-06-30,2018-19,surgery_90th_days,South Australia,278,days,actual
+2020-06-30,2019-20,surgery_90th_days,South Australia,278,days,actual
+2021-06-30,2020-21,surgery_90th_days,South Australia,351,days,actual
+2022-06-30,2021-22,surgery_90th_days,South Australia,339,days,actual
+2023-06-30,2022-23,surgery_90th_days,South Australia,335,days,actual
+2024-06-30,2023-24,surgery_90th_days,South Australia,300,days,actual
+2025-06-30,2024-25,surgery_90th_days,South Australia,317,days,actual
+2016-06-30,2015-16,surgery_90th_days,Tasmania,442,days,actual
+2017-06-30,2016-17,surgery_90th_days,Tasmania,314,days,actual
+2018-06-30,2017-18,surgery_90th_days,Tasmania,239,days,actual
+2019-06-30,2018-19,surgery_90th_days,Tasmania,343,days,actual
+2020-06-30,2019-20,surgery_90th_days,Tasmania,363,days,actual
+2021-06-30,2020-21,surgery_90th_days,Tasmania,588,days,actual
+2022-06-30,2021-22,surgery_90th_days,Tasmania,413,days,actual
+2023-06-30,2022-23,surgery_90th_days,Tasmania,358,days,actual
+2024-06-30,2023-24,surgery_90th_days,Tasmania,284,days,actual
+2025-06-30,2024-25,surgery_90th_days,Tasmania,257,days,actual
+2016-06-30,2015-16,surgery_90th_days,Victoria,173,days,actual
+2017-06-30,2016-17,surgery_90th_days,Victoria,162,days,actual
+2018-06-30,2017-18,surgery_90th_days,Victoria,151,days,actual
+2019-06-30,2018-19,surgery_90th_days,Victoria,147,days,actual
+2020-06-30,2019-20,surgery_90th_days,Victoria,161,days,actual
+2021-06-30,2020-21,surgery_90th_days,Victoria,266,days,actual
+2022-06-30,2021-22,surgery_90th_days,Victoria,254,days,actual
+2023-06-30,2022-23,surgery_90th_days,Victoria,357,days,actual
+2024-06-30,2023-24,surgery_90th_days,Victoria,281,days,actual
+2025-06-30,2024-25,surgery_90th_days,Victoria,205,days,actual
+2016-06-30,2015-16,surgery_90th_days,Western Australia,161,days,actual
+2017-06-30,2016-17,surgery_90th_days,Western Australia,186,days,actual
+2018-06-30,2017-18,surgery_90th_days,Western Australia,200,days,actual
+2019-06-30,2018-19,surgery_90th_days,Western Australia,221,days,actual
+2020-06-30,2019-20,surgery_90th_days,Western Australia,201,days,actual
+2021-06-30,2020-21,surgery_90th_days,Western Australia,279,days,actual
+2022-06-30,2021-22,surgery_90th_days,Western Australia,276,days,actual
+2023-06-30,2022-23,surgery_90th_days,Western Australia,344,days,actual
+2024-06-30,2023-24,surgery_90th_days,Western Australia,276,days,actual
+2025-06-30,2024-25,surgery_90th_days,Western Australia,267,days,actual
+2016-06-30,2015-16,surgery_median_days,Australia,38,days,actual
+2017-06-30,2016-17,surgery_median_days,Australia,39,days,actual
+2018-06-30,2017-18,surgery_median_days,Australia,41,days,actual
+2019-06-30,2018-19,surgery_median_days,Australia,41,days,actual
+2020-06-30,2019-20,surgery_median_days,Australia,39,days,actual
+2021-06-30,2020-21,surgery_median_days,Australia,48,days,actual
+2022-06-30,2021-22,surgery_median_days,Australia,40,days,actual
+2023-06-30,2022-23,surgery_median_days,Australia,49,days,actual
+2024-06-30,2023-24,surgery_median_days,Australia,46,days,actual
+2025-06-30,2024-25,surgery_median_days,Australia,45,days,actual
+2016-06-30,2015-16,surgery_median_days,Australian Capital Territory,na,days,actual
+2017-06-30,2016-17,surgery_median_days,Australian Capital Territory,46,days,actual
+2018-06-30,2017-18,surgery_median_days,Australian Capital Territory,54,days,actual
+2019-06-30,2018-19,surgery_median_days,Australian Capital Territory,46,days,actual
+2020-06-30,2019-20,surgery_median_days,Australian Capital Territory,48,days,actual
+2021-06-30,2020-21,surgery_median_days,Australian Capital Territory,49,days,actual
+2022-06-30,2021-22,surgery_median_days,Australian Capital Territory,43,days,actual
+2023-06-30,2022-23,surgery_median_days,Australian Capital Territory,49,days,actual
+2024-06-30,2023-24,surgery_median_days,Australian Capital Territory,50,days,actual
+2025-06-30,2024-25,surgery_median_days,Australian Capital Territory,54,days,actual
+2016-06-30,2015-16,surgery_median_days,New South Wales,55,days,actual
+2017-06-30,2016-17,surgery_median_days,New South Wales,54,days,actual
+2018-06-30,2017-18,surgery_median_days,New South Wales,55,days,actual
+2019-06-30,2018-19,surgery_median_days,New South Wales,56,days,actual
+2020-06-30,2019-20,surgery_median_days,New South Wales,53,days,actual
+2021-06-30,2020-21,surgery_median_days,New South Wales,68,days,actual
+2022-06-30,2021-22,surgery_median_days,New South Wales,55,days,actual
+2023-06-30,2022-23,surgery_median_days,New South Wales,69,days,actual
+2024-06-30,2023-24,surgery_median_days,New South Wales,65,days,actual
+2025-06-30,2024-25,surgery_median_days,New South Wales,69,days,actual
+2016-06-30,2015-16,surgery_median_days,Northern Territory,31,days,actual
+2017-06-30,2016-17,surgery_median_days,Northern Territory,31,days,actual
+2018-06-30,2017-18,surgery_median_days,Northern Territory,25,days,actual
+2019-06-30,2018-19,surgery_median_days,Northern Territory,31,days,actual
+2020-06-30,2019-20,surgery_median_days,Northern Territory,26,days,actual
+2021-06-30,2020-21,surgery_median_days,Northern Territory,32,days,actual
+2022-06-30,2021-22,surgery_median_days,Northern Territory,30,days,actual
+2023-06-30,2022-23,surgery_median_days,Northern Territory,29,days,actual
+2024-06-30,2023-24,surgery_median_days,Northern Territory,na,days,actual
+2025-06-30,2024-25,surgery_median_days,Northern Territory,41,days,actual
+2016-06-30,2015-16,surgery_median_days,Queensland,31,days,actual
+2017-06-30,2016-17,surgery_median_days,Queensland,34,days,actual
+2018-06-30,2017-18,surgery_median_days,Queensland,42,days,actual
+2019-06-30,2018-19,surgery_median_days,Queensland,42,days,actual
+2020-06-30,2019-20,surgery_median_days,Queensland,40,days,actual
+2021-06-30,2020-21,surgery_median_days,Queensland,42,days,actual
+2022-06-30,2021-22,surgery_median_days,Queensland,36,days,actual
+2023-06-30,2022-23,surgery_median_days,Queensland,40,days,actual
+2024-06-30,2023-24,surgery_median_days,Queensland,40,days,actual
+2025-06-30,2024-25,surgery_median_days,Queensland,42,days,actual
+2016-06-30,2015-16,surgery_median_days,South Australia,40,days,actual
+2017-06-30,2016-17,surgery_median_days,South Australia,39,days,actual
+2018-06-30,2017-18,surgery_median_days,South Australia,42,days,actual
+2019-06-30,2018-19,surgery_median_days,South Australia,41,days,actual
+2020-06-30,2019-20,surgery_median_days,South Australia,43,days,actual
+2021-06-30,2020-21,surgery_median_days,South Australia,50,days,actual
+2022-06-30,2021-22,surgery_median_days,South Australia,48,days,actual
+2023-06-30,2022-23,surgery_median_days,South Australia,49,days,actual
+2024-06-30,2023-24,surgery_median_days,South Australia,47,days,actual
+2025-06-30,2024-25,surgery_median_days,South Australia,52,days,actual
+2016-06-30,2015-16,surgery_median_days,Tasmania,64,days,actual
+2017-06-30,2016-17,surgery_median_days,Tasmania,45,days,actual
+2018-06-30,2017-18,surgery_median_days,Tasmania,42,days,actual
+2019-06-30,2018-19,surgery_median_days,Tasmania,57,days,actual
+2020-06-30,2019-20,surgery_median_days,Tasmania,55,days,actual
+2021-06-30,2020-21,surgery_median_days,Tasmania,65,days,actual
+2022-06-30,2021-22,surgery_median_days,Tasmania,62,days,actual
+2023-06-30,2022-23,surgery_median_days,Tasmania,53,days,actual
+2024-06-30,2023-24,surgery_median_days,Tasmania,48,days,actual
+2025-06-30,2024-25,surgery_median_days,Tasmania,49,days,actual
+2016-06-30,2015-16,surgery_median_days,Victoria,30,days,actual
+2017-06-30,2016-17,surgery_median_days,Victoria,30,days,actual
+2018-06-30,2017-18,surgery_median_days,Victoria,30,days,actual
+2019-06-30,2018-19,surgery_median_days,Victoria,28,days,actual
+2020-06-30,2019-20,surgery_median_days,Victoria,27,days,actual
+2021-06-30,2020-21,surgery_median_days,Victoria,28,days,actual
+2022-06-30,2021-22,surgery_median_days,Victoria,25,days,actual
+2023-06-30,2022-23,surgery_median_days,Victoria,36,days,actual
+2024-06-30,2023-24,surgery_median_days,Victoria,33,days,actual
+2025-06-30,2024-25,surgery_median_days,Victoria,28,days,actual
+2016-06-30,2015-16,surgery_median_days,Western Australia,31,days,actual
+2017-06-30,2016-17,surgery_median_days,Western Australia,35,days,actual
+2018-06-30,2017-18,surgery_median_days,Western Australia,39,days,actual
+2019-06-30,2018-19,surgery_median_days,Western Australia,41,days,actual
+2020-06-30,2019-20,surgery_median_days,Western Australia,36,days,actual
+2021-06-30,2020-21,surgery_median_days,Western Australia,46,days,actual
+2022-06-30,2021-22,surgery_median_days,Western Australia,43,days,actual
+2023-06-30,2022-23,surgery_median_days,Western Australia,51,days,actual
+2024-06-30,2023-24,surgery_median_days,Western Australia,47,days,actual
+2025-06-30,2024-25,surgery_median_days,Western Australia,45,days,actual

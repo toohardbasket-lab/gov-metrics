@@ -37,7 +37,7 @@ export interface MetricDef {
   latest_period_series?: string;
   draft?: boolean;
   draft_banner?: string;
-  series: { id: string; label: string; frequency?: string; derive?: { type: string; from?: string | string[]; lag?: number; numerator?: string; denominator?: string; factor?: number; decimals?: number; unit?: string } }[];
+  series: { id: string; label: string; frequency?: string; decimals?: number; derive?: { type: string; from?: string | string[]; lag?: number; numerator?: string; denominator?: string; factor?: number; decimals?: number; unit?: string } }[];
   state_panel?: boolean;
   state_panel_config?: {
     series: string;
@@ -47,7 +47,8 @@ export interface MetricDef {
     note: string;
     headers: string[];
     date_format?: 'period' | 'month_year';
-    extra_columns?: { header: string; series: string }[];
+    extra_columns?: { header: string; series: string; after?: boolean }[];
+    y_range?: { min: number; max: number };
     places: { jurisdiction: string; abbreviation: string; name: string }[];
   };
   tiles: {
@@ -59,6 +60,7 @@ export interface MetricDef {
     sub_month?: boolean;
     sub_quarter?: boolean;
     sub_date?: boolean;
+    sub_period?: boolean;
     text?: string;
     sub_text?: string;
   }[];
@@ -102,6 +104,7 @@ interface DataRow {
 export interface ChartLine {
   label: string;
   color: number;
+  decimals?: number; // decimal places to show for this line's figures (the series' `decimals`), if it sets any
   points: { date: string; period: string; value: number }[];
 }
 export interface ChartView {
@@ -132,10 +135,13 @@ export interface PanelData {
   note: string;
   frequency: string;
   unit: string;
+  decimals?: number;
+  yRange?: { min: number; max: number };
   nationalLabel: string;
   national: { date: string; period: string; value: number }[];
   places: PanelPlace[];
-  table: { headers: string[]; rows: { place: string; month: string; extras: string[]; value: string }[] };
+  figureHeader: string; // the heading of the figure column (the charts' description uses it)
+  table: { headers: string[]; rows: { place: string; month: string; extras: string[]; extrasAfter: string[]; value: string }[] };
   governments: { date: string; party: string }[];
   events: { date: string; label: string }[];
 }
@@ -244,6 +250,8 @@ export function loadMetric(slug: string): Metric {
     need(units.size === 1, slug, `series "${id}" has more than one unit`);
     return [...units][0];
   };
+  // `decimals` on a series is a display setting: the places shown for its per cent or rate figures.
+  const decimalsOf = (id: string): number | undefined => def.series.find((x) => x.id === id)?.decimals;
   for (const s of def.series) need(jurisdictionsOf.has(s.id), slug, `series "${s.id}" is listed but has no rows in data.csv`);
 
   const { values: cpi, printed: cpiPrinted } = loadCpi();
@@ -256,6 +264,8 @@ export function loadMetric(slug: string): Metric {
     first_year: dataDates[0].slice(0, 4),
     last_year: dataDates.at(-1)!.slice(0, 4),
     latest_period: data.find((r) => r.date === dataDates.at(-1))!.period,
+    // The source's own label for the earliest period, e.g. "2015-16" for a financial year.
+    first_period: data.find((r) => r.date === dataDates[0])!.period,
   };
   // With several series ending on the same date the first row found is not meaningful, so a metric
   // can say which series {latest_period} names (the period of that series' latest row).
@@ -321,7 +331,8 @@ export function loadMetric(slug: string): Metric {
         points.push({ date, period: own.get(date)!.period, value });
       }
       need(points.length > 0, slug, `view "${v.id}" has no points for series "${l.series}"${v.from !== undefined ? ` from ${v.from}` : ''}`);
-      return { label: l.label, color, points };
+      const decimals = decimalsOf(l.series);
+      return { label: l.label, color, ...(decimals !== undefined ? { decimals } : {}), points };
     });
     return {
       id: v.id, label: fill(v.label), caption: fill(v.caption), unit: [...units][0],
@@ -367,15 +378,16 @@ export function loadMetric(slug: string): Metric {
       if (t.sub) {
         const s = latestOf(t.sub.series, t.sub.jurisdiction, 'a tile');
         need(s.date === r.date, slug, `tile "${t.label}" and its sub series have different latest dates`);
-        sub = `${formatValue(s.unit, s.value)} ${t.sub.suffix}`;
+        sub = `${formatValue(s.unit, s.value, decimalsOf(t.sub.series))} ${t.sub.suffix}`;
       }
       need(!(t.sub_month && t.sub_quarter), slug, `tile "${t.label}" cannot have both sub_month and sub_quarter`);
       if (t.sub_month) sub = formatMonthYear(r.date);
       if (t.sub_quarter) sub = formatQuarterYear(r.date);
-      need(!(t.sub_date && (t.sub_month || t.sub_quarter)), slug, `tile "${t.label}" can have only one of sub_date, sub_month and sub_quarter`);
+      need([t.sub_date, t.sub_month, t.sub_quarter, t.sub_period].filter(Boolean).length <= 1, slug, `tile "${t.label}" can have only one of sub_date, sub_month, sub_quarter and sub_period`);
       if (t.sub_date) sub = formatDate(r.date);
-      const key = t.sub_month || t.sub_quarter || t.sub_date ? t.label : `${t.label}, ${formatDate(r.date)}`;
-      return { key, value: formatValue(r.unit, r.value), sub, isText: false };
+      if (t.sub_period) sub = r.period; // the source's own period label, such as 2024-25
+      const key = t.sub_month || t.sub_quarter || t.sub_date || t.sub_period ? t.label : `${t.label}, ${formatDate(r.date)}`;
+      return { key, value: formatValue(r.unit, r.value, decimalsOf(t.series)), sub, isText: false };
     }
     need(t.text !== undefined, slug, `tile "${t.label}" needs either series or text`);
     return { key: t.label, value: t.text!, sub: t.sub_text ?? '', isText: true };
@@ -383,7 +395,7 @@ export function loadMetric(slug: string): Metric {
 
   // Full table, newest first.
   const allDates = [...new Set(data.map((r) => r.date))].sort().reverse();
-  const colInfo = def.table.columns.map((c) => ({ unit: unitOf(c.series, c.jurisdiction, 'the table'), c }));
+  const colInfo = def.table.columns.map((c) => ({ unit: unitOf(c.series, c.jurisdiction, 'the table'), decimals: decimalsOf(c.series), c }));
   const latestJuneAll = (picks: Pick[]) => latestJuneFor(picks);
   const realJune = def.table.columns.some((c) => c.derive === 'real')
     ? latestJuneAll(def.table.columns.filter((c) => c.derive === 'real'))
@@ -395,13 +407,13 @@ export function loadMetric(slug: string): Metric {
   const missingText = def.table.missing ?? 'n/a';
   const rows = allDates.map((date) => {
     const period = fmt === 'month_year' ? formatMonthYear(date) : data.find((r) => r.date === date)!.period;
-    const cells = colInfo.map(({ unit, c }) => {
+    const cells = colInfo.map(({ unit, decimals, c }) => {
       const v = valueFor(c.series, c.jurisdiction, date, c.derive, realJune);
       if (v === undefined) {
         const raw = rowsOf(c.series, c.jurisdiction, 'the table').get(date);
         return raw?.isCode ? raw.valueText : missingText; // show the source's code as it is
       }
-      return formatTable(unit, v);
+      return formatTable(unit, v, decimals);
     });
     return { period, cells };
   });
@@ -426,6 +438,8 @@ export function loadMetric(slug: string): Metric {
     });
     const dateFmt = c.date_format ?? 'month_year';
     const extras = c.extra_columns ?? [];
+    // an extra column shows another series for the same place and date as the latest figure; `after: true`
+    // puts it after the figure instead of before it
     const frequency = def.series.find((x) => x.id === c.series)?.frequency;
     need(frequency, slug, `the state panel series "${c.series}" has no frequency`);
     panel = {
@@ -433,22 +447,27 @@ export function loadMetric(slug: string): Metric {
       note: fill(c.note),
       frequency: frequency!,
       unit,
+      ...(decimalsOf(c.series) !== undefined ? { decimals: decimalsOf(c.series) } : {}),
+      ...(c.y_range ? { yRange: { min: c.y_range.min, max: c.y_range.max } } : {}),
       nationalLabel: c.national_label,
       national: pointsOf(c.national),
       places,
+      figureHeader: fill(c.headers[2]),
       table: {
-        headers: [c.headers[0], c.headers[1], ...extras.map((x) => x.header), c.headers[2]].map((h) => fill(h)),
+        headers: [c.headers[0], c.headers[1], ...extras.filter((x) => !x.after).map((x) => x.header), c.headers[2], ...extras.filter((x) => x.after).map((x) => x.header)].map((h) => fill(h)),
         rows: places.map((p, i) => {
           const last = p.points[p.points.length - 1];
           const jur = c.places[i].jurisdiction;
+          const extraCell = (x: { series: string }) => {
+            const r = rowsOf(x.series, jur, 'the state panel').get(last.date);
+            return r && !r.isCode ? formatTable(r.unit, r.value, decimalsOf(x.series)) : missingText;
+          };
           return {
             place: p.label,
             month: dateFmt === 'period' ? last.period : formatMonthYear(last.date),
-            extras: extras.map((x) => {
-              const r = rowsOf(x.series, jur, 'the state panel').get(last.date);
-              return r && !r.isCode ? formatTable(r.unit, r.value) : missingText;
-            }),
-            value: formatValue(unit, last.value),
+            extras: extras.filter((x) => !x.after).map(extraCell),
+            extrasAfter: extras.filter((x) => x.after).map(extraCell),
+            value: formatValue(unit, last.value, decimalsOf(c.series)),
           };
         }),
       },
