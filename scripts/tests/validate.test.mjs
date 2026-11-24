@@ -136,7 +136,7 @@ failCase('monthly: a rate outside the plausible range', () => un(unRow('1995-03-
 failCase('monthly: a month-to-month jump over the step limit', () => un(unRow('1995-03-31'), (l) => setValue(l, '14.0')), /moves .* per cent from .*, more than the limit of 35 per cent/);
 failCase('monthly: a past month revised by 0.5 is blocked', () => un(unRow('2008-06-30'), (l) => setValue(l, String(Math.round((Number(l.split(',')[4]) + 0.5) * 10) / 10))), /unemployment_rate \(Australia\) on 2008-06-30 \(2008-06\) was [\d.]+ when last accepted and is now [\d.]+, a change of \+0\.5 \(the change is more than 0\.3\)/);
 failCase('the pct unit is refused if format.ts cannot format it', () => editFile(p('src', 'lib', 'format.ts'), (t) => t.replaceAll("unit === 'pct')", "unit === 'pctx')")), /src\/lib\/format\.ts: formats the units .* but scripts\/validate\.mjs lists/);
-failCase('the pct unit is refused on a series if mistyped', () => un(unRow('2008-06-30'), (l) => { const c = l.split(','); c[5] = 'percent'; return c.join(','); }), /the unit "percent" is not one the site can format \(aud_million, pct_gdp, pct, index, count, rate, days\)/);
+failCase('the pct unit is refused on a series if mistyped', () => un(unRow('2008-06-30'), (l) => { const c = l.split(','); c[5] = 'percent'; return c.join(','); }), /the unit "percent" is not one the site can format \(aud_million, pct_gdp, pct, index, count, rate, days, per_day\)/);
 plainCase('monthly: a past month revised by 0.2 only warns', () => {
   un(unRow('2008-06-30'), (l) => setValue(l, String(Math.round((Number(l.split(',')[4]) + 0.2) * 10) / 10)));
   const r = run();
@@ -495,7 +495,7 @@ plainCase('the index unit is known to the checker and the site', () => {
   return check('index unit', r.code === 0 && /PASS rents: 568 rows, 2 series, 1972-09-30 to 2026-09-30/.test(r.out) && /format\.ts/.test(readText(join(REPO, 'src', 'lib', 'format.ts'))) && /unit === 'index'/.test(readText(p('src', 'lib', 'format.ts'))), `exit ${r.code}\n${r.out}`);
 });
 failCase('the index unit is not formatted by the site (format.ts lacks it)', () => editFile(p('src', 'lib', 'format.ts'), (t) => t.replaceAll("  if (unit === 'index') return indexText(v);\n", '').replace("  if (unit === 'index') return String(+v.toFixed(2));\n", '')),
-  /src\/lib\/format\.ts: formats the units \[aud_million, count, days, pct, pct_gdp, rate\] but scripts\/validate\.mjs lists \[aud_million, count, days, index, pct, pct_gdp, rate\]/);
+  /src\/lib\/format\.ts: formats the units \[aud_million, count, days, pct, pct_gdp, per_day, rate\] but scripts\/validate\.mjs lists \[aud_million, count, days, index, pct, pct_gdp, per_day, rate\]/);
 failCase('an index figure outside its plausible range', () => rents(rentsRow('2020-12-31', 'rents_index_quarterly', 'Australia'), (l) => setValue(l, '650.00')), /rents_index_quarterly \(Australia\) on 2020-12-31 is 650, outside the plausible range 1 to 500/);
 failCase('an index figure given another unit (a series has one unit)', () => rents(rentsRow('2020-12-31', 'rents_index_quarterly', 'Australia'), (l) => { const c = l.split(','); c[5] = 'pct'; return c.join(','); }), /series "rents_index_quarterly" has more than one unit \(index, pct\)/);
 failCase('quarterly: delete a middle quarter of the index', () => rents(rentsRow('1990-03-31', 'rents_index_quarterly', 'Australia'), () => null), /rents_index_quarterly \(Australia\) is missing 1990-03-31; the rows jump from 1989-12-31 to 1990-06-30/);
@@ -684,11 +684,71 @@ failCase('decimals: a setting that is not a whole number from 0 to 3', () => edi
 failCase('decimals: a setting that is text', () => editFile(hwYml(), (t) => t.replace('decimals: 0', 'decimals: none')), /series "ed_seen_on_time" has a "decimals" that is not a whole number from 0 to 3/);
 failCase('panel: a fixed scale that is not min below max', () => editFile(hwYml(), (t) => t.replace('y_range: {min: 0, max: 100}', 'y_range: {min: 100, max: 0}')), /"state_panel_config" has a "y_range" that is not \{min: <number>, max: <larger number>\}/);
 failCase('panel: a figure outside the fixed scale', () => editFile(hwYml(), (t) => t.replace('y_range: {min: 0, max: 100}', 'y_range: {min: 0, max: 70}')), /the state panel scale is fixed at 0 to 70 \("y_range"\), but ed_seen_on_time for "[A-Za-z ]+" on 20\d\d-06-30 is \d+, outside it/);
-failCase('panel: an extra column whose "after" is not true or false', () => editFile(hwYml(), (t) => t.replace('after: true}', 'after: later}')), /"extra_columns" that is not a list of \{header, series\} \(and optionally after: true\)/);
+failCase('panel: an extra column whose "after" is not true or false', () => editFile(hwYml(), (t) => t.replace('after: true}', 'after: later}')), /"extra_columns" that is not a list of \{header, series\} \(and optionally after: true/);
 plainCase('panel: the fixed scale and the extra column after the figure are accepted', () => {
   const r = run();
   return check('scale and after', r.code === 0 && /y_range/.test(readText(hwYml())) && /after: true/.test(readText(hwYml())), r.out);
 });
+
+// ---- homelessness: the census frequency, the per_day unit, two tables, extra panel columns with their own latest figure
+const HL = 'homelessness';
+const hlRow = (date, series, jur) => (l) => l.startsWith(`${date},`) && l.includes(`,${series},${jur},`);
+const hl = (match, fn) => editRows(match, fn, HL);
+const hlYml = () => ymlPath(HL);
+plainCase('homelessness: the clean copy passes, with Census dates, the per_day unit and a plain zero', () => {
+  const r = run();
+  const t = readText(dataPath(HL));
+  return check('hl clean', r.code === 0 && /PASS homelessness: 279 rows, 7 series, 2011-08-09 to 2025-06-30/.test(r.out)
+    && /^2021-08-10,2021,census_homeless_number,Australia,122494,count,actual$/m.test(t) && /^2016-08-09,2016,census_homeless_rate,Australia,49\.8,rate,actual$/m.test(t)
+    && /^2025-06-30,2024-25,unassisted_accommodation_daily,Australia,232\.0,per_day,actual$/m.test(t) && /,unassisted_no_need_daily,South Australia,0,per_day,actual/.test(t), `exit ${r.code}\n${r.out}`);
+});
+failCase('census: a Census missing between two others', () => hl(hlRow('2016-08-09', 'census_homeless_rate', 'Australia'), () => null), /census_homeless_rate \(Australia\) is missing 2016-08-09; the rows jump from 2011-08-09 to 2021-08-10/);
+failCase('census: a Census night ten days off its five-year schedule', () => hl(hlRow('2016-08-09', 'census_homeless_number', 'Victoria'), (l) => l.replace('2016-08-09', '2016-08-19')), /census_homeless_number \(Victoria\) has a row on 2016-08-19 \(line \d+\) which is not on the census schedule after 2011-08-09; expected 2016-08-09/);
+failCase('census: a Census held after a gap of ten years', () => hl((l) => l.startsWith('2016-08-09,'), () => null), /census_homeless_(rate|number) \([A-Za-z ]+\) is missing 2016-08-09; the rows jump from 2011-08-09 to 2021-08-10/);
+plainCase('census: a Census night a few days either side of the same day five years on is accepted', () => {
+  hl((l) => l.startsWith('2016-08-09,'), (l) => l.replace('2016-08-09', '2016-08-12'));
+  const r = run('--accept');
+  return check('census tolerance', r.code === 0 && !/census schedule|is missing/.test(r.out) && /Accepted metrics\/homelessness\/data\.csv/.test(r.out), `exit ${r.code}\n${r.out}`);
+});
+failCase('census: a series on the census frequency may not be called annual by mistake (annual needs exactly one year)', () => editFile(hlYml(), (t) => t.replace('id: census_homeless_number\n    label: People who are homeless, number\n    definition: People counted as homeless on Census night (all homelessness operational groups, total). Count of people.\n    source_table: Productivity Commission, Report on Government Services, table 19A.2 (ABS Census of Population and Housing - estimating homelessness), Number, Total\n    frequency: census', 'id: census_homeless_number\n    label: People who are homeless, number\n    definition: People counted as homeless on Census night (all homelessness operational groups, total). Count of people.\n    source_table: Productivity Commission, Report on Government Services, table 19A.2 (ABS Census of Population and Housing - estimating homelessness), Number, Total\n    frequency: annual')), /census_homeless_number \(Australia\) is missing 2012-08-09/);
+failCase('census: an unknown frequency is still refused', () => editFile(hlYml(), (t) => t.replace('frequency: census', 'frequency: decennial')), /has frequency "decennial", which the validator does not know\. Known: annual, monthly, quarterly, census/);
+failCase('homelessness: the Census rate changed by 0.5 blocks (tolerance 0.1)', () => hl(hlRow('2016-08-09', 'census_homeless_rate', 'Australia'), (l) => setValue(l, '50.3')), /census_homeless_rate \(Australia\) on 2016-08-09 \(2016\) was 49\.8 when last accepted and is now 50\.3, a change of \+0\.5 \(the change is more than 0\.1\)/);
+plainCase('homelessness: a Census rate change of 0.1 passes with a warning', () => {
+  hl(hlRow('2016-08-09', 'census_homeless_rate', 'Australia'), (l) => setValue(l, '49.9'));
+  const r = run();
+  return check('rate 0.1', r.code === 0 && /WARNING: metrics\/homelessness\/data\.csv: data has changed since it was last accepted/.test(r.out), `exit ${r.code}\n${r.out}`);
+});
+failCase('homelessness: a Census count changed by 2 blocks (tolerance 1)', () => hl(hlRow('2021-08-10', 'census_homeless_number', 'Australia'), (l) => setValue(l, '122496')), /census_homeless_number \(Australia\) on 2021-08-10 \(2021\) was 122494 when last accepted and is now 122496, a change of \+2 \(the change is more than 1\)/);
+failCase('homelessness: clients changed by more than 1 per cent blocks', () => hl(hlRow('2025-06-30', 'clients', 'Australia'), (l) => setValue(l, '300000')), /clients \(Australia\) on 2025-06-30 \(2024-25\) was 288970 when last accepted and is now 300000/);
+plainCase('homelessness: clients changed by less than 1 per cent passes with a warning', () => {
+  hl(hlRow('2025-06-30', 'clients', 'Australia'), (l) => setValue(l, '289100'));
+  const r = run();
+  return check('clients small', r.code === 0 && /WARNING: metrics\/homelessness\/data\.csv: data has changed since it was last accepted/.test(r.out), `exit ${r.code}\n${r.out}`);
+});
+failCase('homelessness: the unmet-need per cent changed by 0.8 blocks (tolerance 0.5)', () => hl(hlRow('2025-06-30', 'unmet_accommodation_pct', 'Australia'), (l) => setValue(l, '34.0')), /unmet_accommodation_pct \(Australia\) on 2025-06-30 \(2024-25\) was 33\.2 when last accepted and is now 34\.0/);
+failCase('homelessness: requests a day changed by 1.5 blocks (tolerance 1)', () => hl(hlRow('2025-06-30', 'unassisted_other_daily', 'Australia'), (l) => setValue(l, '80.9')), /unassisted_other_daily \(Australia\) on 2025-06-30 \(2024-25\) was 79\.4 when last accepted and is now 80\.9/);
+plainCase('homelessness: requests a day changed by 0.9 passes with a warning', () => {
+  hl(hlRow('2025-06-30', 'unassisted_other_daily', 'Australia'), (l) => setValue(l, '80.3'));
+  const r = run();
+  return check('per day small', r.code === 0 && /WARNING: metrics\/homelessness\/data\.csv: data has changed since it was last accepted/.test(r.out), `exit ${r.code}\n${r.out}`);
+});
+failCase('homelessness: a Census rate over the plausible range', () => hl(hlRow('2021-08-10', 'census_homeless_rate', 'Northern Territory'), (l) => setValue(l, '1500.0')), /census_homeless_rate \(Northern Territory\) on 2021-08-10 is 1500, outside the plausible range 0 to 1000/);
+failCase('homelessness: requests a day over the plausible range', () => hl(hlRow('2025-06-30', 'unassisted_accommodation_daily', 'Australia'), (l) => setValue(l, '5200.0')), /unassisted_accommodation_daily \(Australia\) on 2025-06-30 is 5200, outside the plausible range 0 to 5000/);
+failCase('homelessness: a per_day figure given the rate unit', () => hl(hlRow('2025-06-30', 'unassisted_other_daily', 'Victoria'), (l) => { const c = l.split(','); c[5] = 'rate'; return c.join(','); }), /series "unassisted_other_daily" has more than one unit \(per_day, rate\)/);
+failCase('homelessness: the worked-out total of requests a day outside its plausible range', () => editFile(hlYml(), (t) => t.replace(/(id: unassisted_daily_total[\s\S]*?plausible: )\{min: 0, max: 5000\}/, '$1{min: 0, max: 300}')), /unassisted_daily_total \(Australia\) on 2025-06-30, worked out from unassisted_accommodation_daily 232\.0 \+ unassisted_other_daily 79\.4 \+ unassisted_no_need_daily 41\.7 on 2025-06-30, is 353\.1, outside the plausible range 0 to 300/);
+failCase('homelessness: the worked-out total must not be stored', () => editFile(dataPath(HL), (t) => t + '2025-06-30,2024-25,unassisted_daily_total,Australia,353.1,per_day,actual\n'), /series "unassisted_daily_total" is derived in metric\.yml, so it must not have rows in data\.csv/);
+failCase('tables: a list of tables whose second table names a series that is not declared', () => editFile(hlYml(), (t) => t.replace('series: unassisted_daily_total\n        jurisdiction: Australia\n\nmeaning', 'series: nonesuch\n        jurisdiction: Australia\n\nmeaning')), /nonesuch/);
+failCase('tables: a table that is not a table or a list of tables', () => editFile(hlYml(), (t) => t.replace(/\ntable:\n[\s\S]*?\nmeaning:/, '\ntable: 5\n\nmeaning:')), /"table" must be one table or a list of tables/);
+failCase('tables: a table with no columns', () => editFile(hlYml(), (t) => t.replace('  - period_header: Census\n    columns:', '  - period_header: Census\n    columnz:')), /a table has no "columns"/);
+failCase('tables: a series with several jurisdictions used in a table without naming one', () => editFile(hlYml(), (t) => t.replace('      - header: "Homeless (number)"\n        series: census_homeless_number\n        jurisdiction: Australia', '      - header: "Homeless (number)"\n        series: census_homeless_number')), /the table uses series "census_homeless_number", which has figures for 9 jurisdictions .* Name one with "jurisdiction:"/);
+failCase('panel: with_period needs own_latest', () => editFile(hlYml(), (t) => t.replace('after: true, own_latest: true, with_period: true}', 'after: true, with_period: true}')), /"extra_columns" that is not a list of \{header, series\}/);
+failCase('panel: own_latest that is not true or false', () => editFile(hlYml(), (t) => t.replace('own_latest: true, with_period: true}', 'own_latest: yes please, with_period: true}')), /"extra_columns" that is not a list of \{header, series\}/);
+failCase('panel: an own-latest column for a place with no figure', () => hl((l) => l.includes(',clients,Tasmania,'), () => null), /the state panel column "Clients helped, latest year" shows the latest clients for each place, but "Tasmania" has no figure for it/);
+failCase('panel: markers that is not true or false', () => editFile(hlYml(), (t) => t.replace('\n  markers: true\n  extra_columns', '\n  markers: sometimes\n  extra_columns')), /"state_panel_config" has a "markers" that is not true or false/);
+failCase('panel: a figure above the fixed scale (the Northern Territory in 2011 is 723.7)', () => editFile(hlYml(), (t) => t.replace('y_range: {min: 0, max: 800}', 'y_range: {min: 0, max: 700}')), /the state panel scale is fixed at 0 to 700 \("y_range"\), but census_homeless_rate for "Northern Territory" on 2011-08-09 is 723\.7, outside it/);
+failCase('panel: the places end on different Censuses', () => hl((l) => l.includes(',census_homeless_rate,Tasmania,') && l.startsWith('2021-08-10'), () => null), /the places in the state panel do not all end on the same date/);
+failCase('views: markers that is not true or false', () => editFile(hlYml(), (t) => t.replace('    markers: true\n    lines:', '    markers: 1\n    lines:')), /view "census" has a "markers" that is not true or false/);
+failCase('the per_day unit is refused if format.ts cannot format it', () => editFile(p('src', 'lib', 'format.ts'), (t) => t.replaceAll("unit === 'per_day'", "unit === 'perday'")), /src\/lib\/format\.ts: formats the units .* but scripts\/validate\.mjs lists/);
 
 // ---- derive.mjs directly: sums, ratios, codes, chained series
 plainCase('sumText adds exactly, counts .. and - as zero and blanks on na or np', () => {

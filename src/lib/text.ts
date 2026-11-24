@@ -5,10 +5,10 @@ export function escapeHtml(s: string): string {
 }
 
 export function richText(text: string, tokens: Record<string, string> = {}): string {
-  const parts = text.split(/(\{[a-z_]+\})/);
+  const parts = text.split(/(\{[a-z_]+(?::[a-z_0-9]+)?\})/);
   return parts
     .map((part) => {
-      const t = /^\{([a-z_]+)\}$/.exec(part);
+      const t = /^\{([a-z_]+(?::[a-z_0-9]+)?)\}$/.exec(part);
       if (t) {
         if (!(t[1] in tokens)) throw new Error(`Unknown token {${t[1]}} in: ${text}`);
         return tokens[t[1]];
@@ -22,9 +22,9 @@ export function richText(text: string, tokens: Record<string, string> = {}): str
 // given values, with no markup. An unknown word stops the build.
 export function fillPlain(text: string, values: Record<string, string>): string {
   return text
-    .split(/(\{[a-z_]+\})/)
+    .split(/(\{[a-z_]+(?::[a-z_0-9]+)?\})/)
     .map((part) => {
-      const t = /^\{([a-z_]+)\}$/.exec(part);
+      const t = /^\{([a-z_]+(?::[a-z_0-9]+)?)\}$/.exec(part);
       if (!t) return part;
       if (!(t[1] in values)) throw new Error(`Unknown or unavailable word {${t[1]}} in: ${text}`);
       return values[t[1]];

@@ -26,7 +26,7 @@ const STATUSES = ['actual', 'estimate', 'forecast'];
 // The units the site knows how to format. This is a copy of the list in src/lib/format.ts
 // (formatValue, formatAxis and formatTable). A check below fails if the two lists differ,
 // so a new unit has to be added in both places.
-const KNOWN_UNITS = ['aud_million', 'pct_gdp', 'pct', 'index', 'count', 'rate', 'days'];
+const KNOWN_UNITS = ['aud_million', 'pct_gdp', 'pct', 'index', 'count', 'rate', 'days', 'per_day'];
 
 // How far apart consecutive rows must be. To add another frequency, add an entry here
 // whose `next` returns the date that should follow the one given (for example three months
@@ -72,7 +72,20 @@ const FREQUENCIES = {
     },
     scheduleHint: 'the last day of March, June, September or December',
   },
+  // A Census is held every five years, on a night that moves by a few days (9 August 2011, 9 August 2016,
+  // 10 August 2021). `next` is the same day five years on; a date within `toleranceDays` of it counts as on
+  // schedule. A missing Census (a gap of ten years) is still refused.
+  census: {
+    next(iso) {
+      const [y, m, d] = iso.split('-');
+      return `${String(+y + 5).padStart(4, '0')}-${m}-${d}`;
+    },
+    toleranceDays: 7,
+  },
 };
+
+// Days between two ISO dates (whole days; the dates are real, checked before this is used).
+const daysBetween = (a, b) => Math.round((Date.parse(`${b}T00:00:00Z`) - Date.parse(`${a}T00:00:00Z`)) / 86400000);
 
 // What the page (src/lib/metrics.ts and src/pages/metrics/[slug].astro) reads from metric.yml,
 // plus slug (must match the folder), jurisdiction and draft.
@@ -185,6 +198,15 @@ function loadDefinition(root, slug, F) {
   if (def.draft === true && !def.draft_banner) F.fail(`${path}: "draft" is true but "draft_banner" is missing.`);
   if (def.series !== undefined && def.series !== null && !Array.isArray(def.series)) F.fail(`${path}: "series" must be a list.`);
   if (def.views !== undefined && def.views !== null && !Array.isArray(def.views)) F.fail(`${path}: "views" must be a list.`);
+  if (Array.isArray(def.views)) {
+    for (const v of def.views) if (v && v.markers !== undefined && typeof v.markers !== 'boolean') F.fail(`${path}: view "${v.id}" has a "markers" that is not true or false.`);
+  }
+  if (def.table !== undefined && def.table !== null && (Array.isArray(def.table) ? def.table.length === 0 || def.table.some((t) => !t || typeof t !== 'object' || Array.isArray(t)) : typeof def.table !== 'object')) {
+    F.fail(`${path}: "table" must be one table or a list of tables (each with period_header and columns).`);
+  }
+  for (const t of tablesOf(def)) {
+    if (!Array.isArray(t.columns) || t.columns.length === 0) F.fail(`${path}: a table has no "columns".`);
+  }
   return def;
 }
 
@@ -241,6 +263,12 @@ function loadDataCsv(root, slug, F) {
   return { rows, sha };
 }
 
+// The full tables of a metric: `table` is one table, or a list of tables (each shown in turn under "All figures as a table").
+function tablesOf(def) {
+  if (Array.isArray(def.table)) return def.table.filter((t) => t && typeof t === 'object');
+  return def.table && typeof def.table === 'object' ? [def.table] : [];
+}
+
 function seriesNamedInViews(def) {
   const used = new Map(); // series id -> where it is named
   const add = (id, where) => { if (typeof id === 'string' && !used.has(id)) used.set(id, where); };
@@ -250,7 +278,7 @@ function seriesNamedInViews(def) {
   if (Array.isArray(def.tiles)) {
     for (const t of def.tiles) { add(t?.series, `tile "${t.label}"`); add(t?.sub?.series, `tile "${t.label}"`); }
   }
-  for (const c of def.table?.columns ?? []) add(c?.series, 'the table');
+  for (const t of tablesOf(def)) for (const c of t.columns ?? []) add(c?.series, 'the table');
   return used;
 }
 
@@ -263,7 +291,7 @@ function selectionsInDefinition(def) {
   if (Array.isArray(def.tiles)) {
     for (const t of def.tiles) { add(t?.series, t?.jurisdiction, `tile "${t.label}"`); add(t?.sub?.series, t?.sub?.jurisdiction, `tile "${t.label}"`); }
   }
-  for (const c of def.table?.columns ?? []) add(c?.series, c?.jurisdiction, 'the table');
+  for (const t of tablesOf(def)) for (const c of t.columns ?? []) add(c?.series, c?.jurisdiction, 'the table');
   return out;
 }
 
@@ -420,10 +448,12 @@ function checkSeries(slug, def, data, groups, F) {
           let exp = freq.next(a);
           const missing = [];
           let steps = 0;
-          while (exp < b && steps++ < 2000) { missing.push(exp); exp = freq.next(exp); }
-          if (exp === b && missing.length === 0) continue;
+          // a frequency with `toleranceDays` accepts a date that many days either side of the expected one
+          const hit = (e) => e === b || (freq.toleranceDays !== undefined && Math.abs(daysBetween(e, b)) <= freq.toleranceDays);
+          while (exp < b && !hit(exp) && steps++ < 2000) { missing.push(exp); exp = freq.next(exp); }
+          if (hit(exp) && missing.length === 0) continue;
           if (++reported > 10) break;
-          if (exp === b) F.fail(`${path}: ${id} (${g[0].jurisdiction}) is missing ${missing.join(', ')}; the rows jump from ${a} to ${b}.`);
+          if (hit(exp)) F.fail(`${path}: ${id} (${g[0].jurisdiction}) is missing ${missing.join(', ')}; the rows jump from ${a} to ${b}.`);
           else F.fail(`${path}: ${id} (${g[0].jurisdiction}) has a row on ${b} (line ${g[i].line}) which is not on the ${s.frequency} schedule after ${a}; expected ${freq.next(a)}.`);
         }
       }
@@ -534,7 +564,7 @@ function checkStatePanel(slug, def, data, derivedGroups, F) {
     return;
   }
   for (const k of Object.keys(c)) {
-    if (!['series', 'national', 'national_label', 'heading', 'note', 'headers', 'places', 'date_format', 'extra_columns', 'y_range'].includes(k)) F.fail(`${yml}: "state_panel_config" has a field "${k}" that the checker does not know.`);
+    if (!['series', 'national', 'national_label', 'heading', 'note', 'headers', 'places', 'date_format', 'extra_columns', 'y_range', 'markers'].includes(k)) F.fail(`${yml}: "state_panel_config" has a field "${k}" that the checker does not know.`);
   }
   for (const k of ['series', 'national', 'national_label', 'heading', 'note']) {
     if (typeof c[k] !== 'string' || c[k].trim() === '') F.fail(`${yml}: "state_panel_config" needs "${k}", as text.`);
@@ -556,10 +586,11 @@ function checkStatePanel(slug, def, data, derivedGroups, F) {
   if (c.date_format !== undefined && !['period', 'month_year'].includes(c.date_format)) F.fail(`${yml}: "state_panel_config" has a "date_format" that is not period or month_year.`);
   const declaredIds = new Set((Array.isArray(def.series) ? def.series : []).map((x) => x?.id));
   if (c.extra_columns !== undefined) {
-    if (!Array.isArray(c.extra_columns) || c.extra_columns.some((x) => !x || typeof x.header !== 'string' || x.header.trim() === '' || typeof x.series !== 'string' || !declaredIds.has(x.series) || (x.after !== undefined && typeof x.after !== 'boolean') || Object.keys(x).some((k) => !['header', 'series', 'after'].includes(k)))) {
-      F.fail(`${yml}: "state_panel_config" has "extra_columns" that is not a list of {header, series} (and optionally after: true) with a series from the "series" list.`);
+    if (!Array.isArray(c.extra_columns) || c.extra_columns.some((x) => !x || typeof x.header !== 'string' || x.header.trim() === '' || typeof x.series !== 'string' || !declaredIds.has(x.series) || (x.after !== undefined && typeof x.after !== 'boolean') || (x.own_latest !== undefined && typeof x.own_latest !== 'boolean') || (x.with_period !== undefined && typeof x.with_period !== 'boolean') || (x.with_period === true && x.own_latest !== true) || Object.keys(x).some((k) => !['header', 'series', 'after', 'own_latest', 'with_period'].includes(k)))) {
+      F.fail(`${yml}: "state_panel_config" has "extra_columns" that is not a list of {header, series} (and optionally after: true, own_latest: true, and with_period: true, which needs own_latest) with a series from the "series" list.`);
     }
   }
+  if (c.markers !== undefined && typeof c.markers !== 'boolean') F.fail(`${yml}: "state_panel_config" has a "markers" that is not true or false.`);
   if (c.y_range !== undefined) {
     const r = c.y_range;
     if (!r || typeof r !== 'object' || Array.isArray(r) || Object.keys(r).some((k) => k !== 'min' && k !== 'max') || !isNum(r.min) || !isNum(r.max) || r.min >= r.max) {
@@ -586,6 +617,14 @@ function checkStatePanel(slug, def, data, derivedGroups, F) {
   }
   const states = places.map((x) => x?.jurisdiction).filter((j) => latest.has(j));
   const ends = new Set(states.map((j) => latest.get(j)));
+  // an extra column with own_latest shows that series' own latest figure for each place, so every place needs one
+  for (const x of Array.isArray(c.extra_columns) ? c.extra_columns : []) {
+    if (!x || x.own_latest !== true || typeof x.series !== 'string' || !declaredIds.has(x.series)) continue;
+    for (const j of places.map((p) => p?.jurisdiction).filter((j) => typeof j === 'string')) {
+      const has = [...data.rows.filter((r) => r.series === x.series && r.jurisdiction === j && !r.isCode), ...(derivedGroups.get(`${x.series}|${j}`) ?? [])];
+      if (has.length === 0) F.fail(`${yml}: the state panel column "${x.header}" shows the latest ${x.series} for each place, but "${j}" has no figure for it.`);
+    }
+  }
   if (ends.size > 1) F.fail(`${yml}: the places in the state panel do not all end on the same date (${[...ends].sort().join(', ')}), so the table of latest figures would mix months.`);
 }
 
@@ -819,7 +858,7 @@ function validateRoot(root) {
         for (const v of Array.isArray(def.views) ? def.views : []) {
           if (v?.derive === 'real') for (const l of v.lines ?? []) realSeries.add(l.series);
         }
-        for (const c of def.table?.columns ?? []) if (c?.derive === 'real') realSeries.add(c.series);
+        for (const t of tablesOf(def)) for (const c of t.columns ?? []) if (c?.derive === 'real') realSeries.add(c.series);
         for (const id of realSeries) {
           const missing = [...new Set(data.rows.filter((r) => r.series === id).map((r) => r.date))].filter((d) => !cpi.has(d));
           if (missing.length > 0) {

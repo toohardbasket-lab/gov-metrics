@@ -27,6 +27,7 @@ interface LedgerRow {
   text: string;
   link?: { label: string; url: string };
 }
+interface TableDef { period_header: string; period_format?: 'period' | 'month_year'; missing?: string; columns: { header: string; series: string; jurisdiction?: string; derive?: 'real' }[] }
 export interface MetricDef {
   slug: string;
   title: string;
@@ -47,7 +48,8 @@ export interface MetricDef {
     note: string;
     headers: string[];
     date_format?: 'period' | 'month_year';
-    extra_columns?: { header: string; series: string; after?: boolean }[];
+    extra_columns?: { header: string; series: string; after?: boolean; own_latest?: boolean; with_period?: boolean }[];
+    markers?: boolean;
     y_range?: { min: number; max: number };
     places: { jurisdiction: string; abbreviation: string; name: string }[];
   };
@@ -61,6 +63,7 @@ export interface MetricDef {
     sub_quarter?: boolean;
     sub_date?: boolean;
     sub_period?: boolean;
+    sub_prefix?: string;
     text?: string;
     sub_text?: string;
   }[];
@@ -70,12 +73,13 @@ export interface MetricDef {
     derive: 'none' | 'real';
     lines: { series: string; jurisdiction?: string; label: string; color?: number }[];
     from?: number;
+    markers?: boolean;
     target_band?: { min: number; max: number; label: string };
     caption: string;
   }[];
   chart_alt: string;
   chart_source: string;
-  table: { period_header: string; period_format?: 'period' | 'month_year'; missing?: string; columns: { header: string; series: string; jurisdiction?: string; derive?: 'real' }[] };
+  table: TableDef | TableDef[];
   meaning: string[];
   targets: LedgerRow[];
   update: string;
@@ -113,6 +117,7 @@ export interface ChartView {
   caption: string;
   unit: string;
   from?: number;
+  markers?: boolean; // draw a marker on every point
   band?: { min: number; max: number; label: string };
   lines: ChartLine[];
 }
@@ -137,6 +142,7 @@ export interface PanelData {
   unit: string;
   decimals?: number;
   yRange?: { min: number; max: number };
+  markers?: boolean; // draw a marker on every point of every small chart
   nationalLabel: string;
   national: { date: string; period: string; value: number }[];
   places: PanelPlace[];
@@ -150,7 +156,7 @@ export interface Metric {
   panel?: PanelData;
   tiles: { key: string; value: string; sub: string; isText: boolean }[];
   chart: ChartData;
-  table: { headers: string[]; periodHeader: string; rows: { period: string; cells: string[] }[] };
+  tables: { headers: string[]; periodHeader: string; rows: { period: string; cells: string[] }[] }[];
   rich: {
     banner: string;
     meaning: string[];
@@ -267,6 +273,14 @@ export function loadMetric(slug: string): Metric {
     // The source's own label for the earliest period, e.g. "2015-16" for a financial year.
     first_period: data.find((r) => r.date === dataDates[0])!.period,
   };
+  // {first_period:<series id>} is the period label of that series' earliest row, for text about one series
+  // when the metric's series start in different years (for example {first_period:clients}).
+  const firstOfSeries = new Map<string, DataRow>();
+  for (const [key, m] of store) {
+    const id = key.slice(0, key.indexOf('|'));
+    for (const r of m.values()) if (!firstOfSeries.has(id) || r.date < firstOfSeries.get(id)!.date) firstOfSeries.set(id, r);
+  }
+  for (const [id, r] of firstOfSeries) textTokens[`first_period:${id}`] = r.period;
   // With several series ending on the same date the first row found is not meaningful, so a metric
   // can say which series {latest_period} names (the period of that series' latest row).
   if (def.latest_period_series !== undefined) {
@@ -337,6 +351,7 @@ export function loadMetric(slug: string): Metric {
     return {
       id: v.id, label: fill(v.label), caption: fill(v.caption), unit: [...units][0],
       ...(v.from !== undefined ? { from: v.from } : {}),
+      ...(v.markers === true ? { markers: true } : {}),
       ...(b !== undefined ? { band: { min: b.min, max: b.max, label: b.label } } : {}),
       lines,
     };
@@ -385,7 +400,8 @@ export function loadMetric(slug: string): Metric {
       if (t.sub_quarter) sub = formatQuarterYear(r.date);
       need([t.sub_date, t.sub_month, t.sub_quarter, t.sub_period].filter(Boolean).length <= 1, slug, `tile "${t.label}" can have only one of sub_date, sub_month, sub_quarter and sub_period`);
       if (t.sub_date) sub = formatDate(r.date);
-      if (t.sub_period) sub = r.period; // the source's own period label, such as 2024-25
+      if (t.sub_period) sub = (t.sub_prefix ?? '') + r.period; // the source's own period label, such as 2024-25 (sub_prefix: "Census " gives "Census 2021")
+      need(t.sub_prefix === undefined || (t.sub_period && typeof t.sub_prefix === 'string'), slug, `tile "${t.label}" has a sub_prefix without sub_period (or one that is not text)`);
       const key = t.sub_month || t.sub_quarter || t.sub_date || t.sub_period ? t.label : `${t.label}, ${formatDate(r.date)}`;
       return { key, value: formatValue(r.unit, r.value, decimalsOf(t.series)), sub, isText: false };
     }
@@ -393,29 +409,40 @@ export function loadMetric(slug: string): Metric {
     return { key: t.label, value: t.text!, sub: t.sub_text ?? '', isText: true };
   });
 
-  // Full table, newest first.
+  // Full tables, newest first. `table` is one table (a row for every date in data.csv) or a list of tables (each has a row
+  // for every date on which one of its own columns has a figure or a code, so a Census table and a yearly table can differ).
   const allDates = [...new Set(data.map((r) => r.date))].sort().reverse();
-  const colInfo = def.table.columns.map((c) => ({ unit: unitOf(c.series, c.jurisdiction, 'the table'), decimals: decimalsOf(c.series), c }));
   const latestJuneAll = (picks: Pick[]) => latestJuneFor(picks);
-  const realJune = def.table.columns.some((c) => c.derive === 'real')
-    ? latestJuneAll(def.table.columns.filter((c) => c.derive === 'real'))
-    : undefined;
-  // period_format: month_year shows the row's date as "September 2026" (for tables that mix
-  // quarterly and monthly series); missing: sets what a cell with no figure shows (default n/a).
-  const fmt = def.table.period_format;
-  need(fmt === undefined || fmt === 'period' || fmt === 'month_year', slug, 'table period_format must be period or month_year');
-  const missingText = def.table.missing ?? 'n/a';
-  const rows = allDates.map((date) => {
-    const period = fmt === 'month_year' ? formatMonthYear(date) : data.find((r) => r.date === date)!.period;
-    const cells = colInfo.map(({ unit, decimals, c }) => {
-      const v = valueFor(c.series, c.jurisdiction, date, c.derive, realJune);
-      if (v === undefined) {
-        const raw = rowsOf(c.series, c.jurisdiction, 'the table').get(date);
-        return raw?.isCode ? raw.valueText : missingText; // show the source's code as it is
-      }
-      return formatTable(unit, v, decimals);
+  const tableDefs: TableDef[] = Array.isArray(def.table) ? def.table : [def.table];
+  need(tableDefs.length > 0, slug, 'table is an empty list');
+  const tables = tableDefs.map((td) => {
+    need(Array.isArray(td.columns) && td.columns.length > 0, slug, 'a table has no columns');
+    const colInfo = td.columns.map((c) => ({ unit: unitOf(c.series, c.jurisdiction, 'the table'), decimals: decimalsOf(c.series), c }));
+    const realJune = td.columns.some((c) => c.derive === 'real')
+      ? latestJuneAll(td.columns.filter((c) => c.derive === 'real'))
+      : undefined;
+    // period_format: month_year shows the row's date as "September 2026" (for tables that mix
+    // quarterly and monthly series); missing: sets what a cell with no figure shows (default n/a).
+    const fmt = td.period_format;
+    need(fmt === undefined || fmt === 'period' || fmt === 'month_year', slug, 'table period_format must be period or month_year');
+    const missingText = td.missing ?? 'n/a';
+    const tableDates = Array.isArray(def.table)
+      ? [...new Set(td.columns.flatMap((c) => [...rowsOf(c.series, c.jurisdiction, 'the table').keys()]))].sort().reverse()
+      : allDates;
+    const periodOf = (date: string) => data.find((r) => r.date === date)?.period ?? [...store.values()].map((m) => m.get(date)?.period).find((p) => p !== undefined)!;
+    const rows = tableDates.map((date) => {
+      const period = fmt === 'month_year' ? formatMonthYear(date) : periodOf(date);
+      const cells = colInfo.map(({ unit, decimals, c }) => {
+        const v = valueFor(c.series, c.jurisdiction, date, c.derive, realJune);
+        if (v === undefined) {
+          const raw = rowsOf(c.series, c.jurisdiction, 'the table').get(date);
+          return raw?.isCode ? raw.valueText : missingText; // show the source's code as it is
+        }
+        return formatTable(unit, v, decimals);
+      });
+      return { period, cells };
     });
-    return { period, cells };
+    return { headers: td.columns.map((c) => fill(c.header)), periodHeader: fill(td.period_header), rows };
   });
 
   // The state and territory panel. The places must be the eight jurisdictions in the fixed order, all on
@@ -438,8 +465,7 @@ export function loadMetric(slug: string): Metric {
     });
     const dateFmt = c.date_format ?? 'month_year';
     const extras = c.extra_columns ?? [];
-    // an extra column shows another series for the same place and date as the latest figure; `after: true`
-    // puts it after the figure instead of before it
+    // `after: true` puts an extra column after the figure instead of before it
     const frequency = def.series.find((x) => x.id === c.series)?.frequency;
     need(frequency, slug, `the state panel series "${c.series}" has no frequency`);
     panel = {
@@ -449,6 +475,7 @@ export function loadMetric(slug: string): Metric {
       unit,
       ...(decimalsOf(c.series) !== undefined ? { decimals: decimalsOf(c.series) } : {}),
       ...(c.y_range ? { yRange: { min: c.y_range.min, max: c.y_range.max } } : {}),
+      ...(c.markers === true ? { markers: true } : {}),
       nationalLabel: c.national_label,
       national: pointsOf(c.national),
       places,
@@ -458,9 +485,12 @@ export function loadMetric(slug: string): Metric {
         rows: places.map((p, i) => {
           const last = p.points[p.points.length - 1];
           const jur = c.places[i].jurisdiction;
-          const extraCell = (x: { series: string }) => {
-            const r = rowsOf(x.series, jur, 'the state panel').get(last.date);
-            return r && !r.isCode ? formatTable(r.unit, r.value, decimalsOf(x.series)) : missingText;
+          // an extra column shows another series for the same place and date as the latest figure; own_latest: true shows
+          // that series' own latest figure instead (and with_period: true adds its period label, such as "(2024-25)")
+          const extraCell = (x: { series: string; own_latest?: boolean; with_period?: boolean }) => {
+            const r = x.own_latest ? latestOf(x.series, jur, 'the state panel') : rowsOf(x.series, jur, 'the state panel').get(last.date);
+            if (!r || r.isCode) return tableDefs[0].missing ?? 'n/a';
+            return formatTable(r.unit, r.value, decimalsOf(x.series)) + (x.with_period ? ` (${r.period})` : '');
           };
           return {
             place: p.label,
@@ -488,7 +518,7 @@ export function loadMetric(slug: string): Metric {
     panel,
     tiles,
     chart: { alt: fill(def.chart_alt), source: fill(def.chart_source), views, governments, events },
-    table: { headers: def.table.columns.map((c) => fill(c.header)), periodHeader: fill(def.table.period_header), rows },
+    tables,
     rich: {
       banner: def.draft_banner ? rich(def.draft_banner) : '',
       meaning: def.meaning.map((p) => rich(p)),

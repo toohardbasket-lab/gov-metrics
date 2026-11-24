@@ -74,7 +74,7 @@ const json = JSON.stringify(panel).replace(/</g, '\\u003c');
 
   type Pt = { date: string; period: string; value: number };
   type Panel = {
-    unit: string; decimals?: number; yRange?: { min: number; max: number }; frequency: string; nationalLabel: string; national: Pt[];
+    unit: string; decimals?: number; yRange?: { min: number; max: number }; markers?: boolean; frequency: string; nationalLabel: string; national: Pt[];
     places: { label: string; name: string; abbreviation: string; points: Pt[] }[];
     governments: { date: string; party: string }[];
     events: { date: string; label: string }[];
@@ -146,6 +146,8 @@ const json = JSON.stringify(panel).replace(/</g, '\\u003c');
       const path = (pts: Pt[]) => pts.map((p, i) => (i ? 'L' : 'M') + x(decimalYear(p.date)).toFixed(1) + ' ' + y(p.value).toFixed(1)).join('');
       el('path', { d: path(panel.national), fill: 'none', stroke: 'var(--ink-3)', 'stroke-width': 1, 'stroke-linejoin': 'round' });
       el('path', { d: path(place.points), fill: 'none', stroke: 'var(--series-1)', 'stroke-width': 2, 'stroke-linejoin': 'round' });
+      // markers: true draws a small marker on every point (for a series with only a few points)
+      if (panel.markers) place.points.forEach((q) => el('circle', { cx: x(decimalYear(q.date)), cy: y(q.value), r: 2.5, fill: 'var(--series-1)', stroke: 'var(--card)', 'stroke-width': 1 }));
       const last = place.points[place.points.length - 1];
       el('circle', { cx: x(decimalYear(last.date)), cy: y(last.value), r: 3.5, fill: 'var(--series-1)', stroke: 'var(--card)', 'stroke-width': 1.5 });
       el('text', { x: x(decimalYear(last.date)) + 7, y: y(last.value) + 4, 'font-size': 11.5, 'font-weight': 600, fill: 'var(--ink)' }, formatValue(panel.unit, last.value, panel.decimals));
@@ -164,7 +166,7 @@ const json = JSON.stringify(panel).replace(/</g, '\\u003c');
         const nat = natByDate.get(r.date);
         tip.replaceChildren();
         const head = document.createElement('b');
-        head.textContent = panel.frequency === 'annual' ? formatDate(r.date) : formatMonthYear(r.date);
+        head.textContent = panel.frequency === 'annual' || panel.frequency === 'census' ? formatDate(r.date) : formatMonthYear(r.date);
         tip.appendChild(head);
         tip.appendChild(document.createTextNode(`${place.name}: ${formatValue(panel.unit, r.value, panel.decimals)}`));
         tip.appendChild(document.createElement('br'));

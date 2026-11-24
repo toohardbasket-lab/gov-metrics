@@ -69,7 +69,7 @@ const first = chart.views[0];
   type Line = { label: string; color: number; decimals?: number; points: Pt[] };
   type View = {
     id: string; label: string; caption: string; unit: string;
-    from?: number; band?: { min: number; max: number; label: string };
+    from?: number; markers?: boolean; band?: { min: number; max: number; label: string };
     lines: Line[];
   };
   type Chart = {
@@ -207,6 +207,10 @@ const first = chart.views[0];
       view.lines.forEach((l, i) => {
         el('path', { d: pix[i].map((p, k) => (k ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(''), fill: 'none', stroke: `var(--series-${l.color})`, 'stroke-width': 2, 'stroke-linejoin': 'round' });
       });
+      // A view with markers: true draws a small marker on every point (for a series with only a few points).
+      if (view.markers) {
+        view.lines.forEach((l, i) => pix[i].forEach(([px, py]) => el('circle', { cx: px, cy: py, r: 3.5, fill: `var(--series-${l.color})`, stroke: 'var(--card)', 'stroke-width': 1.5 })));
+      }
       view.lines.forEach((l, i) => {
         const [ex, ey] = pix[i][pix[i].length - 1];
         el('circle', { cx: ex, cy: ey, r: 4, fill: `var(--series-${l.color})`, stroke: 'var(--card)', 'stroke-width': 2 });

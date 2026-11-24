@@ -1,0 +1,245 @@
+# Definition file for one metric. Everything the page shows, other than the numbers
+# in data.csv, comes from this file. See metrics/README.md for what each field does.
+# Words in braces, such as {last_year}, are filled in from the data when the page is built.
+slug: homelessness
+title: Homelessness
+theme: Housing and homelessness
+jurisdiction: Australia
+description: "How many people are homeless on Census night, and how many people specialist homelessness services help and turn away each year."
+lede: "People counted as homeless at each Census since {first_year}, and the people helped, and not helped, by specialist homelessness services each financial year since {first_period:clients}."
+
+draft: true
+draft_banner: "Draft, not for publication. The figures are read from the Productivity Commission by code and have not yet had the human check the plan requires."
+
+# Eight series. Seven are stored in data.csv, one row per date and jurisdiction (Australia and each state and
+# territory): two from the Census (table 19A.2, dated Census night) and five from the specialist homelessness
+# services collection (tables 19A.10 and 19A.11, dated 30 June of the second year of each financial year).
+# unassisted_daily_total is not stored: the site works it out when the page is built and when the data is checked
+# (derive), with the same code in both places. The checker stops the build if a date is missing, a date is off
+# its schedule or a value falls outside the plausible range.
+series:
+  - id: census_homeless_rate
+    label: People who are homeless, per 10,000 people
+    definition: People counted as homeless on Census night, per 10,000 people in the population (all homelessness operational groups, total).
+    source_table: Productivity Commission, Report on Government Services, table 19A.2 (ABS Census of Population and Housing - estimating homelessness), Rate per 10,000 people in the population, Total
+    frequency: census
+    # The brief said 0 to 500, but the Northern Territory's real figures are 723.7 (2011), 599.6 (2016) and 563.6 (2021), so 500 fails the checker. 1000 is used until the owner decides.
+    plausible: {min: 0, max: 1000}
+    # Revision tolerance: Census counts are final and should not change. Service figures can be revised slightly by the AIHW; larger changes block until the owner accepts them.
+    revision: {max_abs: 0.1}
+  - id: census_homeless_number
+    label: People who are homeless, number
+    definition: People counted as homeless on Census night (all homelessness operational groups, total). Count of people.
+    source_table: Productivity Commission, Report on Government Services, table 19A.2 (ABS Census of Population and Housing - estimating homelessness), Number, Total
+    frequency: census
+    plausible: {min: 0, max: 1000000}
+    revision: {max_abs: 1}
+  - id: clients
+    label: Clients of specialist homelessness services
+    definition: Total clients of specialist homelessness services in the financial year. Count of people.
+    source_table: Productivity Commission, Report on Government Services, table 19A.10 (AIHW Specialist Homelessness Services Collection), Unmet need, Total clients
+    frequency: annual
+    plausible: {min: 0, max: 2000000}
+    revision: {max_abs: 1, max_pct: 1, pct_floor: 100}
+  - id: unmet_accommodation_pct
+    label: Needed accommodation but did not get it
+    definition: Per cent of clients who needed accommodation and were not provided with it (clients with an identified need for accommodation who were not provided with that service, as a proportion of clients with a need for accommodation).
+    source_table: Productivity Commission, Report on Government Services, table 19A.10 (AIHW Specialist Homelessness Services Collection), Unmet need, Accommodation services, Proportion of clients with unmet need
+    frequency: annual
+    plausible: {min: 0, max: 100}
+    revision: {max_abs: 0.5}
+  - id: unassisted_accommodation_daily
+    label: Requests not assisted a day, accommodation
+    definition: Average number of requests a day for accommodation services from people who could not be helped. Counted per request, not per person.
+    source_table: Productivity Commission, Report on Government Services, table 19A.11 (AIHW Specialist Homelessness Services Collection), Unassisted requests, Accommodation services, Average daily unassisted requests
+    frequency: annual
+    plausible: {min: 0, max: 5000}
+    revision: {max_abs: 1}
+  - id: unassisted_other_daily
+    label: Requests not assisted a day, other services
+    definition: Average number of requests a day for services other than accommodation from people who could not be helped. Counted per request, not per person.
+    source_table: Productivity Commission, Report on Government Services, table 19A.11 (AIHW Specialist Homelessness Services Collection), Unassisted requests, Services other than accommodation, Average daily unassisted requests
+    frequency: annual
+    plausible: {min: 0, max: 5000}
+    revision: {max_abs: 1}
+  - id: unassisted_no_need_daily
+    label: Requests not assisted a day, no need identified
+    definition: Average number of requests a day from people who could not be helped and for whom no service need was identified. Counted per request, not per person.
+    source_table: Productivity Commission, Report on Government Services, table 19A.11 (AIHW Specialist Homelessness Services Collection), Unassisted requests, No service need identified, Average daily unassisted requests
+    frequency: annual
+    plausible: {min: 0, max: 5000}
+    revision: {max_abs: 1}
+  - id: unassisted_daily_total
+    label: Requests not assisted a day, total (worked out)
+    definition: The sum of the average daily requests not assisted for accommodation services, services other than accommodation, and no service need identified, for each jurisdiction and year. Not stored in data.csv.
+    source_table: Worked out from the three series of table 19A.11
+    derive: {type: sum, from: [unassisted_accommodation_daily, unassisted_other_daily, unassisted_no_need_daily]}
+    frequency: annual
+    plausible: {min: 0, max: 5000}
+
+# The headline figures above the chart. Values are read from data.csv (or worked out from it).
+tiles:
+  - label: Homeless on Census night
+    series: census_homeless_number
+    jurisdiction: Australia
+    sub_period: true
+    sub_prefix: "Census "
+  - label: People helped by services
+    series: clients
+    jurisdiction: Australia
+    sub_period: true
+  - label: Target status
+    text: No numeric target found
+    sub_text: See the target note below
+
+# The chart. color keeps a series the same colour in every view (1 blue, 2 orange, 3 plum, 4 green, 5 violet).
+# The three service views start their axis in 2020, the year before their first point, so they are not squeezed
+# into the right of an axis that starts at the first Census (2011).
+views:
+  - id: census
+    label: Census count
+    derive: none
+    markers: true
+    lines:
+      - series: census_homeless_rate
+        jurisdiction: Australia
+        label: Homeless per 10,000 people
+        color: 1
+    caption: People counted as homeless per 10,000 people in the population, at each Census.
+  - id: clients
+    label: People helped
+    derive: none
+    from: 2020
+    lines:
+      - series: clients
+        jurisdiction: Australia
+        label: Clients of specialist homelessness services
+        color: 1
+    caption: People who received help from specialist homelessness services in each financial year.
+  - id: unmet
+    label: Need not met
+    derive: none
+    from: 2020
+    lines:
+      - series: unmet_accommodation_pct
+        jurisdiction: Australia
+        label: Needed accommodation but did not get it
+        color: 1
+    caption: Per cent of clients who needed accommodation and did not receive it, each financial year.
+  - id: turned-away
+    label: Turned away
+    derive: none
+    from: 2020
+    lines:
+      - series: unassisted_daily_total
+        jurisdiction: Australia
+        label: Requests not assisted, average a day (worked out)
+        color: 1
+    caption: Average number of requests a day from people who could not be helped, each financial year.
+chart_alt: "Line chart of homelessness measures. The full figures are in the tables below."
+chart_source: "Source: Productivity Commission, Report on Government Services, Homelessness services, tables 19A.2, 19A.10 and 19A.11 (from the ABS Census and the AIHW)."
+
+# The full tables. Newest first. Australia only: the states and territories are in the panel under the targets.
+table:
+  - period_header: Census
+    columns:
+      - header: "Homeless (number)"
+        series: census_homeless_number
+        jurisdiction: Australia
+      - header: "Per 10,000 people"
+        series: census_homeless_rate
+        jurisdiction: Australia
+  - period_header: Financial year
+    columns:
+      - header: "Clients"
+        series: clients
+        jurisdiction: Australia
+      - header: "Needed accommodation, not provided %"
+        series: unmet_accommodation_pct
+        jurisdiction: Australia
+      - header: "Requests not assisted a day, accommodation"
+        series: unassisted_accommodation_daily
+        jurisdiction: Australia
+      - header: "Requests not assisted a day, other services"
+        series: unassisted_other_daily
+        jurisdiction: Australia
+      - header: "Requests not assisted a day, no need identified"
+        series: unassisted_no_need_daily
+        jurisdiction: Australia
+      - header: "Requests not assisted a day, total (worked out)"
+        series: unassisted_daily_total
+        jurisdiction: Australia
+
+meaning:
+  - "The **Census count** is the ABS's estimate of people who were homeless on Census night. It includes people sleeping rough, staying temporarily with other households, in supported accommodation, in boarding houses and other temporary lodging, and in severely crowded dwellings. It is the only count of all people who are homeless, and it is made only every five years."
+  - "**Specialist homelessness services** are funded by governments to help people who are homeless or at risk. The yearly figures count the people they helped, the share who needed accommodation and did not get it, and the requests each day from people who could not be helped at all."
+
+# Targets and forecasts ledger. {link} is replaced by the link.
+targets:
+  - label: Target
+    text: "No numeric national target for reducing homelessness was found. Homes for Australia: A National Plan (May 2026) is still to be read in full for one before publication. {link}"
+    link:
+      label: "Treasury, Homes for Australia: A National Plan"
+      url: https://treasury.gov.au/policy-topics/housing/housing-homelessness-strategy/national-housing-homelessness-plan
+
+# The state and territory panel (plan section 3), in the fixed order NSW, Vic, Qld, WA, SA, Tas, ACT, NT.
+# The charts show the Census rate on one scale, 0 to 800: the highest state figure in the data (the Northern
+# Territory in 2011, 723.7) rounded up to the next 100. The two columns after the rate show each place's own latest
+# service figures (the services are counted each financial year, so their period differs from the Census).
+state_panel: true
+state_panel_config:
+  series: census_homeless_rate
+  national: Australia
+  national_label: Australia
+  heading: States and territories
+  note: "Each chart uses the same scale and shows people counted as homeless per 10,000 people at each Census. The grey line is Australia. The Northern Territory's rate is far higher than other places, mostly because of severely crowded dwellings, which the ABS counts as homelessness."
+  headers: ["State or territory", "Census", "Homeless per 10,000"]
+  date_format: period
+  y_range: {min: 0, max: 800}
+  markers: true
+  extra_columns:
+    - {header: "Clients helped, latest year", series: clients, after: true, own_latest: true, with_period: true}
+    - {header: "Needed accommodation, not provided %", series: unmet_accommodation_pct, after: true, own_latest: true}
+  places:
+    - {jurisdiction: New South Wales, abbreviation: NSW, name: New South Wales}
+    - {jurisdiction: Victoria, abbreviation: Vic, name: Victoria}
+    - {jurisdiction: Queensland, abbreviation: Qld, name: Queensland}
+    - {jurisdiction: Western Australia, abbreviation: WA, name: Western Australia}
+    - {jurisdiction: South Australia, abbreviation: SA, name: South Australia}
+    - {jurisdiction: Tasmania, abbreviation: Tas, name: Tasmania}
+    - {jurisdiction: Australian Capital Territory, abbreviation: ACT, name: Australian Capital Territory}
+    - {jurisdiction: Northern Territory, abbreviation: NT, name: Northern Territory}
+
+# Sources and method ledger. {link} is replaced by the link; {update} and {retrieved}
+# by the fields below.
+update: "The Census count every five years, when the ABS publishes its homelessness estimates; service figures each year, when the Productivity Commission publishes the homelessness section of the Report on Government Services (recently in January)."
+retrieved: 2026-11-24
+sources_method:
+  - label: Census count
+    link:
+      label: Productivity Commission, Report on Government Services, Homelessness services
+      url: https://www.pc.gov.au/ongoing/report-on-government-services/housing-homelessness/homelessness-services/
+    text: "{link}, table 19A.2, from the ABS Census of Population and Housing: estimating homelessness. Read from the Commission's CSV dataset and checked against its Excel tables."
+  - label: Services
+    link:
+      label: Productivity Commission, Report on Government Services, Homelessness services
+      url: https://www.pc.gov.au/ongoing/report-on-government-services/housing-homelessness/homelessness-services/
+    text: "{link}, tables 19A.10 and 19A.11, from the AIHW Specialist Homelessness Services Collection. Read from the CSV dataset and checked against the Excel tables."
+  - label: Worked out
+    text: "Requests not assisted, total = accommodation + other services + no service need identified."
+  - label: Updated
+    text: "{update} Data retrieved {retrieved}."
+
+read_with_care:
+  - "The Census count and the service figures measure different things. The Census counts everyone who was homeless on one night; the service figures count only people who sought help from funded services, including people at risk of homelessness who were not yet homeless."
+  - "More people helped by services does not by itself mean more homelessness. It can also reflect more funding, more services or more people asking for help."
+  - "Severely crowded dwellings make up a large share of the Census count, especially in the Northern Territory and among Aboriginal and Torres Strait Islander people."
+  - "The Census count is an estimate. People sleeping rough and people staying with others are hard to count, and the ABS revises its methods between Censuses."
+  - "Requests not assisted are counted per request, not per person. One person may make several requests."
+  - "Each edition of the Report on Government Services carries only recent years. Older years stay on this page when a new edition drops them, and a revised past figure is checked before it is accepted."
+  - "Government shading starts on the day each government was sworn in. Recessions and crises are marked on every chart on this site using the same list. The marks give context and do not assign cause."
+
+corrections_text: None yet. Every correction to this page will be listed here with its date and what changed.
+
+# Fields kept from the worked-example definition file.
+inclusion_tests: {outcome: true, official: true, history: true, ongoing: true, no_editorial_choice: "the ABS Census estimate and the Productivity Commission's standard service measures"}

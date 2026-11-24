@@ -45,6 +45,7 @@ export function formatValue(unit: string, v: number, decimals?: number): string 
   if (unit === 'count') return countText(v);
   if (unit === 'rate') return places(v, decimals, 1);
   if (unit === 'days') return daysText(v);
+  if (unit === 'per_day') return places(v, decimals, 1) + ' a day';
   return unknownUnit(unit);
 }
 
@@ -57,6 +58,7 @@ export function formatAxis(unit: string, v: number): string {
   if (unit === 'count') return Math.abs(v) >= 1000 ? +(v / 1000).toFixed(1) + 'k' : String(v);
   if (unit === 'rate') return String(+v.toFixed(1));
   if (unit === 'days') return countText(v) + ' days';
+  if (unit === 'per_day') return countText(v) + ' a day';
   return unknownUnit(unit);
 }
 
@@ -69,6 +71,7 @@ export function formatTable(unit: string, v: number, decimals?: number): string 
   if (unit === 'count') return countText(v);
   if (unit === 'rate') return places(v, decimals, 1);
   if (unit === 'days') return countText(Math.round(v));
+  if (unit === 'per_day') return places(v, decimals, 1);
   return unknownUnit(unit);
 }
 

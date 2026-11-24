@@ -1,0 +1,26 @@
+{
+  "rogs-2026-partg-section19-homelessness-services-data-tables.xlsx": {
+    "bytes": 432933,
+    "retrieved": "2026-11-24",
+    "sha256": "8c93012b5ac47c8b2ccd695ca3f1bcb8697a9c819556217710e5eb17d625458c",
+    "url": "https://assets.pc.gov.au/2026-01/rogs-2026-partg-section19-homelessness-services-data-tables.xlsx?VersionId=8l3O8_q4Kf08VTCrI2wlAS5Mv1SinIHQ"
+  },
+  "rogs-2026-partg-section19-homelessness-services-dataset.csv": {
+    "bytes": 1133782,
+    "retrieved": "2026-11-24",
+    "sha256": "4cb38419eb586279269ee6f48b90cf3e1bc42e8926b1872b40a24526436e8df7",
+    "url": "https://assets.pc.gov.au/2026-01/rogs-2026-partg-section19-homelessness-services-dataset.csv?VersionId=oou7gCfLtIUjLTYmqVgZgevEBezJo44g"
+  },
+  "rogs-editions": {
+    "editions": {
+      "2011": "2026",
+      "2016": "2026",
+      "2020-21": "2026",
+      "2021": "2026",
+      "2021-22": "2026",
+      "2022-23": "2026",
+      "2023-24": "2026",
+      "2024-25": "2026"
+    }
+  }
+}

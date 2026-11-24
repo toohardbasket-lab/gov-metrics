@@ -68,21 +68,23 @@ const d = m.def;
     <section class="card">
       <details open>
         <summary>All figures as a table</summary>
-        <div class="scroll">
-          <table>
-            <thead>
-              <tr>
-                <th>{m.table.periodHeader}</th>
-                {m.table.headers.map((h) => <th>{h}</th>)}
-              </tr>
-            </thead>
-            <tbody>
-              {m.table.rows.map((r) => (
-                <tr><td>{r.period}</td>{r.cells.map((c) => <td>{c}</td>)}</tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        {m.tables.map((t) => (
+          <div class="scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>{t.periodHeader}</th>
+                  {t.headers.map((h) => <th>{h}</th>)}
+                </tr>
+              </thead>
+              <tbody>
+                {t.rows.map((r) => (
+                  <tr><td>{r.period}</td>{r.cells.map((c) => <td>{c}</td>)}</tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ))}
       </details>
     </section>
 
