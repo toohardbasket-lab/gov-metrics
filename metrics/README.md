@@ -1,6 +1,6 @@
 # Metrics
 
-Each metric has its own folder here. The folder name is the metric's short name (the "slug"), for example `commonwealth-debt`. The metrics so far are `commonwealth-debt`, built from figures parsed by code from Treasury's Word files, and `unemployment-rate`, read by code from the ABS Data API and checked against the ABS Labour Force spreadsheet (see `scrapers/README.md`). Each is a draft until its owner has checked it.
+Each metric has its own folder here. The folder name is the metric's short name (the "slug"), for example `commonwealth-debt`. The metrics so far are `commonwealth-debt`, built from figures parsed by code from Treasury's Word files, `unemployment-rate`, read by code from the ABS Data API and checked against the ABS Labour Force spreadsheet, and `inflation`, three series (quarterly and monthly) checked against second sources (see `scrapers/README.md`). Each is a draft until its owner has checked it.
 
 Every folder that contains a `metric.yml` gets a page at `/metrics/<slug>/` and a link on the home page. The page is drawn entirely from the files in the folder, plus the shared lists in `shared/`. Nothing about any one metric is written into the site code.
 
@@ -44,7 +44,7 @@ All text on the page comes from here. Plain text only, no HTML. Two small extras
 | `{real_base_index}` | The price index for that June, exactly as printed in `shared/cpi_june.csv`. |
 | `{first_real_year}` | The first year that has a price index figure, so the first year of the inflation-adjusted views. |
 | `{first_year}`, `{last_year}` | The calendar years of the earliest and latest dates in `data.csv`. |
-| `{latest_period}` | The period label of the latest row, such as 2025-26. |
+| `{latest_period}` | The period label of the latest row, such as 2025-26. When several series end on the same date, set `latest_period_series` in `metric.yml` to the series whose latest period it should name (the inflation page uses the monthly series). |
 
 An unknown word, or one that cannot be worked out, stops the build. Do not type a year or an index value into the text when one of these will do.
 
@@ -55,10 +55,10 @@ An unknown word, or one that cannot be worked out, stops the build. Do not type 
 | `lede` | The one-sentence description under the title. |
 | `draft`, `draft_banner` | If `draft` is true, the banner text is shown at the top and the home page adds "(draft)". |
 | `series` | Each series id, its label, definition and source table. |
-| `tiles` | The boxes above the chart. A tile with a `series` shows that series' latest value, with a `sub` series (and `suffix`) beneath. A tile with `text` and `sub_text` shows fixed words, such as the target status. A tile with a `series` may also have `sub_month: true` (the label stays plain and the month and year, such as October 2026, go beneath the figure) and `months_back: 12` (the figure for the same month that many months before the latest, so 12 is a year earlier; it cannot be combined with `sub`). |
-| `views` | The chart's view buttons, in order. Each has an `id`, a `label`, a `caption`, and one or two `lines` (a series id and a label). `derive: none` plots data.csv as it is. `derive: real` multiplies each value by the CPI of the latest June in the data divided by the CPI of that row's June, using `shared/cpi_june.csv`. Rows with no CPI figure are left out of that view. All lines in a view share one unit. |
+| `tiles` | The boxes above the chart. A tile with a `series` shows that series' latest value, with a `sub` series (and `suffix`) beneath. A tile with `text` and `sub_text` shows fixed words, such as the target status. A tile with a `series` may also have `sub_month: true` (the label stays plain and the month and year, such as October 2026, go beneath the figure) or `sub_quarter: true` (the same, but the quarter, such as September quarter 2026) and `months_back: 12` (the figure for the same month that many months before the latest, so 12 is a year earlier; it cannot be combined with `sub`). |
+| `views` | The chart's view buttons, in order. Each has an `id`, a `label`, a `caption`, and one to three `lines` (a series id and a label, and optionally `color: 1`, `2` or `3`, the series colour, which defaults to the line's position; set it so a series keeps its colour in every view). `derive: none` plots data.csv as it is. `derive: real` multiplies each value by the CPI of the latest June in the data divided by the CPI of that row's June, using `shared/cpi_june.csv`. Rows with no CPI figure are left out of that view. All lines in a view share one unit. Each line draws its own points, so a quarterly and a monthly series can share a chart; the hover read-out shows each line's value at its own nearest date, and "no figure" for a line with nothing near the cursor. Two optional settings per view: `from: 1983` starts the view in that year (the data before it is not drawn, and the axis starts there), and `target_band: {min: 2, max: 3, label: "Target band 2–3%"}` shades a band across the plot (pale blue with dashed edges, not a status colour) with its label and a legend entry. |
 | `chart_alt`, `chart_source` | The chart's text description for screen readers, and the source line after each caption. |
-| `table` | The column headings of the full table and which series (and whether `derive: real`) each column shows. |
+| `table` | The column headings of the full table and which series (and whether `derive: real`) each column shows. Optional: `period_format: month_year` shows each row's date as "September 2026" instead of the period label (use it when the series have different frequencies; there is one row for each date that has a figure in any series), and `missing: ""` sets what a cell with no figure shows (the default is n/a). |
 | `meaning` | The "What the numbers mean" paragraphs. |
 | `targets` | Rows of the "Targets and forecasts" ledger. |
 | `sources_method`, `update`, `retrieved` | Rows of the "Sources and method" ledger, how often the data is updated, and the date it was retrieved. |
@@ -73,7 +73,7 @@ Each entry in `series` must also carry these, or `npm run validate` fails and th
 
 | Field | What it does |
 |---|---|
-| `frequency` | How often the series has a point: `annual` or `monthly`. For `annual`, consecutive points must be exactly one year apart on the same month and day, so a missing year is caught. For `monthly`, every date must be the last day of a month (28 or 29 February, 30 April and so on) and consecutive points must be in consecutive months, so a missing month is caught. An unknown word fails with a clear message. |
+| `frequency` | How often the series has a point: `annual`, `quarterly` or `monthly`. For `annual`, consecutive points must be exactly one year apart on the same month and day, so a missing year is caught. For `monthly`, every date must be the last day of a month (28 or 29 February, 30 April and so on) and consecutive points must be in consecutive months, so a missing month is caught. For `quarterly`, every date must be the last day of March, June, September or December (31 March, 30 June, 30 September, 31 December) and consecutive points must be consecutive quarters, so a missing quarter is caught. An unknown word fails with a clear message. |
 | `plausible` | The range a real value must fall inside, for example `{min: 0, max: 100}`. A value outside it stops the build. Choose it wide enough that real data never touches it, and narrow enough that a slipped decimal point or a flipped sign does. |
 | `max_step_pct` (optional) | The largest allowed change between consecutive points, as a per cent of the earlier point. Left out for the debt series. |
 | `revision` | How far an already accepted figure may change before the checker blocks it. Required on every series. See "Revision tolerance" below. |

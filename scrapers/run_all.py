@@ -26,6 +26,7 @@ REGISTRY = [
     ("cpi_june", "cpi_june.py"),
     ("commonwealth_debt", "commonwealth_debt.py"),
     ("unemployment_rate", "unemployment_rate.py"),
+    ("inflation", "inflation.py"),
 ]
 
 TAIL_LINES = 30

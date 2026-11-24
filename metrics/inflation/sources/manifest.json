@@ -1,0 +1,32 @@
+{
+  "abs-cpi-1.10001.10.50.Q.csv": {
+    "bytes": 17189,
+    "retrieved": "2026-11-24",
+    "sha256": "97b433dd02c657f578d44d12ded41811dfd0c0097fade1391fe6c3f569349cdf",
+    "url": "https://data.api.abs.gov.au/rest/data/ABS,CPI/1.10001.10.50.Q"
+  },
+  "abs-cpi-3.10001.10.50.M.csv": {
+    "bytes": 1087,
+    "retrieved": "2026-11-24",
+    "sha256": "6a4cefc8b40ccb7253241e44f043bf8a9f47b316f42aa57b2917fea68c238d33",
+    "url": "https://data.api.abs.gov.au/rest/data/ABS,CPI/3.10001.10.50.M"
+  },
+  "abs-cpi-640101.xlsx": {
+    "bytes": 53911,
+    "retrieved": "2026-11-24",
+    "sha256": "756e3e5a1bf286e2edb51e20b730002c74eeca772620ac34f483359b366bf77e",
+    "url": "https://www.abs.gov.au/statistics/economy/price-indexes-and-inflation/consumer-price-index-australia/sep-2026/640101.xlsx"
+  },
+  "abs-cpi_q-3.999902.20.50.Q.csv": {
+    "bytes": 9543,
+    "retrieved": "2026-11-24",
+    "sha256": "951568135f61a97f5c2f294f72591618a96cc37537fcadb503a499b239d12b01",
+    "url": "https://data.api.abs.gov.au/rest/data/ABS,CPI_Q/3.999902.20.50.Q"
+  },
+  "rba-g1-data.csv": {
+    "bytes": 39998,
+    "retrieved": "2026-11-24",
+    "sha256": "777ce0f23e8c2d176a39f033b157df5c24553cc6c63498e1adbb78c59bbf6d96",
+    "url": "https://www.rba.gov.au/statistics/tables/csv/g1-data.csv"
+  }
+}

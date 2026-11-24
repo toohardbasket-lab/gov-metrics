@@ -26,7 +26,7 @@ const STATUSES = ['actual', 'estimate', 'forecast'];
 // so a new unit has to be added in both places.
 const KNOWN_UNITS = ['aud_million', 'pct_gdp', 'pct'];
 
-// How far apart consecutive rows must be. To add another frequency (quarterly, say), add an entry here
+// How far apart consecutive rows must be. To add another frequency, add an entry here
 // whose `next` returns the date that should follow the one given (for example three months
 // later, keeping the end of the month). Nothing else in this file needs to change.
 const FREQUENCIES = {
@@ -52,6 +52,23 @@ const FREQUENCIES = {
       return d === new Date(Date.UTC(y, m, 0)).getUTCDate();
     },
     scheduleHint: 'the last day of a month',
+  },
+  // Quarterly data sits on the last day of March, June, September and December (31 March, 30 June,
+  // 30 September, 31 December). `next` gives the last day of the quarter after the one given.
+  quarterly: {
+    next(iso) {
+      const [y, m] = iso.split('-').map(Number);
+      const total = y * 12 + (m - 1) + 3; // three months on
+      const ny = Math.floor(total / 12);
+      const nm = (total % 12) + 1;
+      const last = new Date(Date.UTC(ny, nm, 0)).getUTCDate();
+      return `${String(ny).padStart(4, '0')}-${String(nm).padStart(2, '0')}-${String(last).padStart(2, '0')}`;
+    },
+    onSchedule(iso) {
+      const [y, m, d] = iso.split('-').map(Number);
+      return m % 3 === 0 && d === new Date(Date.UTC(y, m, 0)).getUTCDate();
+    },
+    scheduleHint: 'the last day of March, June, September or December',
   },
 };
 

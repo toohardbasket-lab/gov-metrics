@@ -1,0 +1,33 @@
+﻿G1 CONSUMER PRICE INFLATION,,,
+Title,Consumer price index,Year-ended inflation,Year-ended trimmed mean inflation – excluding interest charges and tax changes
+Description,Consumer price index; All groups,Consumer price index; All groups; Year-ended change (in per cent),Consumer price index; Trimmed mean excluding interest charges and tax changes of 1999–2000; Year-ended change (in per cent)
+Frequency,Quarterly,Quarterly,Quarterly
+Type,Original,Original,Seasonally adjusted
+Units,"Index, September 2025 month = 100",Per cent,Per cent
+,,,
+,,,
+Source,ABS / RBA,ABS / RBA,ABS / RBA
+Publication date,29-Oct-2026,29-Oct-2026,29-Oct-2026
+Series ID,GCPIAG,GCPIAGYP,GCPIOCPMTMYP
+31/03/1949,2.71,9.9,
+30/06/1949,2.74,8.5,
+30/09/1949,2.82,8.9,
+31/12/1949,2.86,8.7,
+31/03/1950,2.90,7.0,
+30/06/1950,3.02,10.2,
+30/09/1950,3.05,8.2,
+31/12/1950,3.17,10.8,
+31/03/1951,3.32,14.5,
+30/06/1951,3.52,16.6,
+30/09/1951,3.71,21.6,
+31/12/1951,3.98,25.6,
+31/03/2001,51.30,,2.7
+30/06/2001,51.73,,3.0
+30/09/2001,51.87,,3.1
+31/12/2001,52.35,,3.3
+31/03/2002,52.82,,3.1
+30/06/2002,53.20,,2.9
+30/09/2002,53.56,,2.9
+31/12/2002,53.92,,2.8
+31/03/2027,,,
+,,,

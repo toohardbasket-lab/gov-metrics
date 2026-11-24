@@ -19,10 +19,11 @@ const first = chart.views[0];
   </div>
   <div class="legend">
     <span class="legend-series" data-legend-series>
-      {first.lines.map((l, i) => (
-        <span><span class="sw" style={`background:var(--series-${i + 1})`}></span>{l.label}</span>
+      {first.lines.map((l) => (
+        <span><span class="sw" style={`background:var(--series-${l.color})`}></span>{l.label}</span>
       ))}
     </span>
+    <span data-legend-target hidden={!first.band}><span class="sw sw-target"></span><span data-legend-target-label>{first.band?.label}</span></span>
     <span><span class="sw sw-band"></span>Shading marks a change of governing party</span>
   </div>
   <div class="chartwrap" data-chartwrap>
@@ -43,6 +44,8 @@ const first = chart.views[0];
   .metric-chart .legend-series > span { margin-right: 0; }
   .metric-chart .sw { display: inline-block; width: 18px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
   .metric-chart .sw-band { background: var(--band); height: 12px; border: 1px solid var(--rule); }
+  .metric-chart .sw-target { background: var(--target-band-fill); height: 12px; border: 1px dashed var(--target-band-edge); border-radius: 0; }
+  .metric-chart [hidden] { display: none; }
   .metric-chart .chartwrap { position: relative; }
   .metric-chart svg { display: block; width: 100%; height: auto; font-family: var(--body); }
   .metric-chart .tip { position: absolute; pointer-events: none; background: var(--card); border: 1px solid var(--rule); border-radius: 6px; padding: 8px 10px; font-size: 13px; box-shadow: 0 4px 14px rgba(0, 0, 0, .14); display: none; min-width: 190px; font-variant-numeric: tabular-nums; }
@@ -62,16 +65,19 @@ const first = chart.views[0];
   const EVENT_ROW_PX = 14;      // vertical step when event labels would collide
   const EVENT_FLIP_FROM = 0.8;  // marks in the last fifth of the plot get their label on the left
 
+  type Pt = { date: string; period: string; value: number };
+  type Line = { label: string; color: number; points: Pt[] };
   type View = {
     id: string; label: string; caption: string; unit: string;
-    lines: { label: string }[];
-    points: { date: string; period: string; values: number[] }[];
+    from?: number; band?: { min: number; max: number; label: string };
+    lines: Line[];
   };
   type Chart = {
     alt: string; source: string; views: View[];
     governments: { date: string; party: string }[];
     events: { date: string; label: string }[];
   };
+  type Box = { x0: number; x1: number; y0: number; y1: number };
 
   function niceStep(range: number): number {
     const raw = range / 5, p = Math.pow(10, Math.floor(Math.log10(raw)));
@@ -79,15 +85,29 @@ const first = chart.views[0];
     return 10 * p;
   }
 
+  // Does the segment (ax,ay)-(bx,by) pass through the box? Checked by walking along it.
+  function segmentHitsBox(ax: number, ay: number, bx: number, by: number, b: Box): boolean {
+    if (Math.max(ax, bx) < b.x0 || Math.min(ax, bx) > b.x1 || Math.max(ay, by) < b.y0 || Math.min(ay, by) > b.y1) return false;
+    const n = Math.max(1, Math.ceil(Math.hypot(bx - ax, by - ay) / 3));
+    for (let k = 0; k <= n; k++) {
+      const px = ax + (bx - ax) * k / n, py = ay + (by - ay) * k / n;
+      if (px >= b.x0 && px <= b.x1 && py >= b.y0 && py <= b.y1) return true;
+    }
+    return false;
+  }
+  const boxesOverlap = (a: Box, b: Box, pad = 2) => a.x0 < b.x1 + pad && a.x1 > b.x0 - pad && a.y0 < b.y1 + pad && a.y1 > b.y0 - pad;
+
   function start(root: HTMLElement) {
     const chart: Chart = JSON.parse(root.querySelector('script[data-chart-data]')!.textContent!);
     const svg = root.querySelector('svg')!;
     const tip = root.querySelector<HTMLElement>('[data-tip]')!;
     const caption = root.querySelector<HTMLElement>('[data-caption]')!;
     const legend = root.querySelector<HTMLElement>('[data-legend-series]')!;
+    const legendTarget = root.querySelector<HTMLElement>('[data-legend-target]')!;
+    const legendTargetLabel = root.querySelector<HTMLElement>('[data-legend-target-label]')!;
     const buttons = [...root.querySelectorAll<HTMLButtonElement>('button[data-view]')];
 
-    const allDates = chart.views.flatMap((v) => v.points.map((p) => decimalYear(p.date)));
+    const allDates = chart.views.flatMap((v) => v.lines.flatMap((l) => l.points.map((p) => decimalYear(p.date))));
     const X0 = Math.min(...allDates) - PAD_BEFORE;
     const X1 = Math.max(...allDates) + PAD_AFTER;
     const plotW = W - L - R;
@@ -102,19 +122,30 @@ const first = chart.views[0];
 
     function draw(view: View) {
       svg.innerHTML = '';
-      const rows = view.points.map((p) => ({ ...p, t: decimalYear(p.date) }));
-      const vals = rows.flatMap((r) => r.values);
+      // Each line has its own points (lines may have different frequencies). A view with `from`
+      // starts its axis at that year; the others share one axis across views.
+      const xa = view.from !== undefined ? view.from : X0;
+      const lineRows = view.lines.map((l) => l.points.map((p) => ({ ...p, t: decimalYear(p.date) })));
+      const vals = lineRows.flatMap((rows) => rows.map((r) => r.value));
+      const band = view.band;
+      const lo = band ? Math.min(0, ...vals, band.min) : Math.min(0, ...vals);
+      const hi = band ? Math.max(...vals, band.max) : Math.max(...vals);
       const step = niceStep(Math.max(...vals) - Math.min(0, ...vals));
-      const y0 = Math.floor(Math.min(0, ...vals) / step) * step;
-      const y1 = Math.ceil(Math.max(...vals) / step) * step;
-      const x = (t: number) => L + (t - X0) / (X1 - X0) * plotW;
+      const y0 = Math.floor(lo / step) * step;
+      const y1 = Math.ceil(hi / step) * step;
+      const x = (t: number) => L + (t - xa) / (X1 - xa) * plotW;
       const y = (v: number) => T + (y1 - v) / (y1 - y0) * (H - T - B);
+      const pix = lineRows.map((rows) => rows.map((r) => [x(r.t), y(r.value)] as [number, number]));
+      const lineHits = (b: Box) => pix.some((pts) => pts.some((p, k) => k > 0 && segmentHitsBox(pts[k - 1][0], pts[k - 1][1], p[0], p[1], b)));
+      const placedLabels: Box[] = [];
+      // Width of a piece of text as drawn (the label is created, measured and then positioned).
+      const measure = (e: Element, text: string, perChar: number) => (e as SVGTextContentElement).getComputedTextLength() || text.length * perChar;
 
       // Government bands, from shared/governments.csv. The first band shown is unshaded; shading alternates from there.
       const gov = chart.governments.map((g, i) => {
         const a = decimalYear(g.date);
         const b = i + 1 < chart.governments.length ? decimalYear(chart.governments[i + 1].date) : X1;
-        return { party: g.party, a: Math.max(a, X0), b: Math.min(b, X1), raw: a, vis: b > X0 && a < X1 };
+        return { party: g.party, a: Math.max(a, xa), b: Math.min(b, X1), raw: a, vis: b > xa && a < X1 };
       }).filter((g) => g.vis);
       gov.forEach((g, j) => {
         const wpx = x(g.b) - x(g.a);
@@ -123,25 +154,47 @@ const first = chart.views[0];
         if (j > 0) el('line', { x1: x(g.a), x2: x(g.a), y1: T - 4, y2: T, stroke: 'var(--ink-3)', 'stroke-width': 1 });
       });
 
+      // The view's band (for example the 2 to 3 per cent target): a pale blue fill with thin dashed
+      // top and bottom edges, drawn across the whole plot. It is a different colour from the grey
+      // government shading, and its label sits just above or below it where no line is in the way.
+      if (band) {
+        const yt = y(band.max), yb = y(band.min);
+        el('rect', { x: L, y: yt, width: plotW, height: yb - yt, fill: 'var(--target-band-fill)' });
+        for (const yy of [yt, yb]) el('line', { x1: L, x2: W - R, y1: yy, y2: yy, stroke: 'var(--target-band-edge)', 'stroke-width': 1, 'stroke-dasharray': '5 4' });
+        const bl = el('text', { x: L + 6, y: yt - 5, 'text-anchor': 'start', 'font-size': 11.5, fill: 'var(--ink-2)', stroke: 'var(--card)', 'stroke-width': 3, 'paint-order': 'stroke', 'stroke-opacity': 0.85 }, band.label);
+        const len = measure(bl, band.label, 6.5);
+        let chosen: { bx: number; by: number } | null = null;
+        for (const by of [yt - 5, yb + 14]) {
+          for (let bx = L + 6; bx + len <= W - R - 6 && !chosen; bx += 20) {
+            const box = { x0: bx, x1: bx + len, y0: by - 12, y1: by + 4 };
+            if (by - 12 >= T && by + 4 <= H - B && !lineHits(box)) chosen = { bx, by };
+          }
+          if (chosen) break;
+        }
+        const at = chosen ?? { bx: L + 6, by: yt - 5 };
+        bl.setAttribute('x', String(at.bx)); bl.setAttribute('y', String(at.by));
+        placedLabels.push({ x0: at.bx, x1: at.bx + len, y0: at.by - 12, y1: at.by + 4 });
+      }
+
       // Gridlines, zero line and y labels.
       for (let v = y0; v <= y1 + 1e-9; v += step) {
         el('line', { x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: v === 0 ? 'var(--ink-3)' : 'var(--rule)', 'stroke-width': 1 });
         el('text', { x: L - 8, y: y(v) + 4, 'text-anchor': 'end', 'font-size': 12, fill: 'var(--ink-3)' }, formatAxis(view.unit, +v.toFixed(6)));
       }
       // x ticks every five years
-      for (let yr = Math.ceil(X0 / 5) * 5; yr <= X1; yr += 5) {
+      for (let yr = Math.ceil(xa / 5) * 5; yr <= X1; yr += 5) {
         el('text', { x: x(yr), y: H - B + 18, 'text-anchor': 'middle', 'font-size': 12, fill: 'var(--ink-3)' }, yr);
       }
 
       // Event marks, from shared/events.csv. Placed right to left. A label goes to the right of its mark,
       // or to the left in the last fifth of the plot. If it would overlap a label already placed, it drops a row.
       const placed: { x0: number; x1: number; row: number }[] = [];
-      chart.events.filter((e) => { const t = decimalYear(e.date); return t >= X0 && t <= X1; }).reverse().forEach((e) => {
+      chart.events.filter((e) => { const t = decimalYear(e.date); return t >= xa && t <= X1; }).reverse().forEach((e) => {
         const ex = x(decimalYear(e.date));
         el('line', { x1: ex, x2: ex, y1: T + 14, y2: H - B, stroke: 'var(--ink-3)', 'stroke-width': 1, 'stroke-dasharray': '3 4' });
         const flip = ex > L + EVENT_FLIP_FROM * plotW;
         const label = el('text', { x: ex + (flip ? -5 : 5), y: T + 12, 'text-anchor': flip ? 'end' : 'start', 'font-size': 11.5, fill: 'var(--ink-2)' }, e.label);
-        const len = (label as SVGTextContentElement).getComputedTextLength() || e.label.length * 6;
+        const len = measure(label, e.label, 6);
         const x0 = flip ? ex - 5 - len : ex + 5, x1 = x0 + len;
         let row = 0;
         while (placed.some((p) => p.row === row && x0 < p.x1 + 3 && x1 > p.x0 - 3)) row++;
@@ -149,40 +202,89 @@ const first = chart.views[0];
         label.setAttribute('y', String(T + 12 + row * EVENT_ROW_PX));
       });
 
-      // Lines, end points and end labels (below and to the left of the end point, with a halo).
-      const last = rows[rows.length - 1];
-      let prevLabelY = -Infinity;
-      const order = view.lines.map((_, i) => i).sort((a, b) => last.values[a] - last.values[b]).reverse();
-      view.lines.forEach((_, i) => {
-        el('path', { d: rows.map((r, k) => (k ? 'L' : 'M') + x(r.t).toFixed(1) + ' ' + y(r.values[i]).toFixed(1)).join(''), fill: 'none', stroke: `var(--series-${i + 1})`, 'stroke-width': 2, 'stroke-linejoin': 'round' });
-        el('circle', { cx: x(last.t), cy: y(last.values[i]), r: 4, fill: `var(--series-${i + 1})`, stroke: 'var(--card)', 'stroke-width': 2 });
+      // Lines and end points.
+      view.lines.forEach((l, i) => {
+        el('path', { d: pix[i].map((p, k) => (k ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(''), fill: 'none', stroke: `var(--series-${l.color})`, 'stroke-width': 2, 'stroke-linejoin': 'round' });
       });
-      order.forEach((i) => {
-        let ly = y(last.values[i]) + 22;
-        if (ly - prevLabelY < 16) ly = prevLabelY + 16; // keep two end labels from overlapping
-        prevLabelY = ly;
-        el('text', { x: x(last.t) - 10, y: ly, 'text-anchor': 'end', 'font-size': 12.5, 'font-weight': 600, fill: 'var(--ink)', stroke: 'var(--card)', 'stroke-width': 4, 'paint-order': 'stroke', 'stroke-opacity': 0.85 }, view.lines[i].label + ' ' + formatValue(view.unit, last.values[i]));
+      view.lines.forEach((l, i) => {
+        const [ex, ey] = pix[i][pix[i].length - 1];
+        el('circle', { cx: ex, cy: ey, r: 4, fill: `var(--series-${l.color})`, stroke: 'var(--card)', 'stroke-width': 2 });
       });
 
-      // Hover read-out
+      // End labels, below and to the left of the end point, with a halo. A label that sits on its own
+      // line moves to the nearest clear spot within a short distance (if there is none it stays where it was).
+      // A label that sits on another line, or on another label, moves to the nearest clear spot anywhere
+      // above or below the end point, with a thin leader line back to it.
+      let prevLabelY = -Infinity;
+      const lastVal = (i: number) => lineRows[i][lineRows[i].length - 1].value;
+      const order = view.lines.map((_, i) => i).sort((a, b) => lastVal(a) - lastVal(b)).reverse();
+      const hitsLines = (b: Box, keep: (k: number) => boolean) => pix.some((pts, k) => keep(k) && pts.some((p, j) => j > 0 && segmentHitsBox(pts[j - 1][0], pts[j - 1][1], p[0], p[1], b)));
+      const NEAR_PX = 40;
+      const offsets: number[] = [];
+      for (let d = 0; d <= 300; d += 8) offsets.push(-12 - d, 22 + d);
+      offsets.sort((a, b) => Math.abs(a) - Math.abs(b));
+      order.forEach((i) => {
+        const [ex, ey] = pix[i][pix[i].length - 1];
+        const text = view.lines[i].label + ' ' + formatValue(view.unit, lastVal(i));
+        const lab = el('text', { x: ex - 10, y: ey + 22, 'text-anchor': 'end', 'font-size': 12.5, 'font-weight': 600, fill: 'var(--ink)', stroke: 'var(--card)', 'stroke-width': 4, 'paint-order': 'stroke', 'stroke-opacity': 0.85 }, text);
+        const len = measure(lab, text, 7);
+        const boxAt = (ly: number): Box => ({ x0: ex - 10 - len, x1: ex - 10, y0: ly - 12, y1: ly + 3 });
+        const inPlot = (ly: number) => ly - 12 >= T && ly + 3 <= H - B + 10;
+        const onLabel = (ly: number) => placedLabels.some((b) => boxesOverlap(b, boxAt(ly), 0));
+        const clear = (ly: number) => inPlot(ly) && !hitsLines(boxAt(ly), () => true) && !onLabel(ly);
+        let ly = ey + 22, moved = false;
+        if (ly - prevLabelY < 16) ly = prevLabelY + 16; // keep two end labels from overlapping
+        const onOther = hitsLines(boxAt(ly), (k) => k !== i) || onLabel(ly);
+        const onOwn = !onOther && hitsLines(boxAt(ly), (k) => k === i);
+        let found: number | undefined;
+        if (onOther) found = offsets.map((d) => ey + d).find(clear);
+        else if (onOwn) found = offsets.filter((d) => Math.abs(d - 22) <= NEAR_PX).map((d) => ey + d).find(clear);
+        if (found !== undefined) { ly = found; moved = true; } else prevLabelY = ly;
+        placedLabels.push(boxAt(ly));
+        lab.setAttribute('y', String(ly));
+        // A label that has moved well away from its end point gets a thin leader line back to it.
+        if (moved && Math.abs(ly - ey) > 30) {
+          const lead = el('line', { x1: ex - 8, y1: ly - 4, x2: ex - 1, y2: ey + (ly > ey ? 3 : -3), stroke: 'var(--ink-3)', 'stroke-width': 1 });
+          svg.insertBefore(lead, lab);
+        }
+      });
+
+      // Hover read-out. Each line uses its own points: the cursor finds the nearest point of every
+      // line. The nearest of all sets the date at the top; another line's own date is shown in
+      // brackets when it differs, and a line with no point near the cursor reads "no figure".
       const cross = el('line', { y1: T, y2: H - B, stroke: 'var(--ink-2)', 'stroke-width': 1, visibility: 'hidden' });
-      const dots = view.lines.map((_, i) => el('circle', { r: 4.5, fill: `var(--series-${i + 1})`, stroke: 'var(--card)', 'stroke-width': 2, visibility: 'hidden' }));
+      const dots = view.lines.map((l) => el('circle', { r: 4.5, fill: `var(--series-${l.color})`, stroke: 'var(--card)', 'stroke-width': 2, visibility: 'hidden' }));
       const hit = el('rect', { x: L, y: T, width: plotW, height: H - T - B, fill: 'transparent' });
+      const spacing = lineRows.map((rows) => (rows.length > 1 ? (rows[rows.length - 1].t - rows[0].t) / (rows.length - 1) : 1));
       function move(ev: PointerEvent) {
         const b = svg.getBoundingClientRect(), px = (ev.clientX - b.left) / b.width * W;
-        const t = X0 + (px - L) / plotW * (X1 - X0);
-        let r = rows[0];
-        for (const q of rows) if (Math.abs(q.t - t) < Math.abs(r.t - t)) r = q;
-        const cx = x(r.t);
+        const t = xa + (px - L) / plotW * (X1 - xa);
+        const near = lineRows.map((rows) => {
+          let r = rows[0];
+          for (const q of rows) if (Math.abs(q.t - t) < Math.abs(r.t - t)) r = q;
+          return r;
+        });
+        let main = 0;
+        near.forEach((r, i) => { if (Math.abs(r.t - t) < Math.abs(near[main].t - t)) main = i; });
+        const r0 = near[main];
+        const cx = x(r0.t);
         cross.setAttribute('x1', String(cx)); cross.setAttribute('x2', String(cx)); cross.setAttribute('visibility', 'visible');
-        dots.forEach((d, i) => { d.setAttribute('cx', String(cx)); d.setAttribute('cy', String(y(r.values[i]))); d.setAttribute('visibility', 'visible'); });
         tip.replaceChildren();
         const head = document.createElement('b');
-        head.textContent = `${formatDate(r.date)} (${r.period})`;
+        head.textContent = `${formatDate(r0.date)} (${r0.period})`;
         tip.appendChild(head);
         view.lines.forEach((l, i) => {
+          const rows = lineRows[i], r = near[i];
+          // A line shows its nearest point if that is no farther than the line's own spacing or the nearest of all.
+          const inRange = i === main || Math.abs(r.t - t) <= Math.max(spacing[i], Math.abs(r0.t - t));
           if (i) tip.appendChild(document.createElement('br'));
-          tip.appendChild(document.createTextNode(`${l.label}: ${formatValue(view.unit, r.values[i])}`));
+          if (!inRange) {
+            tip.appendChild(document.createTextNode(`${l.label}: no figure`));
+            dots[i].setAttribute('visibility', 'hidden');
+            return;
+          }
+          tip.appendChild(document.createTextNode(`${l.label}: ${formatValue(view.unit, r.value)}${r.date === r0.date ? '' : ` (${r.period})`}`));
+          dots[i].setAttribute('cx', String(x(r.t))); dots[i].setAttribute('cy', String(y(r.value))); dots[i].setAttribute('visibility', 'visible');
         });
         tip.style.display = 'block';
         const left = cx / W * b.width;
@@ -197,14 +299,16 @@ const first = chart.views[0];
       });
 
       caption.textContent = view.caption + ' ' + chart.source;
-      legend.replaceChildren(...view.lines.map((l, i) => {
+      legend.replaceChildren(...view.lines.map((l) => {
         const wrap = document.createElement('span');
         const sw = document.createElement('span');
         sw.className = 'sw';
-        sw.style.background = `var(--series-${i + 1})`;
+        sw.style.background = `var(--series-${l.color})`;
         wrap.append(sw, l.label);
         return wrap;
       }));
+      legendTarget.hidden = !band;
+      legendTargetLabel.textContent = band ? band.label : '';
     }
 
     function select(id: string) {

@@ -48,6 +48,14 @@ export function formatMonthYear(iso: string): string {
   return `${MONTHS[+m[2] - 1]} ${m[1]}`;
 }
 
+// "YYYY-MM-DD" at the end of a quarter -> "September quarter 2026"
+export function formatQuarterYear(iso: string): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  if (!m) throw new Error(`Not a date: ${iso}`);
+  if (![3, 6, 9, 12].includes(+m[2])) throw new Error(`Not the end of a quarter: ${iso}`);
+  return `${MONTHS[+m[2] - 1]} quarter ${m[1]}`;
+}
+
 // "YYYY-MM-DD" -> the year plus the fraction of the year gone, for placing marks on the x axis.
 export function decimalYear(iso: string): number {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);

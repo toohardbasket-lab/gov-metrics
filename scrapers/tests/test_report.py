@@ -306,7 +306,7 @@ def test_source_change_alone_does_not_set_the_flag():
 
 
 def test_run_all_registry_and_status():
-    assert [n for n, _ in run_all.REGISTRY] == ["cpi_june", "commonwealth_debt", "unemployment_rate"]
+    assert [n for n, _ in run_all.REGISTRY] == ["cpi_june", "commonwealth_debt", "unemployment_rate", "inflation"]
     # a script that fails and a script that works, run without touching the network
     with tempfile.TemporaryDirectory() as tmp:
         good = Path(tmp) / "good.py"
@@ -372,6 +372,44 @@ def test_unemployment_metric_revision_and_source_change_in_a_report():
         rev = section(md, "Revised history")
         assert changed is True and "2 revised figures" in summary, summary
         assert rev.count("**LARGE:**") == 1 and "+0.5 percentage points" in rev and "+0.2 percentage points" in rev, rev
+
+
+def test_inflation_metric_labels_tolerances_and_a_new_quarter_in_a_report():
+    """Three series of two frequencies, labels with commas, and a comment between the keys: the report's
+    small reader must still find each label and tolerance, and the quarterly rows must report like any other."""
+    import shutil
+    repo = HERE.parent.parent
+    d = report.read_definition(repo, "inflation")
+    assert d["labels"]["headline_quarterly"] == "Inflation, quarterly CPI", d["labels"]
+    assert d["labels"]["trimmed_mean_quarterly"] == "Underlying inflation (trimmed mean)"
+    assert d["revisions"]["headline_quarterly"] == {"max_abs": report.Decimal("0.1")}, d["revisions"]
+    assert d["revisions"]["headline_monthly"] == {"max_abs": report.Decimal("0.1")}
+    assert d["revisions"]["trimmed_mean_quarterly"] == {"max_abs": report.Decimal("0.3")}
+    with tempfile.TemporaryDirectory() as tmp:
+        for side in ("before", "after"):
+            shutil.copytree(repo / "metrics" / "inflation", Path(tmp) / side / "metrics" / "inflation")
+            (Path(tmp) / side / "shared").mkdir(parents=True)
+        status = Path(tmp) / "status.json"
+        status.write_text(json.dumps({"inflation": {"ok": True, "exit_code": 0, "output_tail": ""}}))
+        data = Path(tmp) / "after" / "metrics" / "inflation" / "data.csv"
+        lines = data.read_text().split("\n")
+        for i, l in enumerate(lines):
+            c = l.split(",")
+            if c[0] == "2000-06-30" and c[2] == "headline_quarterly":
+                c[4] = str(round(float(c[4]) + 0.2, 1))      # over its 0.1
+                lines[i] = ",".join(c)
+            if c[0] == "2000-06-30" and c[2] == "trimmed_mean_quarterly":
+                c[4] = str(round(float(c[4]) + 0.2, 1))      # within its 0.3
+                lines[i] = ",".join(c)
+        lines = [l for l in lines if l != ""] + ["2026-12-31,2026-Q4,headline_quarterly,Australia,3.8,pct,actual", ""]
+        data.write_text("\n".join(lines))
+        md, summary, changed = report.build_report(Path(tmp) / "before", Path(tmp) / "after", status, TODAY)
+        new, rev = section(md, "New data points"), section(md, "Revised history")
+        assert changed is True and "1 new data point" in summary and "2 revised figures" in summary, summary
+        assert "Inflation, quarterly CPI (headline_quarterly), Australia" in new and "2026-12-31 (2026-Q4): 3.8%, actual" in new, new
+        assert rev.count("**LARGE:**") == 1 and "(headline_quarterly)" in rev and rev.count("+0.2 percentage points") == 2, rev
+        head_q, head_t = rev.index("(headline_quarterly)"), rev.index("(trimmed_mean_quarterly)")
+        assert head_q < rev.index("**LARGE:**") < head_t, rev      # the LARGE line is under the headline heading, not the trimmed mean
 
 
 def main():

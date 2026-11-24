@@ -1,0 +1,160 @@
+# Definition file for one metric. Everything the page shows, other than the numbers
+# in data.csv, comes from this file. See metrics/README.md for what each field does.
+# Words in braces, such as {first_year}, are filled in from the data when the page is built.
+slug: inflation
+title: Inflation
+theme: Work and incomes
+jurisdiction: Australia
+description: How much consumer prices rose over twelve months, each quarter since 1950, against the 2 to 3 per cent target.
+lede: "How much consumer prices rose over the previous twelve months, each quarter since {first_year} and each month since April 2025, with the 2 to 3 per cent target band shaded."
+
+draft: true
+draft_banner: "Draft, not for publication. The figures are read from the ABS and the Reserve Bank by code and have not yet had the human check the plan requires."
+
+# {latest_period} names the period of the latest row of this series (the monthly CPI), because
+# three series end on the same date and the first one found would be arbitrary.
+latest_period_series: headline_monthly
+
+# Three series of two frequencies (quarterly and monthly). The validator (npm run validate) stops the
+# build if a quarter or month is missing, a date is not the last day of its quarter or month, or a value
+# falls outside the plausible range. There is no step check (max_step_pct): inflation rates cross zero,
+# so a step as a per cent of the earlier figure means nothing.
+series:
+  - id: headline_quarterly
+    label: Inflation, quarterly CPI
+    definition: Year-ended change in the Consumer Price Index, all groups, weighted average of the eight capital cities, quarterly, original.
+    source_table: Reserve Bank of Australia, table G1, series GCPIAGYP
+    frequency: quarterly
+    plausible: {min: -5, max: 30}
+    # Revision tolerance: headline CPI is not revised, so any change over 0.1 points blocks. The trimmed mean is seasonally adjusted and re-estimated, so up to 0.3 points is allowed.
+    revision: {max_abs: 0.1}
+  - id: headline_monthly
+    label: Inflation, monthly CPI
+    definition: Year-ended change in the complete monthly Consumer Price Index, all groups, weighted average of the eight capital cities, original.
+    source_table: ABS, Consumer Price Index, Australia, Table 1
+    frequency: monthly
+    plausible: {min: -5, max: 30}
+    revision: {max_abs: 0.1}
+  - id: trimmed_mean_quarterly
+    label: Underlying inflation (trimmed mean)
+    definition: Year-ended change in the trimmed mean, quarterly, seasonally adjusted.
+    source_table: ABS, Consumer Price Index, Australia (Data API CPI_Q 3.999902.20.50.Q)
+    frequency: quarterly
+    plausible: {min: -2, max: 15}
+    revision: {max_abs: 0.3}
+
+# The headline figures above the chart. Values are read from data.csv.
+# sub_month: true puts the month of the figure beneath it; sub_quarter: true puts the quarter ("September quarter 2026").
+tiles:
+  - label: Inflation, monthly CPI
+    series: headline_monthly
+    sub_month: true
+  - label: Underlying inflation (trimmed mean)
+    series: trimmed_mean_quarterly
+    sub_quarter: true
+  - label: Target status
+    text: Ongoing target, no deadline
+    sub_text: 2 to 3 per cent
+
+# The chart. Each line uses its own points. target_band shades the 2 to 3 per cent band; from starts a view
+# later than the data. color picks the series colour (1 blue, 2 orange, 3 plum) so a series keeps its colour in every view.
+views:
+  - id: since-1950
+    label: Since 1950
+    derive: none
+    lines:
+      - series: headline_quarterly
+        label: Inflation, quarterly CPI
+        color: 1
+      - series: headline_monthly
+        label: Inflation, monthly CPI
+        color: 2
+    target_band: {min: 2, max: 3, label: "Target band 2–3%"}
+    caption: Per cent change over twelve months. Quarterly figures from 1950; monthly figures from April 2025.
+  - id: since-1983
+    label: Since 1983, with underlying
+    derive: none
+    from: 1983
+    lines:
+      - series: headline_quarterly
+        label: Inflation, quarterly CPI
+        color: 1
+      - series: trimmed_mean_quarterly
+        label: Underlying inflation (trimmed mean)
+        color: 3
+      - series: headline_monthly
+        label: Inflation, monthly CPI
+        color: 2
+    target_band: {min: 2, max: 3, label: "Target band 2–3%"}
+    caption: Per cent change over twelve months. The trimmed mean starts in 1983.
+chart_alt: "Line chart of inflation over twelve months, {first_year} to {last_year}, with the 2 to 3 per cent target band shaded. The full figures are in the table below."
+chart_source: "Sources: ABS, Consumer Price Index, Australia; Reserve Bank of Australia, table G1. Latest month: {latest_period}."
+
+# The full table. Newest first, one row for each date that has a figure in any series.
+# period_format: month_year shows the date as "September 2026"; missing: "" leaves a cell blank where a series has no figure.
+table:
+  period_header: Quarter or month ending
+  period_format: month_year
+  missing: ""
+  columns:
+    - header: "Quarterly CPI %"
+      series: headline_quarterly
+    - header: "Monthly CPI %"
+      series: headline_monthly
+    - header: "Trimmed mean %"
+      series: trimmed_mean_quarterly
+
+meaning:
+  - "**Inflation** here is the rise in the Consumer Price Index over the previous twelve months. The index tracks the prices of a fixed basket of goods and services bought by households in the eight capital cities."
+  - "**Underlying inflation** (the trimmed mean) leaves out the items with the largest price rises and falls in each period, to show the general trend. The Reserve Bank watches it closely, but the target is set on headline inflation."
+  - "Since late 2025 the ABS has published a complete monthly CPI. It is now the main measure of headline inflation and the benchmark for the target. Quarterly figures are still published and give the long history."
+
+# Targets and forecasts ledger.
+targets:
+  - label: Target
+    text: "Headline inflation between 2 and 3 per cent, aiming for the midpoint. The Reserve Bank's Monetary Policy Board sets interest rates to meet it, as agreed with the Australian Government in the Statement on the Conduct of Monetary Policy. It is an ongoing target with no deadline, so this page gives no on-track status."
+  - label: Target measure
+    text: "Since late 2025 the benchmark is twelve-month headline inflation from the complete monthly CPI. Before that it was twelve-month headline inflation from the quarterly CPI. {link}"
+    link:
+      label: Reserve Bank, Statement on Monetary Policy, November 2025, Box C
+      url: https://www.rba.gov.au/publications/smp/2025/nov/box-c-the-transition-to-a-complete-monthly-cpi.html
+  - label: Reserve Bank forecast
+    text: "Not yet added. To be taken from the latest Statement on Monetary Policy before publication."
+
+# Sources and method ledger. {link} is replaced by the link; {update} and {retrieved}
+# by the fields below.
+update: "Monthly CPI: each month, when the ABS publishes Consumer Price Index, Australia, usually late in the following month. Quarterly figures and the trimmed mean: after each quarter."
+retrieved: 2026-11-24
+sources_method:
+  - label: Inflation, quarterly CPI
+    link:
+      label: Reserve Bank of Australia, table G1
+      url: https://www.rba.gov.au/statistics/tables/
+    text: "{link}, series GCPIAGYP. Each quarter is checked against the twelve-month change worked out from the ABS quarterly CPI index (Data API CPI 1.10001.10.50.Q); all agree."
+  - label: Inflation, monthly CPI
+    link:
+      label: ABS, Consumer Price Index, Australia
+      url: https://www.abs.gov.au/statistics/economy/price-indexes-and-inflation/consumer-price-index-australia/latest-release
+    text: "{link}, read from the ABS Data API (CPI 3.10001.10.50.M) and checked month by month against Table 1."
+  - label: Underlying inflation (trimmed mean)
+    link:
+      label: ABS, Consumer Price Index, Australia
+      url: https://www.abs.gov.au/statistics/economy/price-indexes-and-inflation/consumer-price-index-australia/latest-release
+    text: "{link}, read from the ABS Data API (CPI_Q 3.999902.20.50.Q) and checked against Reserve Bank table G1 (series GCPIOCPMTMYP)."
+  - label: Updated
+    text: "{update} Data retrieved {retrieved}."
+
+read_with_care:
+  - "The benchmark changed in late 2025 from the quarterly CPI to the monthly CPI. One compares a month with the same month a year earlier, the other a whole quarter with the same quarter a year earlier, so the two can differ by several tenths of a point for the same date."
+  - "The ABS publishes twelve-month figures from the complete monthly CPI only from April 2025, so the monthly line is short."
+  - "Headline inflation is not seasonally adjusted. The trimmed mean is, and the ABS re-estimates it, so past figures can change slightly."
+  - "The Reserve Bank's own table shows slightly different trimmed mean figures for some quarters before 2002, by up to 0.2 points. This page uses the ABS's figures."
+  - "The goods and services tax, introduced on 1 July 2000, added a one-off rise to prices, which shows in the twelve-month figures from September 2000 to June 2001."
+  - "The CPI is not a cost-of-living index. It measures the prices of a fixed basket, and each household's costs differ. The ABS publishes separate living cost indexes for different kinds of household."
+  - "Government shading starts on the day each government was sworn in. Recessions and crises are marked on every chart on this site using the same list. The marks give context and do not assign cause."
+
+corrections_text: None yet. Every correction to this page will be listed here with its date and what changed.
+
+# Fields kept from the worked-example definition file.
+state_panel: false
+inclusion_tests: {outcome: true, official: true, history: true, ongoing: true, no_editorial_choice: "the standard headline measure, plus the Reserve Bank's main underlying measure"}

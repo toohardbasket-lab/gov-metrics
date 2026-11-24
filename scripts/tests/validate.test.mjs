@@ -156,6 +156,56 @@ plainCase('monthly: a December to January step crosses the year', () => {
   return check('year end', r.code !== 0 && /is missing 1999-12-31, 2000-01-31; the rows jump from 1999-11-30 to 2000-02-29/.test(r.out), r.out);
 });
 
+// ---- quarterly data (inflation: two quarterly series and one monthly series in one file)
+const INF = 'inflation';
+const inf = (match, fn) => editRows(match, fn, INF);
+const bump = (by) => (l) => setValue(l, String(Math.round((Number(l.split(',')[4]) + by) * 10) / 10));
+failCase('quarterly: delete a middle quarter', () => inf(row('2000-06-30', 'headline_quarterly'), () => null), /headline_quarterly \(Australia\) is missing 2000-06-30; the rows jump from 2000-03-31 to 2000-09-30/);
+failCase('quarterly: delete two quarters in a row', () => inf((l) => (l.startsWith('2000-06-30,') || l.startsWith('2000-09-30,')) && l.includes(',trimmed_mean_quarterly,'), () => null), /trimmed_mean_quarterly \(Australia\) is missing 2000-06-30, 2000-09-30; the rows jump from 2000-03-31 to 2000-12-31/);
+failCase('quarterly: delete a December quarter (the step crosses the year)', () => inf(row('1999-12-31', 'headline_quarterly'), () => null), /headline_quarterly \(Australia\) is missing 1999-12-31; the rows jump from 1999-09-30 to 2000-03-31/);
+failCase('quarterly: a date that is not the last day of its month', () => inf(row('2000-06-30', 'headline_quarterly'), (l) => l.replace('2000-06-30', '2000-06-29')), /on 2000-06-29 is not the last day of March, June, September or December, as quarterly data must be/);
+failCase('quarterly: a month end that is not a quarter end', () => inf(row('2000-06-30', 'trimmed_mean_quarterly'), (l) => l.replace('2000-06-30', '2000-07-31')), /on 2000-07-31 is not the last day of March, June, September or December/);
+failCase('quarterly: the first day of the quarter instead of the last', () => inf(row('2000-03-31', 'headline_quarterly'), (l) => l.replace('2000-03-31', '2000-01-01')), /on 2000-01-01 is not the last day of March, June, September or December/);
+failCase('quarterly: a quarter repeated', () => inf(row('1990-09-30', 'headline_quarterly'), (l) => [l, l]), /headline_quarterly \(Australia\) on 1990-09-30: duplicate of line \d+/);
+failCase('quarterly: the latest quarter removed (rows fall against the lock)', () => inf(row('2026-09-30', 'headline_quarterly'), () => null), /inflation\/data\.lock\.json: headline_quarterly \(Australia\) has 306 rows, fewer than the 307/);
+failCase('quarterly: headline above its plausible range', () => inf(row('1995-03-31', 'headline_quarterly'), (l) => setValue(l, '35.0')), /headline_quarterly \(Australia\) on 1995-03-31 is 35, outside the plausible range -5 to 30/);
+failCase('quarterly: trimmed mean above its plausible range', () => inf(row('1995-03-31', 'trimmed_mean_quarterly'), (l) => setValue(l, '16.0')), /trimmed_mean_quarterly \(Australia\) on 1995-03-31 is 16, outside the plausible range -2 to 15/);
+failCase('quarterly: monthly series in the same file still checks its months', () => inf(row('2025-07-31', 'headline_monthly'), () => null), /headline_monthly \(Australia\) is missing 2025-07-31; the rows jump from 2025-06-30 to 2025-08-31/);
+failCase('quarterly: a past headline quarter revised by 0.2 is blocked (limit 0.1)', () => inf(row('2008-06-30', 'headline_quarterly'), bump(0.2)), /headline_quarterly \(Australia\) on 2008-06-30 \(2008-Q2\) was [\d.]+ when last accepted and is now [\d.]+, a change of \+0\.2 \(the change is more than 0\.1\)/);
+failCase('quarterly: a past trimmed mean quarter revised by 0.4 is blocked (limit 0.3)', () => inf(row('2008-06-30', 'trimmed_mean_quarterly'), bump(0.4)), /trimmed_mean_quarterly \(Australia\) on 2008-06-30 \(2008-Q2\) was [\d.]+ when last accepted and is now [\d.]+, a change of \+0\.4 \(the change is more than 0\.3\)/);
+failCase('quarterly: a past monthly headline figure revised by 0.2 is blocked (limit 0.1)', () => inf(row('2025-12-31', 'headline_monthly'), bump(0.2)), /headline_monthly \(Australia\) on 2025-12-31 \(2025-12\) was [\d.]+ when last accepted and is now [\d.]+, a change of \+0\.2 \(the change is more than 0\.1\)/);
+failCase('quarterly: a sign flip on a past headline quarter is blocked', () => inf(row('2000-03-31', 'headline_quarterly'), (l) => setValue(l, String(-Number(l.split(',')[4])))), /headline_quarterly \(Australia\) on 2000-03-31 \(2000-Q1\) was [\d.]+ when last accepted and is now -[\d.]+/);
+failCase('quarterly: an unknown frequency names quarterly among the known ones', () => editFile(p('metrics', INF, 'metric.yml'), (t) => t.replace('frequency: quarterly', 'frequency: weekly')), /series "headline_quarterly" has frequency "weekly", which the validator does not know\. Known: annual, monthly, quarterly/);
+failCase('quarterly: a series with no frequency at all is refused', () => editFile(p('metrics', INF, 'metric.yml'), (t) => t.replace('    frequency: quarterly\n    plausible: {min: -5, max: 30}', '    plausible: {min: -5, max: 30}')), /series "headline_quarterly" has no "frequency"/);
+plainCase('quarterly: a past headline quarter revised by exactly 0.1 only warns', () => {
+  inf(row('2008-06-30', 'headline_quarterly'), bump(0.1));
+  const r = run();
+  return check('revised 0.1', r.code === 0 && /WARNING: metrics\/inflation\/data\.csv: data has changed since it was last accepted \(1 accepted figure revised/.test(r.out), `exit ${r.code}\n${r.out}`);
+});
+plainCase('quarterly: no step check is needed (a series that crosses zero passes without max_step_pct)', () => {
+  const t = readText(p('metrics', INF, 'metric.yml'));
+  const ok = !/^\s+max_step_pct:/m.test(t);
+  const r = run();
+  return check('no step check', ok && r.code === 0 && /PASS inflation: /.test(r.out), `has step check: ${!ok}\n${r.out}`);
+});
+plainCase('quarterly: a new December quarter on the end passes', () => {
+  const lines = readText(dataPath(INF)).split('\n').filter((l) => l !== '');
+  const last = lines.filter((l) => l.includes(',headline_quarterly,')).at(-1).split(',');
+  last[0] = '2026-12-31'; last[1] = '2026-Q4'; last[4] = '3.8';
+  writeFileSync(dataPath(INF), lines.concat([last.join(',')]).join('\n') + '\n');
+  const r = run();
+  return check('new quarter', r.code === 0 && !/FAIL/.test(r.out), `exit ${r.code}\n${r.out}`);
+});
+plainCase('quarterly: a new March quarter after a December one passes (year crossing)', () => {
+  const lines = readText(dataPath(INF)).split('\n').filter((l) => l !== '');
+  const last = lines.filter((l) => l.includes(',headline_quarterly,')).at(-1).split(',');
+  const dec = [...last]; dec[0] = '2026-12-31'; dec[1] = '2026-Q4'; dec[4] = '3.8';
+  const mar = [...last]; mar[0] = '2027-03-31'; mar[1] = '2027-Q1'; mar[4] = '3.6';
+  writeFileSync(dataPath(INF), lines.concat([dec.join(','), mar.join(',')]).join('\n') + '\n');
+  const r = run();
+  return check('year crossing', r.code === 0 && !/FAIL/.test(r.out), `exit ${r.code}\n${r.out}`);
+});
+
 // ---- source files
 failCase('change one byte of a source file', () => {
   const f = p('metrics', SLUG, 'sources', 'fbo-2025-26-part-1.docx');

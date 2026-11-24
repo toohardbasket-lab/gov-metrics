@@ -1,9 +1,13 @@
 /* Colours and fonts. Light by default, dark when the reader's device asks for it.
-   The two series colours (--series-1, --series-2) are the pair already checked for colour blindness. */
+   The two series colours (--series-1, --series-2) are the pair already checked for colour blindness.
+   --series-3 (plum) is used only by views with three lines; it was checked against the other two with a
+   colour-blindness simulation (deuteranopia, protanopia, tritanopia): the smallest colour distance to either
+   of them is about 30 (CIE76 delta E), against 18 for a green. The target band (--target-band-*) is a pale blue
+   fill with dashed edges, deliberately not a status colour. */
 :root {
   color-scheme: light dark;
   --paper: #f6f7f9; --card: #ffffff; --ink: #131a24; --ink-2: #4a5565; --ink-3: #6f7b8c; --rule: #d9dee6;
-  --accent: #16406e; --band: #e9edf2; --series-1: #2a78d6; --series-2: #eb6834; --note: #fff6dc; --note-rule: #e2c66a;
+  --accent: #16406e; --band: #e9edf2; --series-1: #2a78d6; --series-2: #eb6834; --series-3: #b0498a; --target-band-fill: rgba(42, 120, 214, 0.13); --target-band-edge: #5f8fcf; --note: #fff6dc; --note-rule: #e2c66a;
   --display: "Source Serif 4", Georgia, serif;
   --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
 }
@@ -12,14 +16,14 @@
   :root:not([data-theme="light"]) {
     color-scheme: dark;
     --paper: #12161c; --card: #1a1f27; --ink: #eef1f5; --ink-2: #b9c2cf; --ink-3: #8f9aaa; --rule: #303846;
-    --accent: #9cc3ef; --band: #222935; --series-1: #3987e5; --series-2: #d95926; --note: #2c2714; --note-rule: #6b5a1f;
+    --accent: #9cc3ef; --band: #222935; --series-1: #3987e5; --series-2: #d95926; --series-3: #e08cc0; --target-band-fill: rgba(110, 170, 240, 0.16); --target-band-edge: #6f9bd6; --note: #2c2714; --note-rule: #6b5a1f;
   }
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
   --paper: #12161c; --card: #1a1f27; --ink: #eef1f5; --ink-2: #b9c2cf; --ink-3: #8f9aaa; --rule: #303846;
-  --accent: #9cc3ef; --band: #222935; --series-1: #3987e5; --series-2: #d95926; --note: #2c2714; --note-rule: #6b5a1f;
+  --accent: #9cc3ef; --band: #222935; --series-1: #3987e5; --series-2: #d95926; --series-3: #e08cc0; --target-band-fill: rgba(110, 170, 240, 0.16); --target-band-edge: #6f9bd6; --note: #2c2714; --note-rule: #6b5a1f;
 }
 
 * { box-sizing: border-box; }

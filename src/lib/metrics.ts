@@ -2,7 +2,7 @@ import { readdirSync, statSync, existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parse as parseYaml } from 'yaml';
 import { parseCsv } from './csv';
-import { formatDate, formatMonthYear, formatTable, formatValue } from './format';
+import { formatDate, formatMonthYear, formatQuarterYear, formatTable, formatValue } from './format';
 import { escapeHtml, fillPlain, richText } from './text';
 
 const ROOT = process.cwd();
@@ -30,6 +30,7 @@ export interface MetricDef {
   jurisdiction: string;
   description?: string;
   lede: string;
+  latest_period_series?: string;
   draft?: boolean;
   draft_banner?: string;
   series: { id: string; label: string }[];
@@ -39,6 +40,7 @@ export interface MetricDef {
     sub?: { series: string; suffix: string };
     months_back?: number;
     sub_month?: boolean;
+    sub_quarter?: boolean;
     text?: string;
     sub_text?: string;
   }[];
@@ -46,12 +48,14 @@ export interface MetricDef {
     id: string;
     label: string;
     derive: 'none' | 'real';
-    lines: { series: string; label: string }[];
+    lines: { series: string; label: string; color?: number }[];
+    from?: number;
+    target_band?: { min: number; max: number; label: string };
     caption: string;
   }[];
   chart_alt: string;
   chart_source: string;
-  table: { period_header: string; columns: { header: string; series: string; derive?: 'real' }[] };
+  table: { period_header: string; period_format?: 'period' | 'month_year'; missing?: string; columns: { header: string; series: string; derive?: 'real' }[] };
   meaning: string[];
   targets: LedgerRow[];
   update: string;
@@ -72,13 +76,22 @@ interface DataRow {
   status: string;
 }
 
+// Each line carries its own points, so lines of different frequencies can share one chart.
+// `color` is 1 to 3 (the --series-N colours). `from` is the first year drawn, when the view starts
+// later than the data. `band` is a shaded band across the plot (for example a target range).
+export interface ChartLine {
+  label: string;
+  color: number;
+  points: { date: string; period: string; value: number }[];
+}
 export interface ChartView {
   id: string;
   label: string;
   caption: string;
   unit: string;
-  lines: { label: string }[];
-  points: { date: string; period: string; values: number[] }[];
+  from?: number;
+  band?: { min: number; max: number; label: string };
+  lines: ChartLine[];
 }
 export interface ChartData {
   alt: string;
@@ -174,6 +187,13 @@ export function loadMetric(slug: string): Metric {
     last_year: dataDates.at(-1)!.slice(0, 4),
     latest_period: data.find((r) => r.date === dataDates.at(-1))!.period,
   };
+  // With several series ending on the same date the first row found is not meaningful, so a metric
+  // can say which series {latest_period} names (the period of that series' latest row).
+  if (def.latest_period_series !== undefined) {
+    const own = data.filter((r) => r.series === def.latest_period_series);
+    need(own.length > 0, slug, `latest_period_series "${def.latest_period_series}" has no rows in data.csv`);
+    textTokens.latest_period = own.reduce((a, b) => (b.date > a.date ? b : a)).period;
+  }
   if (juneDates.length > 0) {
     const latestJune = juneDates.at(-1)!;
     textTokens.real_base = formatMonthYear(latestJune);
@@ -204,21 +224,40 @@ export function loadMetric(slug: string): Metric {
     return derive === 'real' ? realValue(row, latestJune!) : row.value;
   };
 
-  // Chart views
+  // Chart views. Each line uses its own points (a series with no figure on a date has no point
+  // there), so quarterly and monthly lines can share a chart.
   const views: ChartView[] = def.views.map((v) => {
-    need(v.lines.length >= 1 && v.lines.length <= 2, slug, `view "${v.id}" must have one or two lines (the page defines two series colours)`);
+    need(v.lines.length >= 1 && v.lines.length <= 3, slug, `view "${v.id}" must have one to three lines (the page defines three series colours)`);
     const units = new Set(v.lines.map((l) => unitOf(l.series, `view "${v.id}"`)));
     need(units.size === 1, slug, `view "${v.id}" mixes units; one scale per view`);
     const ids = v.lines.map((l) => l.series);
     const latestJune = v.derive === 'real' ? latestJuneFor(ids) : undefined;
-    const dates = [...new Set(ids.flatMap((id) => [...bySeries.get(id)!.keys()]))].sort();
-    const points = [];
-    for (const date of dates) {
-      const values = ids.map((id) => valueFor(id, date, v.derive, latestJune));
-      if (values.some((x) => x === undefined)) continue;
-      points.push({ date, period: bySeries.get(ids[0])!.get(date)!.period, values: values as number[] });
+    if (v.from !== undefined) need(Number.isInteger(v.from) && v.from > 1000 && v.from < 3000, slug, `view "${v.id}" has a "from" that is not a year`);
+    const b = v.target_band;
+    if (b !== undefined) {
+      need(typeof b.min === 'number' && typeof b.max === 'number' && b.min < b.max, slug, `view "${v.id}" has a target_band whose min and max are not numbers with min below max`);
+      need(typeof b.label === 'string' && b.label.trim() !== '', slug, `view "${v.id}" has a target_band with no label`);
     }
-    return { id: v.id, label: fill(v.label), caption: fill(v.caption), unit: [...units][0], lines: v.lines.map((l) => ({ label: l.label })), points };
+    const firstDate = v.from !== undefined ? `${v.from}-01-01` : '0000-01-01';
+    const lines: ChartLine[] = v.lines.map((l, i) => {
+      const color = l.color ?? i + 1;
+      need(Number.isInteger(color) && color >= 1 && color <= 3, slug, `view "${v.id}" has a line colour that is not 1, 2 or 3`);
+      const points: ChartLine['points'] = [];
+      for (const date of [...bySeries.get(l.series)!.keys()].sort()) {
+        if (date < firstDate) continue;
+        const value = valueFor(l.series, date, v.derive, latestJune);
+        if (value === undefined) continue;
+        points.push({ date, period: bySeries.get(l.series)!.get(date)!.period, value });
+      }
+      need(points.length > 0, slug, `view "${v.id}" has no points for series "${l.series}"${v.from !== undefined ? ` from ${v.from}` : ''}`);
+      return { label: l.label, color, points };
+    });
+    return {
+      id: v.id, label: fill(v.label), caption: fill(v.caption), unit: [...units][0],
+      ...(v.from !== undefined ? { from: v.from } : {}),
+      ...(b !== undefined ? { band: { min: b.min, max: b.max, label: b.label } } : {}),
+      lines,
+    };
   });
 
   const governments = readCsv(join(ROOT, 'shared', 'governments.csv'))
@@ -258,8 +297,10 @@ export function loadMetric(slug: string): Metric {
         need(s.date === r.date, slug, `tile "${t.label}" and its sub series have different latest dates`);
         sub = `${formatValue(s.unit, s.value)} ${t.sub.suffix}`;
       }
+      need(!(t.sub_month && t.sub_quarter), slug, `tile "${t.label}" cannot have both sub_month and sub_quarter`);
       if (t.sub_month) sub = formatMonthYear(r.date);
-      const key = t.sub_month ? t.label : `${t.label}, ${formatDate(r.date)}`;
+      if (t.sub_quarter) sub = formatQuarterYear(r.date);
+      const key = t.sub_month || t.sub_quarter ? t.label : `${t.label}, ${formatDate(r.date)}`;
       return { key, value: formatValue(r.unit, r.value), sub, isText: false };
     }
     need(t.text !== undefined, slug, `tile "${t.label}" needs either series or text`);
@@ -273,11 +314,16 @@ export function loadMetric(slug: string): Metric {
   const realJune = def.table.columns.some((c) => c.derive === 'real')
     ? latestJuneAll(def.table.columns.filter((c) => c.derive === 'real').map((c) => c.series))
     : undefined;
+  // period_format: month_year shows the row's date as "September 2026" (for tables that mix
+  // quarterly and monthly series); missing: sets what a cell with no figure shows (default n/a).
+  const fmt = def.table.period_format;
+  need(fmt === undefined || fmt === 'period' || fmt === 'month_year', slug, 'table period_format must be period or month_year');
+  const missingText = def.table.missing ?? 'n/a';
   const rows = allDates.map((date) => {
-    const period = data.find((r) => r.date === date)!.period;
+    const period = fmt === 'month_year' ? formatMonthYear(date) : data.find((r) => r.date === date)!.period;
     const cells = colInfo.map(({ unit, c }) => {
       const v = valueFor(c.series, date, c.derive, realJune);
-      return v === undefined ? 'n/a' : formatTable(unit, v);
+      return v === undefined ? missingText : formatTable(unit, v);
     });
     return { period, cells };
   });
