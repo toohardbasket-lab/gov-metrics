@@ -25,7 +25,7 @@ const json = JSON.stringify(panel).replace(/</g, '\\u003c');
       <figure class="panel-cell" data-place={p.label}>
         <figcaption>{p.label}</figcaption>
         <div class="panel-wrap">
-          <svg viewBox="0 0 300 200" role="img" aria-label={`${p.label}: twelve-month change, ${p.points[0].period} to ${p.points[p.points.length - 1].period}`}></svg>
+          <svg viewBox="0 0 300 200" role="img" aria-label={`${p.label}: ${panel.table.headers[panel.table.headers.length - 1]}, ${p.points[0].period} to ${p.points[p.points.length - 1].period}`}></svg>
           <div class="panel-tip"></div>
         </div>
       </figure>
@@ -38,7 +38,7 @@ const json = JSON.stringify(panel).replace(/</g, '\\u003c');
       </thead>
       <tbody>
         {panel.table.rows.map((r) => (
-          <tr><td>{r.place}</td><td>{r.month}</td><td>{r.value}</td></tr>
+          <tr><td>{r.place}</td><td>{r.month}</td>{r.extras.map((x) => <td>{x}</td>)}<td>{r.value}</td></tr>
         ))}
       </tbody>
     </table>
@@ -63,7 +63,7 @@ const json = JSON.stringify(panel).replace(/</g, '\\u003c');
 </style>
 
 <script>
-  import { decimalYear, formatAxis, formatMonthYear, formatValue } from '../lib/format';
+  import { decimalYear, formatAxis, formatDate, formatMonthYear, formatValue } from '../lib/format';
 
   const NS = 'http://www.w3.org/2000/svg';
   // Drawing area of one small chart, in the SVG's own units.
@@ -72,7 +72,7 @@ const json = JSON.stringify(panel).replace(/</g, '\\u003c');
 
   type Pt = { date: string; period: string; value: number };
   type Panel = {
-    unit: string; nationalLabel: string; national: Pt[];
+    unit: string; frequency: string; nationalLabel: string; national: Pt[];
     places: { label: string; name: string; abbreviation: string; points: Pt[] }[];
     governments: { date: string; party: string }[];
     events: { date: string; label: string }[];
@@ -129,7 +129,10 @@ const json = JSON.stringify(panel).replace(/</g, '\\u003c');
         el('line', { x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: v === 0 ? 'var(--ink-3)' : 'var(--rule)', 'stroke-width': 1 });
         el('text', { x: L - 5, y: y(v) + 4, 'text-anchor': 'end', 'font-size': 10.5, fill: 'var(--ink-3)' }, formatAxis(panel.unit, +v.toFixed(6)));
       }
-      for (let yr = Math.ceil(xa); yr <= xb; yr++) {
+      // Year labels: every year if they fit, otherwise every second or fifth year (about 30 px each).
+      const pxPerYear = plotW / (xb - xa);
+      const yearStep = [1, 2, 5, 10].find((k) => k * pxPerYear >= 34) ?? 10;
+      for (let yr = Math.ceil(xa / yearStep) * yearStep; yr <= xb; yr += yearStep) {
         el('text', { x: x(yr), y: H - B + 14, 'text-anchor': 'middle', 'font-size': 10.5, fill: 'var(--ink-3)' }, yr);
       }
       // Event marks from shared/events.csv that fall inside the period (none do for a short series).
@@ -158,7 +161,7 @@ const json = JSON.stringify(panel).replace(/</g, '\\u003c');
         const nat = natByDate.get(r.date);
         tip.replaceChildren();
         const head = document.createElement('b');
-        head.textContent = formatMonthYear(r.date);
+        head.textContent = panel.frequency === 'annual' ? formatDate(r.date) : formatMonthYear(r.date);
         tip.appendChild(head);
         tip.appendChild(document.createTextNode(`${place.name}: ${formatValue(panel.unit, r.value)}`));
         tip.appendChild(document.createElement('br'));

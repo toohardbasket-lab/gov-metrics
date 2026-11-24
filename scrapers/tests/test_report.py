@@ -208,6 +208,19 @@ def test_parse_revision():
         assert report.parse_revision(bad) is None, bad
 
 
+def test_a_figure_that_becomes_a_code_is_a_large_revision_and_the_edition_note_is_not_a_download():
+    rev = report.parse_revision("{max_abs: 1, max_pct: 2, pct_floor: 100}")
+    assert report.revision_breach("1234", "na", rev) and report.revision_breach("..", "5", rev) and report.revision_breach("na", "np", rev)
+    assert not report.revision_breach("..", "..", rev) and not report.revision_breach("1000", "1010", rev) and report.revision_breach("1000", "1030", rev)
+    with tempfile.TemporaryDirectory() as tmp:
+        for side in ("before", "after"):
+            d = Path(tmp) / side / "metrics/toy/sources"
+            d.mkdir(parents=True)
+            (d / "manifest.json").write_text(json.dumps({"rogs-editions": {"editions": {"2025": "2026"}}}))
+        lines, changed = report.source_lines(Path(tmp) / "before", Path(tmp) / "after")
+        assert lines == [] and changed == 0, lines
+
+
 def test_more_than_fifteen_revisions_are_summarised():
     years = tuple(range(2000, 2030))
     over = {y: str(5000 + y) for y in years}
@@ -306,7 +319,7 @@ def test_source_change_alone_does_not_set_the_flag():
 
 
 def test_run_all_registry_and_status():
-    assert [n for n, _ in run_all.REGISTRY] == ["cpi_june", "commonwealth_debt", "unemployment_rate", "inflation", "wages_and_prices", "rents"]
+    assert [n for n, _ in run_all.REGISTRY] == ["cpi_june", "commonwealth_debt", "unemployment_rate", "inflation", "wages_and_prices", "rents", "social_housing"]
     # the scraper that copies the inflation page's figures must come after the inflation scraper
     names = [n for n, _ in run_all.REGISTRY]
     assert run_all.DEPENDS_ON == {"wages_and_prices": "inflation"} and names.index("inflation") < names.index("wages_and_prices")

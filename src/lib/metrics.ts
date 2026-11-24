@@ -4,10 +4,12 @@ import { parse as parseYaml } from 'yaml';
 import { parseCsv } from './csv';
 import { formatDate, formatMonthYear, formatQuarterYear, formatTable, formatValue } from './format';
 import { escapeHtml, fillPlain, richText } from './text';
-import { deriveYearEndedChange } from './derive.mjs';
+import { computeDerived, isValueCode } from './derive.mjs';
 import { STATE_ORDER } from './jurisdictions.mjs';
 
 const ROOT = process.cwd();
+// The most lines one view can draw: the page defines this many series colours (--series-1 to --series-5).
+const MAX_LINES = 5;
 
 // Lists metric folders (metrics/<slug>/ that contain a metric.yml) at build time.
 export function listMetricSlugs(): string[] {
@@ -35,7 +37,7 @@ export interface MetricDef {
   latest_period_series?: string;
   draft?: boolean;
   draft_banner?: string;
-  series: { id: string; label: string; frequency?: string; derive?: { type: string; from: string; lag: number } }[];
+  series: { id: string; label: string; frequency?: string; derive?: { type: string; from?: string | string[]; lag?: number; numerator?: string; denominator?: string; factor?: number; decimals?: number; unit?: string } }[];
   state_panel?: boolean;
   state_panel_config?: {
     series: string;
@@ -44,6 +46,8 @@ export interface MetricDef {
     heading: string;
     note: string;
     headers: string[];
+    date_format?: 'period' | 'month_year';
+    extra_columns?: { header: string; series: string }[];
     places: { jurisdiction: string; abbreviation: string; name: string }[];
   };
   tiles: {
@@ -54,6 +58,7 @@ export interface MetricDef {
     months_back?: number;
     sub_month?: boolean;
     sub_quarter?: boolean;
+    sub_date?: boolean;
     text?: string;
     sub_text?: string;
   }[];
@@ -86,12 +91,13 @@ interface DataRow {
   jurisdiction: string;
   value: number;
   valueText: string; // as written in data.csv (derived figures are worked out from this text)
+  isCode?: boolean; // the value is a source code (.., na, np, -), not a number: value is NaN
   unit: string;
   status: string;
 }
 
 // Each line carries its own points, so lines of different frequencies can share one chart.
-// `color` is 1 to 3 (the --series-N colours). `from` is the first year drawn, when the view starts
+// `color` is 1 to 5 (the --series-N colours). `from` is the first year drawn, when the view starts
 // later than the data. `band` is a shaded band across the plot (for example a target range).
 export interface ChartLine {
   label: string;
@@ -124,11 +130,12 @@ export interface PanelPlace {
 export interface PanelData {
   heading: string;
   note: string;
+  frequency: string;
   unit: string;
   nationalLabel: string;
   national: { date: string; period: string; value: number }[];
   places: PanelPlace[];
-  table: { headers: string[]; rows: { place: string; month: string; value: string }[] };
+  table: { headers: string[]; rows: { place: string; month: string; extras: string[]; value: string }[] };
   governments: { date: string; party: string }[];
   events: { date: string; label: string }[];
 }
@@ -158,10 +165,11 @@ function readCsv(path: string): Record<string, string>[] {
 
 function loadData(slug: string): DataRow[] {
   const rows = readCsv(join(ROOT, 'metrics', slug, 'data.csv')).map((r) => {
-    const value = Number(r.value);
-    if (r.value === '' || Number.isNaN(value)) throw new Error(`metrics/${slug}/data.csv: bad value "${r.value}" for ${r.series} ${r.date}`);
+    const isCode = isValueCode(r.value);
+    const value = isCode ? NaN : Number(r.value);
+    if (!isCode && (r.value === '' || Number.isNaN(value))) throw new Error(`metrics/${slug}/data.csv: bad value "${r.value}" for ${r.series} ${r.date}`);
     if (!/^\d{4}-\d{2}-\d{2}$/.test(r.date)) throw new Error(`metrics/${slug}/data.csv: bad date "${r.date}"`);
-    return { date: r.date, period: r.period, series: r.series, jurisdiction: r.jurisdiction, value, valueText: r.value, unit: r.unit, status: r.status };
+    return { date: r.date, period: r.period, series: r.series, jurisdiction: r.jurisdiction, value, valueText: r.value, isCode, unit: r.unit, status: r.status };
   });
   const seen = new Set<string>();
   for (const r of rows) {
@@ -205,19 +213,19 @@ export function loadMetric(slug: string): Metric {
     jurisdictionsOf.set(r.series, js);
   };
   for (const r of data) addRow(r);
-  // Derived series (metric.yml `derive`) are worked out here from a stored series, with the same code as
-  // the checker (src/lib/derive.mjs). A period with no figure `lag` periods earlier has no derived figure.
-  for (const s of def.series) {
-    if (s.derive === undefined) continue;
-    need(s.derive.type === 'year_ended_change', slug, `series "${s.id}" has derive type "${s.derive.type}", which the site does not know`);
-    const src = def.series.find((x) => x.id === s.derive!.from);
-    need(src && src.derive === undefined && src.frequency, slug, `series "${s.id}" must be worked out from a stored series that has a frequency`);
-    for (const j of jurisdictionsOf.get(s.derive.from) ?? []) {
-      const srcRows = [...store.get(`${s.derive.from}|${j}`)!.values()].map((r) => ({ date: r.date, period: r.period, valueText: r.valueText }));
-      for (const d of deriveYearEndedChange(srcRows, s.derive.lag, src!.frequency!)) {
-        addRow({ date: d.date, period: d.period, series: s.id, jurisdiction: j, value: d.value, valueText: d.valueText, unit: 'pct', status: 'actual' });
-      }
-    }
+  // Derived series (metric.yml `derive`) are worked out here with the same code as the checker
+  // (src/lib/derive.mjs). A date where an input is missing, unknown or a code has no derived figure.
+  const storedForDerive = new Map<string, { date: string; period: string; valueText: string; unit: string }[]>();
+  for (const r of data) {
+    const k = `${r.series}|${r.jurisdiction}`;
+    if (!storedForDerive.has(k)) storedForDerive.set(k, []);
+    storedForDerive.get(k)!.push({ date: r.date, period: r.period, valueText: r.valueText, unit: r.unit });
+  }
+  const worked = computeDerived(def.series, storedForDerive);
+  need(worked.problems.length === 0, slug, worked.problems.join(' '));
+  for (const [key, rows] of worked.groups) {
+    const sid = key.split('|')[0];
+    for (const d of rows) addRow({ date: d.date, period: d.period, series: sid, jurisdiction: key.slice(sid.length + 1), value: d.value, valueText: d.valueText, unit: d.unit, status: 'actual' });
   }
   const rowsOf = (id: string, jurisdiction: string | undefined, where: string) => {
     const js = jurisdictionsOf.get(id) ?? [];
@@ -283,14 +291,14 @@ export function loadMetric(slug: string): Metric {
   };
   const valueFor = (id: string, jurisdiction: string | undefined, date: string, derive?: string, latestJune?: string): number | undefined => {
     const row = rowsOf(id, jurisdiction, 'a figure').get(date);
-    if (!row) return undefined;
+    if (!row || row.isCode) return undefined; // a code (.., na, np, -) is a date with no figure
     return derive === 'real' ? realValue(row, latestJune!) : row.value;
   };
 
   // Chart views. Each line uses its own points (a series with no figure on a date has no point
   // there), so quarterly and monthly lines can share a chart.
   const views: ChartView[] = def.views.map((v) => {
-    need(v.lines.length >= 1 && v.lines.length <= 3, slug, `view "${v.id}" must have one to three lines (the page defines three series colours)`);
+    need(v.lines.length >= 1 && v.lines.length <= MAX_LINES, slug, `view "${v.id}" must have one to ${MAX_LINES} lines (the page defines ${MAX_LINES} series colours)`);
     const units = new Set(v.lines.map((l) => unitOf(l.series, l.jurisdiction, `view "${v.id}"`)));
     need(units.size === 1, slug, `view "${v.id}" mixes units; one scale per view`);
     const latestJune = v.derive === 'real' ? latestJuneFor(v.lines) : undefined;
@@ -303,7 +311,7 @@ export function loadMetric(slug: string): Metric {
     const firstDate = v.from !== undefined ? `${v.from}-01-01` : '0000-01-01';
     const lines: ChartLine[] = v.lines.map((l, i) => {
       const color = l.color ?? i + 1;
-      need(Number.isInteger(color) && color >= 1 && color <= 3, slug, `view "${v.id}" has a line colour that is not 1, 2 or 3`);
+      need(Number.isInteger(color) && color >= 1 && color <= MAX_LINES, slug, `view "${v.id}" has a line colour that is not a whole number from 1 to ${MAX_LINES}`);
       const points: ChartLine['points'] = [];
       const own = rowsOf(l.series, l.jurisdiction, `view "${v.id}"`);
       for (const date of [...own.keys()].sort()) {
@@ -333,8 +341,9 @@ export function loadMetric(slug: string): Metric {
   // Tiles: the latest value of each series.
   const latestOf = (id: string, jurisdiction: string | undefined, where: string) => {
     const m = rowsOf(id, jurisdiction, where);
-    const date = [...m.keys()].sort().at(-1)!;
-    return m.get(date)!;
+    const date = [...m.values()].filter((r) => !r.isCode).map((r) => r.date).sort().at(-1);
+    need(date, slug, `${where} uses series "${id}", which has no figure (only codes)`);
+    return m.get(date!)!;
   };
   // A tile with months_back shows the figure for the same calendar month that many months before
   // the latest (12 = a year earlier). A tile with sub_month puts the month and year beneath the
@@ -363,7 +372,9 @@ export function loadMetric(slug: string): Metric {
       need(!(t.sub_month && t.sub_quarter), slug, `tile "${t.label}" cannot have both sub_month and sub_quarter`);
       if (t.sub_month) sub = formatMonthYear(r.date);
       if (t.sub_quarter) sub = formatQuarterYear(r.date);
-      const key = t.sub_month || t.sub_quarter ? t.label : `${t.label}, ${formatDate(r.date)}`;
+      need(!(t.sub_date && (t.sub_month || t.sub_quarter)), slug, `tile "${t.label}" can have only one of sub_date, sub_month and sub_quarter`);
+      if (t.sub_date) sub = formatDate(r.date);
+      const key = t.sub_month || t.sub_quarter || t.sub_date ? t.label : `${t.label}, ${formatDate(r.date)}`;
       return { key, value: formatValue(r.unit, r.value), sub, isText: false };
     }
     need(t.text !== undefined, slug, `tile "${t.label}" needs either series or text`);
@@ -386,7 +397,11 @@ export function loadMetric(slug: string): Metric {
     const period = fmt === 'month_year' ? formatMonthYear(date) : data.find((r) => r.date === date)!.period;
     const cells = colInfo.map(({ unit, c }) => {
       const v = valueFor(c.series, c.jurisdiction, date, c.derive, realJune);
-      return v === undefined ? missingText : formatTable(unit, v);
+      if (v === undefined) {
+        const raw = rowsOf(c.series, c.jurisdiction, 'the table').get(date);
+        return raw?.isCode ? raw.valueText : missingText; // show the source's code as it is
+      }
+      return formatTable(unit, v);
     });
     return { period, cells };
   });
@@ -403,24 +418,38 @@ export function loadMetric(slug: string): Metric {
       need(c.places[i].jurisdiction === want.jurisdiction && c.places[i].abbreviation === want.abbreviation, slug, `state_panel_config place ${i + 1} must be ${want.jurisdiction} (${want.abbreviation}): the order is fixed`);
     });
     const unit = unitOf(c.series, c.national, 'the state panel');
-    const pointsOf = (j: string) =>
-      [...rowsOf(c.series, j, 'the state panel').values()].sort((a, b) => a.date.localeCompare(b.date)).map((r) => ({ date: r.date, period: r.period, value: r.value }));
+    const numeric = (j: string) => [...rowsOf(c.series, j, 'the state panel').values()].filter((r) => !r.isCode).sort((a, b) => a.date.localeCompare(b.date));
+    const pointsOf = (j: string) => numeric(j).map((r) => ({ date: r.date, period: r.period, value: r.value }));
     const places: PanelPlace[] = c.places.map((p) => {
       need(unitOf(c.series, p.jurisdiction, 'the state panel') === unit, slug, `the state panel mixes units (${p.jurisdiction})`);
       return { label: `${p.name} (${p.abbreviation})`, name: p.name, abbreviation: p.abbreviation, points: pointsOf(p.jurisdiction) };
     });
+    const dateFmt = c.date_format ?? 'month_year';
+    const extras = c.extra_columns ?? [];
+    const frequency = def.series.find((x) => x.id === c.series)?.frequency;
+    need(frequency, slug, `the state panel series "${c.series}" has no frequency`);
     panel = {
       heading: fill(c.heading),
       note: fill(c.note),
+      frequency: frequency!,
       unit,
       nationalLabel: c.national_label,
       national: pointsOf(c.national),
       places,
       table: {
-        headers: c.headers.map((h) => fill(h)),
-        rows: places.map((p) => {
+        headers: [c.headers[0], c.headers[1], ...extras.map((x) => x.header), c.headers[2]].map((h) => fill(h)),
+        rows: places.map((p, i) => {
           const last = p.points[p.points.length - 1];
-          return { place: p.label, month: formatMonthYear(last.date), value: formatValue(unit, last.value) };
+          const jur = c.places[i].jurisdiction;
+          return {
+            place: p.label,
+            month: dateFmt === 'period' ? last.period : formatMonthYear(last.date),
+            extras: extras.map((x) => {
+              const r = rowsOf(x.series, jur, 'the state panel').get(last.date);
+              return r && !r.isCode ? formatTable(r.unit, r.value) : missingText;
+            }),
+            value: formatValue(unit, last.value),
+          };
         }),
       },
       governments,

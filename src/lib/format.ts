@@ -14,6 +14,11 @@ function indexText(v: number): string {
   return s.endsWith('0') ? s.slice(0, -1) : s;
 }
 
+// A whole number with thousands separators (450,607).
+function countText(v: number): string {
+  return Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
 // Read-outs, tiles and chart end labels.
 export function formatValue(unit: string, v: number): string {
   if (unit === 'aud_million') {
@@ -23,6 +28,8 @@ export function formatValue(unit: string, v: number): string {
   if (unit === 'pct_gdp') return v.toFixed(1) + '%';
   if (unit === 'pct') return v.toFixed(1) + '%';
   if (unit === 'index') return indexText(v);
+  if (unit === 'count') return countText(v);
+  if (unit === 'rate') return v.toFixed(1);
   return unknownUnit(unit);
 }
 
@@ -32,6 +39,8 @@ export function formatAxis(unit: string, v: number): string {
   if (unit === 'pct_gdp') return v + '%';
   if (unit === 'pct') return v + '%';
   if (unit === 'index') return String(+v.toFixed(2));
+  if (unit === 'count') return Math.abs(v) >= 1000 ? +(v / 1000).toFixed(1) + 'k' : String(v);
+  if (unit === 'rate') return String(+v.toFixed(1));
   return unknownUnit(unit);
 }
 
@@ -41,6 +50,8 @@ export function formatTable(unit: string, v: number): string {
   if (unit === 'pct_gdp') return v.toFixed(1);
   if (unit === 'pct') return v.toFixed(1);
   if (unit === 'index') return indexText(v);
+  if (unit === 'count') return countText(v);
+  if (unit === 'rate') return v.toFixed(1);
   return unknownUnit(unit);
 }
 

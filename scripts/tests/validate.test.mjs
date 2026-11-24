@@ -11,7 +11,7 @@ import { createHash } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { deriveYearEndedChange, shiftPeriods, yearEndedChangeText } from '../../src/lib/derive.mjs';
+import { computeDerived, deriveYearEndedChange, isValueCode, ratioText, shiftPeriods, sumText, yearEndedChangeText } from '../../src/lib/derive.mjs';
 
 const REPO = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const VALIDATE = join(REPO, 'scripts', 'validate.mjs');
@@ -136,7 +136,7 @@ failCase('monthly: a rate outside the plausible range', () => un(unRow('1995-03-
 failCase('monthly: a month-to-month jump over the step limit', () => un(unRow('1995-03-31'), (l) => setValue(l, '14.0')), /moves .* per cent from .*, more than the limit of 35 per cent/);
 failCase('monthly: a past month revised by 0.5 is blocked', () => un(unRow('2008-06-30'), (l) => setValue(l, String(Math.round((Number(l.split(',')[4]) + 0.5) * 10) / 10))), /unemployment_rate \(Australia\) on 2008-06-30 \(2008-06\) was [\d.]+ when last accepted and is now [\d.]+, a change of \+0\.5 \(the change is more than 0\.3\)/);
 failCase('the pct unit is refused if format.ts cannot format it', () => editFile(p('src', 'lib', 'format.ts'), (t) => t.replaceAll("unit === 'pct')", "unit === 'pctx')")), /src\/lib\/format\.ts: formats the units .* but scripts\/validate\.mjs lists/);
-failCase('the pct unit is refused on a series if mistyped', () => un(unRow('2008-06-30'), (l) => { const c = l.split(','); c[5] = 'percent'; return c.join(','); }), /the unit "percent" is not one the site can format \(aud_million, pct_gdp, pct, index\)/);
+failCase('the pct unit is refused on a series if mistyped', () => un(unRow('2008-06-30'), (l) => { const c = l.split(','); c[5] = 'percent'; return c.join(','); }), /the unit "percent" is not one the site can format \(aud_million, pct_gdp, pct, index, count, rate\)/);
 plainCase('monthly: a past month revised by 0.2 only warns', () => {
   un(unRow('2008-06-30'), (l) => setValue(l, String(Math.round((Number(l.split(',')[4]) + 0.2) * 10) / 10)));
   const r = run();
@@ -495,7 +495,7 @@ plainCase('the index unit is known to the checker and the site', () => {
   return check('index unit', r.code === 0 && /PASS rents: 568 rows, 2 series, 1972-09-30 to 2026-09-30/.test(r.out) && /format\.ts/.test(readText(join(REPO, 'src', 'lib', 'format.ts'))) && /unit === 'index'/.test(readText(p('src', 'lib', 'format.ts'))), `exit ${r.code}\n${r.out}`);
 });
 failCase('the index unit is not formatted by the site (format.ts lacks it)', () => editFile(p('src', 'lib', 'format.ts'), (t) => t.replaceAll("  if (unit === 'index') return indexText(v);\n", '').replace("  if (unit === 'index') return String(+v.toFixed(2));\n", '')),
-  /src\/lib\/format\.ts: formats the units \[aud_million, pct, pct_gdp\] but scripts\/validate\.mjs lists \[aud_million, index, pct, pct_gdp\]/);
+  /src\/lib\/format\.ts: formats the units \[aud_million, count, pct, pct_gdp, rate\] but scripts\/validate\.mjs lists \[aud_million, count, index, pct, pct_gdp, rate\]/);
 failCase('an index figure outside its plausible range', () => rents(rentsRow('2020-12-31', 'rents_index_quarterly', 'Australia'), (l) => setValue(l, '650.00')), /rents_index_quarterly \(Australia\) on 2020-12-31 is 650, outside the plausible range 1 to 500/);
 failCase('an index figure given another unit (a series has one unit)', () => rents(rentsRow('2020-12-31', 'rents_index_quarterly', 'Australia'), (l) => { const c = l.split(','); c[5] = 'pct'; return c.join(','); }), /series "rents_index_quarterly" has more than one unit \(index, pct\)/);
 failCase('quarterly: delete a middle quarter of the index', () => rents(rentsRow('1990-03-31', 'rents_index_quarterly', 'Australia'), () => null), /rents_index_quarterly \(Australia\) is missing 1990-03-31; the rows jump from 1989-12-31 to 1990-06-30/);
@@ -526,8 +526,13 @@ failCase('derived: a derive with no from', () => editFile(rentsYml(), (t) => t.r
 failCase('derived: a field the checker does not know', () => editFile(rentsYml(), (t) => t.replace('lag: 4}', 'lag: 4, round: 2}')), /series "rents_quarterly" has a "derive" field "round" that the checker does not know/);
 failCase('derived: worked out from a monthly series but declared quarterly', () => editFile(rentsYml(), (t) => t.replace('from: rents_index_quarterly, lag: 4', 'from: rents_monthly, lag: 4')),
   /series "rents_quarterly" says it is quarterly but the series it is worked out from is monthly/);
-failCase('derived: worked out from another derived series', () => editFile(rentsYml(), (t) => t.replace('  - id: rents_monthly\n', "  - id: rents_chained\n    label: Chained\n    derive: {type: year_ended_change, from: rents_quarterly, lag: 4}\n    frequency: quarterly\n    plausible: {min: -20, max: 40}\n  - id: rents_monthly\n")),
-  /series "rents_chained" is worked out from "rents_quarterly", which is itself derived/);
+plainCase('derived: worked out from another derived series is allowed', () => {
+  editFile(rentsYml(), (t) => t.replace('  - id: rents_monthly\n', "  - id: rents_chained\n    label: Chained\n    derive: {type: year_ended_change, from: rents_quarterly, lag: 4}\n    frequency: quarterly\n    plausible: {min: -100000, max: 100000}\n  - id: rents_monthly\n"));
+  const r = run();
+  return check('chained derive', r.code === 0 && /PASS rents/.test(r.out), `exit ${r.code}\n${r.out}`);
+});
+failCase('derived: two series worked out from each other', () => editFile(rentsYml(), (t) => t.replace('  - id: rents_monthly\n', "  - id: loop_a\n    label: A\n    derive: {type: sum, from: [loop_b, rents_index_quarterly]}\n    frequency: quarterly\n    plausible: {min: 0, max: 1000}\n  - id: loop_b\n    label: B\n    derive: {type: sum, from: [loop_a, rents_index_quarterly]}\n    frequency: quarterly\n    plausible: {min: 0, max: 1000}\n  - id: rents_monthly\n")),
+  /is worked out from itself \(through other derived series\)/);
 failCase('derived: no plausible range', () => editFile(rentsYml(), (t) => t.replace('    plausible: {min: -20, max: 40}\n  - id: rents_monthly', '  - id: rents_monthly')), /series "rents_quarterly" needs "plausible"/);
 failCase('derived: used in a view but the series entry is removed', () => editFile(rentsYml(), (t) => t.replace(/  - id: rents_quarterly\n[\s\S]*?  - id: rents_monthly\n/, '  - id: rents_monthly\n')),
   /uses series "rents_quarterly", which is not in the "series" list/);
@@ -592,9 +597,115 @@ failCase('panel: the note is missing', () => editFile(rentsYml(), (t) => t.repla
 failCase('panel: the heading is empty', () => editFile(rentsYml(), (t) => t.replace('heading: Capital cities', 'heading: ""')), /"state_panel_config" needs "heading", as text/);
 failCase('panel: the table headings are not three', () => editFile(rentsYml(), (t) => t.replace('headers: [Capital city, Month, Rents over twelve months]', 'headers: [Capital city, Month]')), /"state_panel_config" needs "headers", a list of three column headings/);
 failCase('panel: the national line has no rows', () => editFile(rentsYml(), (t) => t.replace('national: Australia', 'national: Atlantis')), /the state panel needs rents_monthly for "Atlantis", but data\.csv has no rows for it/);
-failCase('panel: the panel series is the derived one', () => editFile(rentsYml(), (t) => t.replace('  series: rents_monthly\n  national', '  series: rents_quarterly\n  national')), /the state panel series "rents_quarterly" must be a stored series/);
+failCase('panel: the panel series is not in the series list', () => editFile(rentsYml(), (t) => t.replace('  series: rents_monthly\n  national', '  series: rents_nonesuch\n  national')), /the state panel series "rents_nonesuch" must be in the "series" list/);
 failCase('panel: the cities end in different months', () => editFile(dataPath(RENTS), (t) => t.split('\n').filter((l) => !(l.startsWith('2026-09-30,') && l.includes(',rents_monthly,Tasmania,'))).join('\n')), /the places in the state panel do not all end on the same date \(2026-08-31, 2026-09-30\)/);
 failCase('panel: state_panel is not true or false', () => editFile(rentsYml(), (t) => t.replace('state_panel: true', 'state_panel: yes please')), /"state_panel" must be true or false/);
+
+// ---- social housing: value codes, sum and ratio derived series, a derived panel series, the edition map
+const SH = 'social-housing';
+const shRow = (date, series, jur) => (l) => l.startsWith(`${date},`) && l.includes(`,${series},${jur},`);
+const sh = (match, fn) => editRows(match, fn, SH);
+const shYml = () => ymlPath(SH);
+const shRun = () => run();
+plainCase('social housing: the clean copy passes with codes in the data and worked-out series', () => {
+  const r = shRun();
+  const t = readText(dataPath(SH));
+  return check('sh clean', r.code === 0 && /PASS social-housing: 450 rows, 5 series, 2016-06-30 to 2025-06-30/.test(r.out) && /,somih,Victoria,\.\.,count,actual/.test(t) && /2016-06-30,2016,somih,Northern Territory,na,count,actual/.test(t), `exit ${r.code}\n${r.out}`);
+});
+failCase('codes: a value that is neither a number nor a code', () => sh(shRow('2025-06-30', 'public_housing', 'Victoria'), (l) => setValue(l, 'n/a')), /public_housing \(Victoria\) on 2025-06-30: the value "n\/a" is not a number or one of the codes \.\., na, np, -/);
+plainCase('codes: np and a plain hyphen are accepted as codes', () => {
+  sh(shRow('2025-06-30', 'indigenous_community_housing', 'Victoria'), (l) => setValue(l, 'np'));
+  sh(shRow('2024-06-30', 'indigenous_community_housing', 'Victoria'), (l) => setValue(l, '-'));
+  const r = shRun();
+  return check('np and hyphen', !/value "/.test(r.out), r.out) && check('np and hyphen revision', /blocks|changed between "\d+" and "np"/.test(r.out) || r.code !== 0, r.out);
+});
+failCase('codes: a figure turning into a code is a revision that blocks', () => sh(shRow('2025-06-30', 'public_housing', 'Victoria'), (l) => setValue(l, 'na')), /public_housing \(Victoria\) on 2025-06-30 \(2025\) was 64277 when last accepted and is now na \(a figure or code changed between "64277" and "na"\)/);
+failCase('codes: a code turning into a figure is a revision that blocks', () => sh(shRow('2025-06-30', 'somih', 'Victoria'), (l) => setValue(l, '5')), /somih \(Victoria\) on 2025-06-30 \(2025\) was \.\. when last accepted and is now 5/);
+failCase('codes: a missing year is still caught when the neighbours are codes', () => sh(shRow('2022-06-30', 'somih', 'Victoria'), () => null), /somih \(Victoria\) is missing 2022-06-30; the rows jump from 2021-06-30 to 2023-06-30/);
+failCase('revision: one past public housing count changed by 5 per cent blocks', () => sh(shRow('2020-06-30', 'public_housing', 'Australia'), (l) => setValue(l, String(Math.round(Number(l.split(',')[4]) * 1.05)))),
+  /public_housing \(Australia\) on 2020-06-30 \(2020\) was 300403 when last accepted and is now 315423, a change of \+15020 \(the change is more than 1 and more than 2 per cent\)/);
+plainCase('revision: a 1 per cent change to a dwelling count passes with a warning', () => {
+  sh(shRow('2020-06-30', 'public_housing', 'Australia'), (l) => setValue(l, String(Math.round(Number(l.split(',')[4]) * 1.01))));
+  const r = shRun();
+  return check('1 per cent', r.code === 0 && /WARNING: metrics\/social-housing\/data\.csv: data has changed since it was last accepted \(1 accepted figure revised/.test(r.out), `exit ${r.code}\n${r.out}`);
+});
+failCase('revision: a population figure changed by 2 per cent blocks (tolerance 1 per cent)', () => sh(shRow('2020-06-30', 'population', 'Australia'), (l) => setValue(l, String(Math.round(Number(l.split(',')[4]) * 1.02)))), /population \(Australia\) on 2020-06-30 .* \(the change is more than 1 and more than 1 per cent\)/);
+failCase('derived sum: a part that is not in the series list', () => editFile(shYml(), (t) => t.replace('from: [public_housing, community_housing, somih, indigenous_community_housing]', 'from: [public_housing, community_housing, somih, nonesuch]')), /series "total_social_housing" is worked out from "nonesuch", which is not in the "series" list/);
+failCase('derived sum: a sum of one series', () => editFile(shYml(), (t) => t.replace('from: [public_housing, community_housing, somih, indigenous_community_housing]', 'from: [public_housing]')), /series "total_social_housing" has a "derive" of type sum whose "from" is not a list of at least two series ids/);
+failCase('derived ratio: no unit', () => editFile(shYml(), (t) => t.replace(', unit: rate}', '}')), /series "per_1000_people" has a "derive" of type ratio with no "unit"/);
+failCase('derived ratio: a factor that is not a whole number', () => editFile(shYml(), (t) => t.replace('factor: 1000', 'factor: 0.5')), /"derive" "factor" that is not a whole number above zero/);
+failCase('derived ratio: a field the checker does not know', () => editFile(shYml(), (t) => t.replace('factor: 1000', 'factor: 1000, scale: 2')), /"derive" field "scale" that the checker does not know for type ratio/);
+failCase('derived: sum and ratio on different frequencies', () => editFile(shYml(), (t) => t.replace('    derive: {type: ratio, numerator: total_social_housing, denominator: population, factor: 1000, decimals: 1, unit: rate}\n    frequency: annual', '    derive: {type: ratio, numerator: total_social_housing, denominator: population, factor: 1000, decimals: 1, unit: rate}\n    frequency: monthly')), /series "per_1000_people" says it is monthly but "total_social_housing", which it is worked out from, is annual/);
+failCase('derived: the worked-out rate outside its plausible range', () => sh(shRow('2025-06-30', 'population', 'Northern Territory'), (l) => setValue(l, '1000')), /per_1000_people \(Northern Territory\) on 2025-06-30, worked out from total_social_housing 12808 and population 1000 on 2025-06-30, is 12808, outside the plausible range 0 to 200/);
+failCase('derived: a derived series must not be stored (sum)', () => editFile(dataPath(SH), (t) => t + '2025-06-30,2025,total_social_housing,Australia,450607,count,actual\n'), /series "total_social_housing" is derived in metric\.yml, so it must not have rows in data\.csv/);
+failCase('derived: the worked-out total outside its plausible range', () => editFile(shYml(), (t) => t.replace('  - id: total_social_housing\n', '  - id: total_social_housing\n    TMP: 1\n').replace('    TMP: 1\n', '').replace(/(id: total_social_housing[\s\S]*?plausible: )\{min: 0, max: 1000000\}/, '$1{min: 0, max: 400000}')), /total_social_housing \(Australia\) on 2025-06-30, worked out from public_housing 296541 \+ community_housing 118425 \+ somih 17163 \+ indigenous_community_housing 18478 on 2025-06-30, is 450607, outside the plausible range 0 to 400000/);
+failCase('panel: an extra column naming a series that is not declared', () => editFile(shYml(), (t) => t.replace('{header: Dwellings (worked out), series: total_social_housing}', '{header: Dwellings (worked out), series: nonesuch}')), /"extra_columns" that is not a list of \{header, series\}/);
+failCase('panel: a date_format that is not known', () => editFile(shYml(), (t) => t.replace('date_format: period', 'date_format: weekly')), /a "date_format" that is not period or month_year/);
+failCase('panel: the panel series (derived) has no figures for a place', () => editFile(shYml(), (t) => t.replace('national: Australia\n  national_label', 'national: Atlantis\n  national_label')), /the state panel needs per_1000_people for "Atlantis", but data\.csv has no rows for it/);
+failCase('panel: a year missing from the derived rate (population removed for one state) does not hide a real gap', () => sh(shRow('2022-06-30', 'population', 'Tasmania'), () => null), /population \(Tasmania\) is missing 2022-06-30/);
+failCase('manifest: the edition note is not a map of period to edition', () => editFile(join(work, 'metrics', SH, 'sources', 'manifest.json'), (t) => t.replace(/"rogs-editions": \{[\s\S]*?\n  \}/, '"rogs-editions": {\n    "editions": {}\n  }')), /the entry for "rogs-editions" has "editions" that is not a non-empty map of period to edition/);
+plainCase('manifest: the edition note is accepted and is not treated as a file', () => {
+  const r = shRun();
+  return check('editions note', r.code === 0 && !/rogs-editions/.test(r.out) && /"rogs-editions"/.test(readText(join(work, 'metrics', SH, 'sources', 'manifest.json'))), r.out);
+});
+
+// ---- derive.mjs directly: sums, ratios, codes, chained series
+plainCase('sumText adds exactly, counts .. and - as zero and blanks on na or np', () => {
+  const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  return check('sum plain', eq(sumText(['92709', '17163', '118425', '18478']), { text: '246775' }), 'plain sum')
+    && check('sum codes zero', eq(sumText(['5', '..', '-', '7']), { text: '12' }), 'zero codes')
+    && check('sum all zero codes', eq(sumText(['..', '..']), { text: '0' }), 'all zero')
+    && check('sum na', sumText(['5', 'na']).blank?.includes('na'), 'na blanks')
+    && check('sum np beats zero codes', sumText(['..', 'np', '3']).blank?.includes('np'), 'np blanks')
+    && check('sum decimals exact', eq(sumText(['0.1', '0.2']), { text: '0.3' }), 'decimals')
+    && check('sum mixed scales', eq(sumText(['1.5', '2']), { text: '3.5' }), 'scales')
+    && check('sum junk', sumText(['5', 'x']).blank !== undefined, 'junk is blank, never guessed');
+});
+plainCase('ratioText rounds half up to the places asked and blanks on codes or a zero denominator', () => {
+  const t = (...a) => ratioText(...a);
+  return check('ratio real', t('450607', '27601739', 1000, 1).text === '16.3', 'Australia 2025')
+    && check('ratio half up', t('1', '8', 1000, 1).text === '125.0' && t('5', '16000', 1000, 1).text === '0.3' && t('1', '16000', 1000, 1).text === '0.1', 'ties go up')
+    && check('ratio tie exact', t('25', '1000', 1, 1).text === '0.0', 'no floating point')
+    && check('ratio 0.05 tie', t('1', '2000', 100, 1).text === '0.1', '0.05 rounds up to 0.1')
+    && check('ratio negative tie away from zero', t('-1', '2000', 100, 1).text === '-0.1', 'negative tie')
+    && check('ratio zero places', t('3', '2', 1, 0).text === '2' && t('1', '3', 1, 0).text === '0', 'no decimals')
+    && check('ratio code numerator', t('na', '5', 1000, 1).blank?.includes('numerator is na'), 'code')
+    && check('ratio code denominator', t('5', '..', 1000, 1).blank?.includes('denominator is ..'), 'code')
+    && check('ratio zero denominator', t('5', '0', 1000, 1).blank !== undefined, 'zero')
+    && check('isValueCode', isValueCode('..') && isValueCode('na') && isValueCode('np') && isValueCode('-') && !isValueCode('0') && !isValueCode('-1'), 'codes');
+});
+plainCase('computeDerived chains a sum into a ratio, leaves blanks out and says why', () => {
+  const stored = new Map();
+  const put = (id, j, rows) => stored.set(`${id}|${j}`, rows.map(([date, v]) => ({ date, period: date.slice(0, 4), valueText: v, unit: 'count' })));
+  put('a', 'X', [['2024-06-30', '10'], ['2025-06-30', '12']]);
+  put('b', 'X', [['2024-06-30', '..'], ['2025-06-30', 'na']]);
+  put('pop', 'X', [['2024-06-30', '1000'], ['2025-06-30', '1000']]);
+  put('a', 'Y', [['2024-06-30', '5']]);
+  put('b', 'Y', [['2024-06-30', '5'], ['2025-06-30', '5']]);
+  put('pop', 'Y', [['2024-06-30', '100'], ['2025-06-30', '100']]);
+  const series = [
+    { id: 'a' }, { id: 'b' }, { id: 'pop' },
+    { id: 'rate', derive: { type: 'ratio', numerator: 'total', denominator: 'pop', factor: 1000, decimals: 1, unit: 'rate' } }, // declared before its input on purpose
+    { id: 'total', derive: { type: 'sum', from: ['a', 'b'] } },
+  ];
+  const out = computeDerived(series, stored);
+  const rows = (k) => (out.groups.get(k) ?? []).map((r) => `${r.date}=${r.valueText}${r.unit}`).join(' ');
+  return check('derive total X', rows('total|X') === '2024-06-30=10count', rows('total|X'))
+    && check('derive rate X', rows('rate|X') === '2024-06-30=10.0rate', rows('rate|X'))
+    && check('derive total Y (2025 missing a)', rows('total|Y') === '2024-06-30=10count', rows('total|Y'))
+    && check('derive rate Y', rows('rate|Y') === '2024-06-30=100.0rate', rows('rate|Y'))
+    && check('blank reasons', out.blanks.some((b) => b.series === 'total' && b.jurisdiction === 'X' && b.date === '2025-06-30' && /na/.test(b.reason)) && out.blanks.some((b) => b.series === 'total' && b.jurisdiction === 'Y' && /a has no figure for 2025-06-30/.test(b.reason)), JSON.stringify(out.blanks))
+    && check('no problems', out.problems.length === 0, out.problems.join('; '));
+});
+plainCase('computeDerived refuses a loop, an unknown input and mixed units', () => {
+  const stored = new Map([['a|X', [{ date: '2024-06-30', period: '2024', valueText: '1', unit: 'count' }]], ['p|X', [{ date: '2024-06-30', period: '2024', valueText: '1', unit: 'pct' }]]]);
+  const loop = computeDerived([{ id: 'a' }, { id: 'u', derive: { type: 'sum', from: ['v', 'a'] } }, { id: 'v', derive: { type: 'sum', from: ['u', 'a'] } }], stored);
+  const unknown = computeDerived([{ id: 'a' }, { id: 'u', derive: { type: 'sum', from: ['a', 'zz'] } }], stored);
+  const mixed = computeDerived([{ id: 'a' }, { id: 'p' }, { id: 'u', derive: { type: 'sum', from: ['a', 'p'] } }], stored);
+  return check('loop', loop.problems.some((m) => /worked out from itself/.test(m)), loop.problems.join(';'))
+    && check('unknown', unknown.problems.some((m) => /"zz", which is not in the "series" list/.test(m)), unknown.problems.join(';'))
+    && check('mixed', mixed.problems.some((m) => /different units \(count, pct\)/.test(m)), mixed.problems.join(';'));
+});
 
 rmSync(base, { recursive: true, force: true });
 

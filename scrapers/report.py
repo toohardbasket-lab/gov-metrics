@@ -197,6 +197,8 @@ def revision_breach(old, new, rev):
     """True if changing a figure from the text `old` to the text `new` breaks the tolerance `rev`.
     The same rule as revisionBreach in scripts/validate.mjs."""
     a, b = to_decimal(old), to_decimal(new)
+    if rev is not None and old != new and (a is None or b is None) and (old in ("..", "na", "np", "-") or new in ("..", "na", "np", "-")):
+        return True  # a figure that becomes a code, or a code that changes, is always a revision to check (as in scripts/validate.mjs)
     if rev is None or a is None or b is None or a == b:
         return False
     change = abs(b - a)
@@ -413,9 +415,10 @@ def source_lines(before, after):
             if mp.exists():
                 try:
                     entries = json.loads(mp.read_text(encoding="utf-8"))
-                    # an entry with a "path" refers to another metric's file (a copied series); it is
-                    # not a download kept in this folder, so it has no line here
-                    names |= {k for k, v in entries.items() if not (isinstance(v, dict) and "path" in v)}
+                    # an entry with a "path" refers to another metric's file (a copied series), and an entry with
+                    # "editions" is a scraper's note of which edition each stored year came from; neither is a
+                    # download kept in this folder, so neither has a line here
+                    names |= {k for k, v in entries.items() if not (isinstance(v, dict) and ("path" in v or "editions" in v))}
                 except (OSError, ValueError, AttributeError):
                     pass
         for name in sorted(names):

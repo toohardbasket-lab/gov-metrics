@@ -1,0 +1,223 @@
+# Definition file for one metric. Everything the page shows, other than the numbers
+# in data.csv, comes from this file. See metrics/README.md for what each field does.
+# Words in braces, such as {last_year}, are filled in from the data when the page is built.
+slug: social-housing
+title: Social housing
+theme: Housing and homelessness
+jurisdiction: Australia
+description: "How many social housing homes there are, at 30 June each year since 2016, in total and per 1,000 people."
+lede: "Social housing dwellings at 30 June each year since {first_year}: public housing, community housing and Indigenous housing, in total and per 1,000 residents."
+
+draft: true
+draft_banner: "Draft, not for publication. The figures are read from the Productivity Commission and the ABS by code and have not yet had the human check the plan requires."
+
+# Seven series. The four dwelling series and population are stored in data.csv, one row per year and
+# jurisdiction (Australia and each state and territory). A dwelling figure may be a code the Commission uses
+# instead of a number (.. not applicable, na not available, np not published, - nil); it is stored as the code.
+# total_social_housing and per_1000_people are not stored: the site works them out when the page is built and
+# when the data is checked (derive), with the same code in both places. In the total, .. and nil count as zero
+# and na or np leave the total blank. The checker stops the build if a year is missing, a date is not 30 June
+# or a value falls outside the plausible range.
+series:
+  - id: public_housing
+    label: Public housing
+    definition: Public housing dwellings at 30 June, owned and managed by state and territory housing authorities. Count of dwellings.
+    source_table: Productivity Commission, Report on Government Services, table 18A.3 (Descriptive data), Public housing
+    frequency: annual
+    plausible: {min: 0, max: 1000000}
+    # Revision tolerance: the Commission and the ABS revise past figures a little; a change of more than 2 per cent to a dwelling count, or 1 per cent to a population figure, blocks until the owner accepts it.
+    # max_abs is required by the checker; 1 makes the per cent limit decide for counts of 100 or more (pct_floor), and any change of more than 1 block a count below 100.
+    revision: {max_abs: 1, max_pct: 2, pct_floor: 100}
+  - id: somih
+    label: State owned and managed Indigenous housing
+    definition: State owned and managed Indigenous housing (SOMIH) dwellings at 30 June. Count of dwellings. Where a state has no such program the Commission gives .. (not applicable).
+    source_table: Productivity Commission, Report on Government Services, table 18A.3 (Descriptive data), State owned and managed Indigenous housing
+    frequency: annual
+    plausible: {min: 0, max: 1000000}
+    revision: {max_abs: 1, max_pct: 2, pct_floor: 100}
+  - id: community_housing
+    label: Community housing
+    definition: Community housing at 30 June, counted in tenancy (rental) units, as the Commission counts it for its national total. Not the count of buildings or dwellings.
+    source_table: Productivity Commission, Report on Government Services, table 18A.3 (Descriptive data), Community housing, Number of Tenancy (Rental) Units
+    frequency: annual
+    plausible: {min: 0, max: 1000000}
+    revision: {max_abs: 1, max_pct: 2, pct_floor: 100}
+  - id: indigenous_community_housing
+    label: Indigenous community housing
+    definition: Indigenous community housing dwellings at 30 June. Count of dwellings.
+    source_table: Productivity Commission, Report on Government Services, table 18A.3 (Descriptive data), Indigenous community housing
+    frequency: annual
+    plausible: {min: 0, max: 1000000}
+    revision: {max_abs: 1, max_pct: 2, pct_floor: 100}
+  - id: population
+    label: Population
+    definition: Estimated resident population at 30 June (the June quarter), persons, all ages, Australia and each state and territory.
+    source_table: ABS, National, state and territory population, Table 4 (Data API ERP_Q 1.3.TOT.<region>.Q)
+    frequency: annual
+    plausible: {min: 0, max: 40000000}
+    revision: {max_abs: 1, max_pct: 1}
+  - id: total_social_housing
+    label: All social housing (worked out)
+    definition: The sum of public housing, community housing (tenancy units), state owned and managed Indigenous housing and Indigenous community housing, for each jurisdiction and year. Not applicable (..) and nil count as zero; if any part is not available (na) or not published (np) the total is left blank. Not stored in data.csv.
+    source_table: Worked out from the four dwelling series (table 18A.3)
+    derive: {type: sum, from: [public_housing, community_housing, somih, indigenous_community_housing]}
+    frequency: annual
+    plausible: {min: 0, max: 1000000}
+  - id: per_1000_people
+    label: Social housing per 1,000 people (worked out)
+    definition: All social housing divided by the estimated resident population, times 1,000, rounded half up to one decimal place. Left blank if either figure is blank. Not stored in data.csv.
+    source_table: Worked out from total_social_housing and population
+    derive: {type: ratio, numerator: total_social_housing, denominator: population, factor: 1000, decimals: 1, unit: rate}
+    frequency: annual
+    plausible: {min: 0, max: 200}
+
+# The headline figures above the chart. Values are read from data.csv (or worked out from it).
+tiles:
+  - label: Social housing dwellings
+    series: total_social_housing
+    jurisdiction: Australia
+    sub_date: true
+  - label: Per 1,000 people
+    series: per_1000_people
+    jurisdiction: Australia
+    sub_date: true
+  - label: Target status
+    text: No status
+    sub_text: See the target note below
+
+# The chart. color keeps a series the same colour in every view (1 blue, 2 orange, 3 plum, 4 green, 5 violet).
+views:
+  - id: dwellings
+    label: Dwellings
+    derive: none
+    lines:
+      - series: total_social_housing
+        jurisdiction: Australia
+        label: All social housing (worked out)
+        color: 1
+      - series: public_housing
+        jurisdiction: Australia
+        label: Public housing
+        color: 2
+      - series: community_housing
+        jurisdiction: Australia
+        label: Community housing
+        color: 3
+      - series: somih
+        jurisdiction: Australia
+        label: State owned and managed Indigenous housing
+        color: 4
+      - series: indigenous_community_housing
+        jurisdiction: Australia
+        label: Indigenous community housing
+        color: 5
+    caption: Dwellings at 30 June. Community housing is counted in tenancy units.
+  - id: rate
+    label: Per 1,000 people
+    derive: none
+    lines:
+      - series: per_1000_people
+        jurisdiction: Australia
+        label: Social housing per 1,000 people (worked out)
+        color: 1
+    caption: Social housing dwellings per 1,000 residents at 30 June.
+chart_alt: "Line chart of social housing dwellings at 30 June each year, {first_year} to {last_year}. The full figures are in the table below."
+chart_source: "Sources: Productivity Commission, Report on Government Services, table 18A.3; ABS, National, state and territory population."
+
+# The full table. Newest first. Australia only: the states and territories are in the panel under the targets.
+table:
+  period_header: At 30 June
+  columns:
+    - header: "Public housing"
+      series: public_housing
+      jurisdiction: Australia
+    - header: "Community housing"
+      series: community_housing
+      jurisdiction: Australia
+    - header: "State owned Indigenous housing"
+      series: somih
+      jurisdiction: Australia
+    - header: "Indigenous community housing"
+      series: indigenous_community_housing
+      jurisdiction: Australia
+    - header: "Total (worked out)"
+      series: total_social_housing
+      jurisdiction: Australia
+    - header: "Population"
+      series: population
+      jurisdiction: Australia
+    - header: "Per 1,000 people (worked out)"
+      series: per_1000_people
+      jurisdiction: Australia
+
+meaning:
+  - "**Social housing** is rental housing for people on low incomes, provided by governments and community organisations at rents below the market. It has four parts: public housing, run by state and territory governments; community housing, run by not-for-profit providers; state owned and managed Indigenous housing; and Indigenous community housing."
+  - "The total is the sum of the four parts, counted as the Productivity Commission counts them. Dividing by the population shows whether social housing is keeping up as the population grows."
+
+# Targets and forecasts ledger.
+targets:
+  - label: Target
+    text: "The Housing Australia Future Fund is meant to help deliver 30,000 new social and affordable rental homes in its first five years, from November 2023: 20,000 social homes, including 4,000 for women and children affected by family and domestic violence or older women at risk of homelessness, and 10,000 affordable homes for frontline workers. A further 10,000 affordable homes are funded under the National Housing Accord. {link}"
+    link:
+      label: Prime Minister, Landmark housing legislation passes the Parliament, September 2023
+      url: https://www.pm.gov.au/media/landmark-housing-legislation-passes-parliament
+  - label: Target status
+    text: "No status. The target counts new homes paid for through the Fund, many of them affordable rather than social housing. This page counts all social housing, so it cannot show progress against the target."
+
+# The state and territory panel (plan section 3), in the fixed order NSW, Vic, Qld, WA, SA, Tas, ACT, NT.
+# The rate is worked out (derived); the extra column beside it is the worked-out total.
+state_panel: true
+state_panel_config:
+  series: per_1000_people
+  national: Australia
+  national_label: Australia
+  heading: States and territories
+  note: "Each chart uses the same scale. Rates are social housing dwellings per 1,000 residents. The grey line is Australia."
+  headers: ["State or territory", "At 30 June", "Per 1,000 people (worked out)"]
+  date_format: period
+  extra_columns:
+    - {header: Dwellings (worked out), series: total_social_housing}
+  places:
+    - {jurisdiction: New South Wales, abbreviation: NSW, name: New South Wales}
+    - {jurisdiction: Victoria, abbreviation: Vic, name: Victoria}
+    - {jurisdiction: Queensland, abbreviation: Qld, name: Queensland}
+    - {jurisdiction: Western Australia, abbreviation: WA, name: Western Australia}
+    - {jurisdiction: South Australia, abbreviation: SA, name: South Australia}
+    - {jurisdiction: Tasmania, abbreviation: Tas, name: Tasmania}
+    - {jurisdiction: Australian Capital Territory, abbreviation: ACT, name: Australian Capital Territory}
+    - {jurisdiction: Northern Territory, abbreviation: NT, name: Northern Territory}
+
+# Sources and method ledger. {link} is replaced by the link; {update} and {retrieved}
+# by the fields below.
+update: "Each year, when the Productivity Commission publishes the housing section of the Report on Government Services (recently in June). Population figures are updated each quarter by the ABS."
+retrieved: 2026-11-24
+sources_method:
+  - label: Dwellings
+    link:
+      label: Productivity Commission, Report on Government Services, Housing
+      url: https://www.pc.gov.au/ongoing/report-on-government-services/housing-homelessness/housing/
+    text: "{link}, table 18A.3, read from the Commission's CSV dataset and checked against its Excel tables."
+  - label: Population
+    link:
+      label: ABS, National, state and territory population
+      url: https://www.abs.gov.au/statistics/people/population/national-state-and-territory-population/latest-release
+    text: "{link}: estimated resident population at 30 June, read from the ABS Data API (ERP_Q) and checked against the ABS spreadsheet."
+  - label: Worked out
+    text: "Total = public housing + community housing (tenancy units) + state owned and managed Indigenous housing + Indigenous community housing. Not applicable (..) counts as zero; if any part is not available, the total is left blank. Per 1,000 people = total ÷ population × 1,000, rounded to one decimal place."
+  - label: Updated
+    text: "{update} Data retrieved {retrieved}."
+
+read_with_care:
+  - "Community housing is counted in tenancy units, as the Productivity Commission does for its national total. A building with several separately let units counts once for each unit."
+  - "When a state transfers public housing to community housing providers, the dwellings move from one type to another, so a fall in one type can be matched by a rise in another with no change in the total."
+  - "Where a state has no separate state owned and managed Indigenous housing program, that part counts as zero."
+  - "For 2016 the Northern Territory's figure for state owned and managed Indigenous housing is not available. The Territory's 2016 total is left blank, and the Australia figure for 2016 leaves those dwellings out, so it is lower than it would otherwise be and not fully comparable with later years."
+  - "Each edition of the Report on Government Services carries only recent years. Older years stay on this page when a new edition drops them, and a revised past figure is checked before it is accepted."
+  - "The ABS revises its population estimates for several years after first release, so the per-person figures can change slightly."
+  - "Waiting lists are not shown. States manage and count their waiting lists differently, so the numbers are not comparable between states."
+  - "Government shading starts on the day each government was sworn in. Recessions and crises are marked on every chart on this site using the same list. The marks give context and do not assign cause."
+
+corrections_text: None yet. Every correction to this page will be listed here with its date and what changed.
+
+# Fields kept from the worked-example definition file.
+inclusion_tests: {outcome: true, official: true, history: true, ongoing: true, no_editorial_choice: "the Productivity Commission's count of social housing, in total and per person"}

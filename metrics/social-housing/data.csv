@@ -1,0 +1,451 @@
+date,period,series,jurisdiction,value,unit,status
+2016-06-30,2016,community_housing,Australia,80226,count,actual
+2017-06-30,2017,community_housing,Australia,82902,count,actual
+2018-06-30,2018,community_housing,Australia,87819,count,actual
+2019-06-30,2019,community_housing,Australia,100205,count,actual
+2020-06-30,2020,community_housing,Australia,103895,count,actual
+2021-06-30,2021,community_housing,Australia,108519,count,actual
+2022-06-30,2022,community_housing,Australia,112843,count,actual
+2023-06-30,2023,community_housing,Australia,114150,count,actual
+2024-06-30,2024,community_housing,Australia,118817,count,actual
+2025-06-30,2025,community_housing,Australia,118425,count,actual
+2016-06-30,2016,community_housing,Australian Capital Territory,715,count,actual
+2017-06-30,2017,community_housing,Australian Capital Territory,883,count,actual
+2018-06-30,2018,community_housing,Australian Capital Territory,895,count,actual
+2019-06-30,2019,community_housing,Australian Capital Territory,907,count,actual
+2020-06-30,2020,community_housing,Australian Capital Territory,936,count,actual
+2021-06-30,2021,community_housing,Australian Capital Territory,970,count,actual
+2022-06-30,2022,community_housing,Australian Capital Territory,958,count,actual
+2023-06-30,2023,community_housing,Australian Capital Territory,1695,count,actual
+2024-06-30,2024,community_housing,Australian Capital Territory,1736,count,actual
+2025-06-30,2025,community_housing,Australian Capital Territory,1246,count,actual
+2016-06-30,2016,community_housing,New South Wales,32266,count,actual
+2017-06-30,2017,community_housing,New South Wales,34398,count,actual
+2018-06-30,2018,community_housing,New South Wales,35345,count,actual
+2019-06-30,2019,community_housing,New South Wales,46557,count,actual
+2020-06-30,2020,community_housing,New South Wales,49509,count,actual
+2021-06-30,2021,community_housing,New South Wales,53233,count,actual
+2022-06-30,2022,community_housing,New South Wales,54292,count,actual
+2023-06-30,2023,community_housing,New South Wales,53913,count,actual
+2024-06-30,2024,community_housing,New South Wales,54412,count,actual
+2025-06-30,2025,community_housing,New South Wales,52439,count,actual
+2016-06-30,2016,community_housing,Northern Territory,373,count,actual
+2017-06-30,2017,community_housing,Northern Territory,385,count,actual
+2018-06-30,2018,community_housing,Northern Territory,374,count,actual
+2019-06-30,2019,community_housing,Northern Territory,431,count,actual
+2020-06-30,2020,community_housing,Northern Territory,464,count,actual
+2021-06-30,2021,community_housing,Northern Territory,478,count,actual
+2022-06-30,2022,community_housing,Northern Territory,495,count,actual
+2023-06-30,2023,community_housing,Northern Territory,488,count,actual
+2024-06-30,2024,community_housing,Northern Territory,731,count,actual
+2025-06-30,2025,community_housing,Northern Territory,906,count,actual
+2016-06-30,2016,community_housing,Queensland,11679,count,actual
+2017-06-30,2017,community_housing,Queensland,11512,count,actual
+2018-06-30,2018,community_housing,Queensland,11116,count,actual
+2019-06-30,2019,community_housing,Queensland,10941,count,actual
+2020-06-30,2020,community_housing,Queensland,11054,count,actual
+2021-06-30,2021,community_housing,Queensland,11439,count,actual
+2022-06-30,2022,community_housing,Queensland,11524,count,actual
+2023-06-30,2023,community_housing,Queensland,11665,count,actual
+2024-06-30,2024,community_housing,Queensland,12548,count,actual
+2025-06-30,2025,community_housing,Queensland,13158,count,actual
+2016-06-30,2016,community_housing,South Australia,7472,count,actual
+2017-06-30,2017,community_housing,South Australia,7484,count,actual
+2018-06-30,2018,community_housing,South Australia,11561,count,actual
+2019-06-30,2019,community_housing,South Australia,11622,count,actual
+2020-06-30,2020,community_housing,South Australia,12151,count,actual
+2021-06-30,2021,community_housing,South Australia,12387,count,actual
+2022-06-30,2022,community_housing,South Australia,12430,count,actual
+2023-06-30,2023,community_housing,South Australia,12333,count,actual
+2024-06-30,2024,community_housing,South Australia,13048,count,actual
+2025-06-30,2025,community_housing,South Australia,13010,count,actual
+2016-06-30,2016,community_housing,Tasmania,6076,count,actual
+2017-06-30,2017,community_housing,Tasmania,6115,count,actual
+2018-06-30,2018,community_housing,Tasmania,5980,count,actual
+2019-06-30,2019,community_housing,Tasmania,6698,count,actual
+2020-06-30,2020,community_housing,Tasmania,6919,count,actual
+2021-06-30,2021,community_housing,Tasmania,7019,count,actual
+2022-06-30,2022,community_housing,Tasmania,9267,count,actual
+2023-06-30,2023,community_housing,Tasmania,9715,count,actual
+2024-06-30,2024,community_housing,Tasmania,10139,count,actual
+2025-06-30,2025,community_housing,Tasmania,10430,count,actual
+2016-06-30,2016,community_housing,Victoria,14236,count,actual
+2017-06-30,2017,community_housing,Victoria,14278,count,actual
+2018-06-30,2018,community_housing,Victoria,14486,count,actual
+2019-06-30,2019,community_housing,Victoria,15081,count,actual
+2020-06-30,2020,community_housing,Victoria,14857,count,actual
+2021-06-30,2021,community_housing,Victoria,14996,count,actual
+2022-06-30,2022,community_housing,Victoria,16159,count,actual
+2023-06-30,2023,community_housing,Victoria,16363,count,actual
+2024-06-30,2024,community_housing,Victoria,18191,count,actual
+2025-06-30,2025,community_housing,Victoria,19625,count,actual
+2016-06-30,2016,community_housing,Western Australia,7409,count,actual
+2017-06-30,2017,community_housing,Western Australia,7847,count,actual
+2018-06-30,2018,community_housing,Western Australia,8062,count,actual
+2019-06-30,2019,community_housing,Western Australia,7968,count,actual
+2020-06-30,2020,community_housing,Western Australia,8005,count,actual
+2021-06-30,2021,community_housing,Western Australia,7997,count,actual
+2022-06-30,2022,community_housing,Western Australia,7718,count,actual
+2023-06-30,2023,community_housing,Western Australia,7978,count,actual
+2024-06-30,2024,community_housing,Western Australia,8012,count,actual
+2025-06-30,2025,community_housing,Western Australia,7611,count,actual
+2016-06-30,2016,indigenous_community_housing,Australia,15461,count,actual
+2017-06-30,2017,indigenous_community_housing,Australia,16030,count,actual
+2018-06-30,2018,indigenous_community_housing,Australia,15766,count,actual
+2019-06-30,2019,indigenous_community_housing,Australia,16193,count,actual
+2020-06-30,2020,indigenous_community_housing,Australia,15053,count,actual
+2021-06-30,2021,indigenous_community_housing,Australia,15814,count,actual
+2022-06-30,2022,indigenous_community_housing,Australia,16302,count,actual
+2023-06-30,2023,indigenous_community_housing,Australia,17533,count,actual
+2024-06-30,2024,indigenous_community_housing,Australia,18182,count,actual
+2025-06-30,2025,indigenous_community_housing,Australia,18478,count,actual
+2016-06-30,2016,indigenous_community_housing,Australian Capital Territory,..,count,actual
+2017-06-30,2017,indigenous_community_housing,Australian Capital Territory,..,count,actual
+2018-06-30,2018,indigenous_community_housing,Australian Capital Territory,..,count,actual
+2019-06-30,2019,indigenous_community_housing,Australian Capital Territory,..,count,actual
+2020-06-30,2020,indigenous_community_housing,Australian Capital Territory,..,count,actual
+2021-06-30,2021,indigenous_community_housing,Australian Capital Territory,..,count,actual
+2022-06-30,2022,indigenous_community_housing,Australian Capital Territory,..,count,actual
+2023-06-30,2023,indigenous_community_housing,Australian Capital Territory,..,count,actual
+2024-06-30,2024,indigenous_community_housing,Australian Capital Territory,..,count,actual
+2025-06-30,2025,indigenous_community_housing,Australian Capital Territory,..,count,actual
+2016-06-30,2016,indigenous_community_housing,New South Wales,3004,count,actual
+2017-06-30,2017,indigenous_community_housing,New South Wales,3370,count,actual
+2018-06-30,2018,indigenous_community_housing,New South Wales,3461,count,actual
+2019-06-30,2019,indigenous_community_housing,New South Wales,3719,count,actual
+2020-06-30,2020,indigenous_community_housing,New South Wales,2869,count,actual
+2021-06-30,2021,indigenous_community_housing,New South Wales,3611,count,actual
+2022-06-30,2022,indigenous_community_housing,New South Wales,3989,count,actual
+2023-06-30,2023,indigenous_community_housing,New South Wales,4978,count,actual
+2024-06-30,2024,indigenous_community_housing,New South Wales,5336,count,actual
+2025-06-30,2025,indigenous_community_housing,New South Wales,5471,count,actual
+2016-06-30,2016,indigenous_community_housing,Northern Territory,1926,count,actual
+2017-06-30,2017,indigenous_community_housing,Northern Territory,2248,count,actual
+2018-06-30,2018,indigenous_community_housing,Northern Territory,1862,count,actual
+2019-06-30,2019,indigenous_community_housing,Northern Territory,1973,count,actual
+2020-06-30,2020,indigenous_community_housing,Northern Territory,1801,count,actual
+2021-06-30,2021,indigenous_community_housing,Northern Territory,1803,count,actual
+2022-06-30,2022,indigenous_community_housing,Northern Territory,1790,count,actual
+2023-06-30,2023,indigenous_community_housing,Northern Territory,1844,count,actual
+2024-06-30,2024,indigenous_community_housing,Northern Territory,1878,count,actual
+2025-06-30,2025,indigenous_community_housing,Northern Territory,1984,count,actual
+2016-06-30,2016,indigenous_community_housing,Queensland,5154,count,actual
+2017-06-30,2017,indigenous_community_housing,Queensland,5232,count,actual
+2018-06-30,2018,indigenous_community_housing,Queensland,5224,count,actual
+2019-06-30,2019,indigenous_community_housing,Queensland,5400,count,actual
+2020-06-30,2020,indigenous_community_housing,Queensland,5238,count,actual
+2021-06-30,2021,indigenous_community_housing,Queensland,5236,count,actual
+2022-06-30,2022,indigenous_community_housing,Queensland,5184,count,actual
+2023-06-30,2023,indigenous_community_housing,Queensland,5477,count,actual
+2024-06-30,2024,indigenous_community_housing,Queensland,5433,count,actual
+2025-06-30,2025,indigenous_community_housing,Queensland,5406,count,actual
+2016-06-30,2016,indigenous_community_housing,South Australia,692,count,actual
+2017-06-30,2017,indigenous_community_housing,South Australia,735,count,actual
+2018-06-30,2018,indigenous_community_housing,South Australia,727,count,actual
+2019-06-30,2019,indigenous_community_housing,South Australia,697,count,actual
+2020-06-30,2020,indigenous_community_housing,South Australia,689,count,actual
+2021-06-30,2021,indigenous_community_housing,South Australia,681,count,actual
+2022-06-30,2022,indigenous_community_housing,South Australia,681,count,actual
+2023-06-30,2023,indigenous_community_housing,South Australia,683,count,actual
+2024-06-30,2024,indigenous_community_housing,South Australia,696,count,actual
+2025-06-30,2025,indigenous_community_housing,South Australia,688,count,actual
+2016-06-30,2016,indigenous_community_housing,Tasmania,76,count,actual
+2017-06-30,2017,indigenous_community_housing,Tasmania,76,count,actual
+2018-06-30,2018,indigenous_community_housing,Tasmania,81,count,actual
+2019-06-30,2019,indigenous_community_housing,Tasmania,81,count,actual
+2020-06-30,2020,indigenous_community_housing,Tasmania,87,count,actual
+2021-06-30,2021,indigenous_community_housing,Tasmania,90,count,actual
+2022-06-30,2022,indigenous_community_housing,Tasmania,96,count,actual
+2023-06-30,2023,indigenous_community_housing,Tasmania,96,count,actual
+2024-06-30,2024,indigenous_community_housing,Tasmania,96,count,actual
+2025-06-30,2025,indigenous_community_housing,Tasmania,96,count,actual
+2016-06-30,2016,indigenous_community_housing,Victoria,1939,count,actual
+2017-06-30,2017,indigenous_community_housing,Victoria,1720,count,actual
+2018-06-30,2018,indigenous_community_housing,Victoria,1707,count,actual
+2019-06-30,2019,indigenous_community_housing,Victoria,1612,count,actual
+2020-06-30,2020,indigenous_community_housing,Victoria,1670,count,actual
+2021-06-30,2021,indigenous_community_housing,Victoria,1694,count,actual
+2022-06-30,2022,indigenous_community_housing,Victoria,1864,count,actual
+2023-06-30,2023,indigenous_community_housing,Victoria,1763,count,actual
+2024-06-30,2024,indigenous_community_housing,Victoria,2060,count,actual
+2025-06-30,2025,indigenous_community_housing,Victoria,2146,count,actual
+2016-06-30,2016,indigenous_community_housing,Western Australia,2670,count,actual
+2017-06-30,2017,indigenous_community_housing,Western Australia,2649,count,actual
+2018-06-30,2018,indigenous_community_housing,Western Australia,2704,count,actual
+2019-06-30,2019,indigenous_community_housing,Western Australia,2711,count,actual
+2020-06-30,2020,indigenous_community_housing,Western Australia,2699,count,actual
+2021-06-30,2021,indigenous_community_housing,Western Australia,2699,count,actual
+2022-06-30,2022,indigenous_community_housing,Western Australia,2698,count,actual
+2023-06-30,2023,indigenous_community_housing,Western Australia,2692,count,actual
+2024-06-30,2024,indigenous_community_housing,Western Australia,2683,count,actual
+2025-06-30,2025,indigenous_community_housing,Western Australia,2687,count,actual
+2016-06-30,2016,population,Australia,24190907,count,actual
+2017-06-30,2017,population,Australia,24592588,count,actual
+2018-06-30,2018,population,Australia,24963258,count,actual
+2019-06-30,2019,population,Australia,25334826,count,actual
+2020-06-30,2020,population,Australia,25649248,count,actual
+2021-06-30,2021,population,Australia,25685412,count,actual
+2022-06-30,2022,population,Australia,26018721,count,actual
+2023-06-30,2023,population,Australia,26659922,count,actual
+2024-06-30,2024,population,Australia,27194286,count,actual
+2025-06-30,2025,population,Australia,27601739,count,actual
+2016-06-30,2016,population,Australian Capital Territory,403104,count,actual
+2017-06-30,2017,population,Australian Capital Territory,415046,count,actual
+2018-06-30,2018,population,Australian Capital Territory,426081,count,actual
+2019-06-30,2019,population,Australian Capital Territory,435730,count,actual
+2020-06-30,2020,population,Australian Capital Territory,444903,count,actual
+2021-06-30,2021,population,Australian Capital Territory,452508,count,actual
+2022-06-30,2022,population,Australian Capital Territory,461262,count,actual
+2023-06-30,2023,population,Australian Capital Territory,471340,count,actual
+2024-06-30,2024,population,Australian Capital Territory,478430,count,actual
+2025-06-30,2025,population,Australian Capital Territory,484681,count,actual
+2016-06-30,2016,population,New South Wales,7732858,count,actual
+2017-06-30,2017,population,New South Wales,7855316,count,actual
+2018-06-30,2018,population,New South Wales,7954476,count,actual
+2019-06-30,2019,population,New South Wales,8046748,count,actual
+2020-06-30,2020,population,New South Wales,8110610,count,actual
+2021-06-30,2021,population,New South Wales,8097062,count,actual
+2022-06-30,2022,population,New South Wales,8182098,count,actual
+2023-06-30,2023,population,New South Wales,8356387,count,actual
+2024-06-30,2024,population,New South Wales,8492050,count,actual
+2025-06-30,2025,population,New South Wales,8587369,count,actual
+2016-06-30,2016,population,Northern Territory,245678,count,actual
+2017-06-30,2017,population,Northern Territory,247412,count,actual
+2018-06-30,2018,population,Northern Territory,247095,count,actual
+2019-06-30,2019,population,Northern Territory,246559,count,actual
+2020-06-30,2020,population,Northern Territory,247428,count,actual
+2021-06-30,2021,population,Northern Territory,248151,count,actual
+2022-06-30,2022,population,Northern Territory,253100,count,actual
+2023-06-30,2023,population,Northern Territory,257508,count,actual
+2024-06-30,2024,population,Northern Territory,260884,count,actual
+2025-06-30,2025,population,Northern Territory,265978,count,actual
+2016-06-30,2016,population,Queensland,4845152,count,actual
+2017-06-30,2017,population,Queensland,4926380,count,actual
+2018-06-30,2018,population,Queensland,5006623,count,actual
+2019-06-30,2019,population,Queensland,5088847,count,actual
+2020-06-30,2020,population,Queensland,5165613,count,actual
+2021-06-30,2021,population,Queensland,5215814,count,actual
+2022-06-30,2022,population,Queensland,5310905,count,actual
+2023-06-30,2023,population,Queensland,5450235,count,actual
+2024-06-30,2024,population,Queensland,5571890,count,actual
+2025-06-30,2025,population,Queensland,5670203,count,actual
+2016-06-30,2016,population,South Australia,1712843,count,actual
+2017-06-30,2017,population,South Australia,1728673,count,actual
+2018-06-30,2018,population,South Australia,1746137,count,actual
+2019-06-30,2019,population,South Australia,1767395,count,actual
+2020-06-30,2020,population,South Australia,1790355,count,actual
+2021-06-30,2021,population,South Australia,1802601,count,actual
+2022-06-30,2022,population,South Australia,1824969,count,actual
+2023-06-30,2023,population,South Australia,1857646,count,actual
+2024-06-30,2024,population,South Australia,1882164,count,actual
+2025-06-30,2025,population,South Australia,1901652,count,actual
+2016-06-30,2016,population,Tasmania,517514,count,actual
+2017-06-30,2017,population,Tasmania,526762,count,actual
+2018-06-30,2018,population,Tasmania,537291,count,actual
+2019-06-30,2019,population,Tasmania,547841,count,actual
+2020-06-30,2020,population,Tasmania,557578,count,actual
+2021-06-30,2021,population,Tasmania,567239,count,actual
+2022-06-30,2022,population,Tasmania,572300,count,actual
+2023-06-30,2023,population,Tasmania,573731,count,actual
+2024-06-30,2024,population,Tasmania,574765,count,actual
+2025-06-30,2025,population,Tasmania,577827,count,actual
+2016-06-30,2016,population,Victoria,6173172,count,actual
+2017-06-30,2017,population,Victoria,6302608,count,actual
+2018-06-30,2018,population,Victoria,6423038,count,actual
+2019-06-30,2019,population,Victoria,6537305,count,actual
+2020-06-30,2020,population,Victoria,6615046,count,actual
+2021-06-30,2021,population,Victoria,6547822,count,actual
+2022-06-30,2022,population,Victoria,6615232,count,actual
+2023-06-30,2023,population,Victoria,6797169,count,actual
+2024-06-30,2024,population,Victoria,6950961,count,actual
+2025-06-30,2025,population,Victoria,7064041,count,actual
+2016-06-30,2016,population,Western Australia,2555978,count,actual
+2017-06-30,2017,population,Western Australia,2585720,count,actual
+2018-06-30,2018,population,Western Australia,2617792,count,actual
+2019-06-30,2019,population,Western Australia,2659625,count,actual
+2020-06-30,2020,population,Western Australia,2712912,count,actual
+2021-06-30,2021,population,Western Australia,2749365,count,actual
+2022-06-30,2022,population,Western Australia,2793934,count,actual
+2023-06-30,2023,population,Western Australia,2890936,count,actual
+2024-06-30,2024,population,Western Australia,2978147,count,actual
+2025-06-30,2025,population,Western Australia,3044966,count,actual
+2016-06-30,2016,public_housing,Australia,320041,count,actual
+2017-06-30,2017,public_housing,Australia,319913,count,actual
+2018-06-30,2018,public_housing,Australia,316231,count,actual
+2019-06-30,2019,public_housing,Australia,305191,count,actual
+2020-06-30,2020,public_housing,Australia,300403,count,actual
+2021-06-30,2021,public_housing,Australia,299520,count,actual
+2022-06-30,2022,public_housing,Australia,297600,count,actual
+2023-06-30,2023,public_housing,Australia,298404,count,actual
+2024-06-30,2024,public_housing,Australia,297684,count,actual
+2025-06-30,2025,public_housing,Australia,296541,count,actual
+2016-06-30,2016,public_housing,Australian Capital Territory,10917,count,actual
+2017-06-30,2017,public_housing,Australian Capital Territory,11077,count,actual
+2018-06-30,2018,public_housing,Australian Capital Territory,11181,count,actual
+2019-06-30,2019,public_housing,Australian Capital Territory,10955,count,actual
+2020-06-30,2020,public_housing,Australian Capital Territory,10985,count,actual
+2021-06-30,2021,public_housing,Australian Capital Territory,10859,count,actual
+2022-06-30,2022,public_housing,Australian Capital Territory,10744,count,actual
+2023-06-30,2023,public_housing,Australian Capital Territory,10827,count,actual
+2024-06-30,2024,public_housing,Australian Capital Territory,10952,count,actual
+2025-06-30,2025,public_housing,Australian Capital Territory,11097,count,actual
+2016-06-30,2016,public_housing,New South Wales,110174,count,actual
+2017-06-30,2017,public_housing,New South Wales,110221,count,actual
+2018-06-30,2018,public_housing,New South Wales,111341,count,actual
+2019-06-30,2019,public_housing,New South Wales,100623,count,actual
+2020-06-30,2020,public_housing,New South Wales,96939,count,actual
+2021-06-30,2021,public_housing,New South Wales,96728,count,actual
+2022-06-30,2022,public_housing,New South Wales,96712,count,actual
+2023-06-30,2023,public_housing,New South Wales,95765,count,actual
+2024-06-30,2024,public_housing,New South Wales,94470,count,actual
+2025-06-30,2025,public_housing,New South Wales,92709,count,actual
+2016-06-30,2016,public_housing,Northern Territory,4970,count,actual
+2017-06-30,2017,public_housing,Northern Territory,5000,count,actual
+2018-06-30,2018,public_housing,Northern Territory,5017,count,actual
+2019-06-30,2019,public_housing,Northern Territory,4954,count,actual
+2020-06-30,2020,public_housing,Northern Territory,4911,count,actual
+2021-06-30,2021,public_housing,Northern Territory,4929,count,actual
+2022-06-30,2022,public_housing,Northern Territory,4890,count,actual
+2023-06-30,2023,public_housing,Northern Territory,4814,count,actual
+2024-06-30,2024,public_housing,Northern Territory,4566,count,actual
+2025-06-30,2025,public_housing,Northern Territory,4129,count,actual
+2016-06-30,2016,public_housing,Queensland,51188,count,actual
+2017-06-30,2017,public_housing,Queensland,51263,count,actual
+2018-06-30,2018,public_housing,Queensland,51413,count,actual
+2019-06-30,2019,public_housing,Queensland,51817,count,actual
+2020-06-30,2020,public_housing,Queensland,51890,count,actual
+2021-06-30,2021,public_housing,Queensland,52195,count,actual
+2022-06-30,2022,public_housing,Queensland,52643,count,actual
+2023-06-30,2023,public_housing,Queensland,53010,count,actual
+2024-06-30,2024,public_housing,Queensland,53509,count,actual
+2025-06-30,2025,public_housing,Queensland,53727,count,actual
+2016-06-30,2016,public_housing,South Australia,37852,count,actual
+2017-06-30,2017,public_housing,South Australia,37281,count,actual
+2018-06-30,2018,public_housing,South Australia,32686,count,actual
+2019-06-30,2019,public_housing,South Australia,32472,count,actual
+2020-06-30,2020,public_housing,South Australia,32147,count,actual
+2021-06-30,2021,public_housing,South Australia,31938,count,actual
+2022-06-30,2022,public_housing,South Australia,31591,count,actual
+2023-06-30,2023,public_housing,South Australia,31577,count,actual
+2024-06-30,2024,public_housing,South Australia,31462,count,actual
+2025-06-30,2025,public_housing,South Australia,31611,count,actual
+2016-06-30,2016,public_housing,Tasmania,7166,count,actual
+2017-06-30,2017,public_housing,Tasmania,7065,count,actual
+2018-06-30,2018,public_housing,Tasmania,7005,count,actual
+2019-06-30,2019,public_housing,Tasmania,7037,count,actual
+2020-06-30,2020,public_housing,Tasmania,7050,count,actual
+2021-06-30,2021,public_housing,Tasmania,7031,count,actual
+2022-06-30,2022,public_housing,Tasmania,4999,count,actual
+2023-06-30,2023,public_housing,Tasmania,4997,count,actual
+2024-06-30,2024,public_housing,Tasmania,5066,count,actual
+2025-06-30,2025,public_housing,Tasmania,5051,count,actual
+2016-06-30,2016,public_housing,Victoria,64241,count,actual
+2017-06-30,2017,public_housing,Victoria,64170,count,actual
+2018-06-30,2018,public_housing,Victoria,64295,count,actual
+2019-06-30,2019,public_housing,Victoria,64428,count,actual
+2020-06-30,2020,public_housing,Victoria,64072,count,actual
+2021-06-30,2021,public_housing,Victoria,63921,count,actual
+2022-06-30,2022,public_housing,Victoria,63987,count,actual
+2023-06-30,2023,public_housing,Victoria,64720,count,actual
+2024-06-30,2024,public_housing,Victoria,64223,count,actual
+2025-06-30,2025,public_housing,Victoria,64277,count,actual
+2016-06-30,2016,public_housing,Western Australia,33533,count,actual
+2017-06-30,2017,public_housing,Western Australia,33836,count,actual
+2018-06-30,2018,public_housing,Western Australia,33293,count,actual
+2019-06-30,2019,public_housing,Western Australia,32905,count,actual
+2020-06-30,2020,public_housing,Western Australia,32409,count,actual
+2021-06-30,2021,public_housing,Western Australia,31919,count,actual
+2022-06-30,2022,public_housing,Western Australia,32034,count,actual
+2023-06-30,2023,public_housing,Western Australia,32694,count,actual
+2024-06-30,2024,public_housing,Western Australia,33436,count,actual
+2025-06-30,2025,public_housing,Western Australia,33940,count,actual
+2016-06-30,2016,somih,Australia,9949,count,actual
+2017-06-30,2017,somih,Australia,14921,count,actual
+2018-06-30,2018,somih,Australia,14686,count,actual
+2019-06-30,2019,somih,Australia,14662,count,actual
+2020-06-30,2020,somih,Australia,14639,count,actual
+2021-06-30,2021,somih,Australia,14714,count,actual
+2022-06-30,2022,somih,Australia,14291,count,actual
+2023-06-30,2023,somih,Australia,14028,count,actual
+2024-06-30,2024,somih,Australia,15868,count,actual
+2025-06-30,2025,somih,Australia,17163,count,actual
+2016-06-30,2016,somih,Australian Capital Territory,..,count,actual
+2017-06-30,2017,somih,Australian Capital Territory,..,count,actual
+2018-06-30,2018,somih,Australian Capital Territory,..,count,actual
+2019-06-30,2019,somih,Australian Capital Territory,..,count,actual
+2020-06-30,2020,somih,Australian Capital Territory,..,count,actual
+2021-06-30,2021,somih,Australian Capital Territory,..,count,actual
+2022-06-30,2022,somih,Australian Capital Territory,..,count,actual
+2023-06-30,2023,somih,Australian Capital Territory,..,count,actual
+2024-06-30,2024,somih,Australian Capital Territory,..,count,actual
+2025-06-30,2025,somih,Australian Capital Territory,..,count,actual
+2016-06-30,2016,somih,New South Wales,4613,count,actual
+2017-06-30,2017,somih,New South Wales,4608,count,actual
+2018-06-30,2018,somih,New South Wales,4603,count,actual
+2019-06-30,2019,somih,New South Wales,4591,count,actual
+2020-06-30,2020,somih,New South Wales,4560,count,actual
+2021-06-30,2021,somih,New South Wales,4531,count,actual
+2022-06-30,2022,somih,New South Wales,4120,count,actual
+2023-06-30,2023,somih,New South Wales,3737,count,actual
+2024-06-30,2024,somih,New South Wales,5380,count,actual
+2025-06-30,2025,somih,New South Wales,6552,count,actual
+2016-06-30,2016,somih,Northern Territory,na,count,actual
+2017-06-30,2017,somih,Northern Territory,5032,count,actual
+2018-06-30,2018,somih,Northern Territory,5120,count,actual
+2019-06-30,2019,somih,Northern Territory,5168,count,actual
+2020-06-30,2020,somih,Northern Territory,5231,count,actual
+2021-06-30,2021,somih,Northern Territory,5381,count,actual
+2022-06-30,2022,somih,Northern Territory,5428,count,actual
+2023-06-30,2023,somih,Northern Territory,5586,count,actual
+2024-06-30,2024,somih,Northern Territory,5705,count,actual
+2025-06-30,2025,somih,Northern Territory,5789,count,actual
+2016-06-30,2016,somih,Queensland,3344,count,actual
+2017-06-30,2017,somih,Queensland,3324,count,actual
+2018-06-30,2018,somih,Queensland,3292,count,actual
+2019-06-30,2019,somih,Queensland,3271,count,actual
+2020-06-30,2020,somih,Queensland,3242,count,actual
+2021-06-30,2021,somih,Queensland,3216,count,actual
+2022-06-30,2022,somih,Queensland,3229,count,actual
+2023-06-30,2023,somih,Queensland,3226,count,actual
+2024-06-30,2024,somih,Queensland,3259,count,actual
+2025-06-30,2025,somih,Queensland,3291,count,actual
+2016-06-30,2016,somih,South Australia,1769,count,actual
+2017-06-30,2017,somih,South Australia,1734,count,actual
+2018-06-30,2018,somih,South Australia,1449,count,actual
+2019-06-30,2019,somih,South Australia,1414,count,actual
+2020-06-30,2020,somih,South Australia,1388,count,actual
+2021-06-30,2021,somih,South Australia,1365,count,actual
+2022-06-30,2022,somih,South Australia,1350,count,actual
+2023-06-30,2023,somih,South Australia,1315,count,actual
+2024-06-30,2024,somih,South Australia,1360,count,actual
+2025-06-30,2025,somih,South Australia,1369,count,actual
+2016-06-30,2016,somih,Tasmania,223,count,actual
+2017-06-30,2017,somih,Tasmania,223,count,actual
+2018-06-30,2018,somih,Tasmania,222,count,actual
+2019-06-30,2019,somih,Tasmania,218,count,actual
+2020-06-30,2020,somih,Tasmania,218,count,actual
+2021-06-30,2021,somih,Tasmania,221,count,actual
+2022-06-30,2022,somih,Tasmania,164,count,actual
+2023-06-30,2023,somih,Tasmania,164,count,actual
+2024-06-30,2024,somih,Tasmania,164,count,actual
+2025-06-30,2025,somih,Tasmania,162,count,actual
+2016-06-30,2016,somih,Victoria,..,count,actual
+2017-06-30,2017,somih,Victoria,..,count,actual
+2018-06-30,2018,somih,Victoria,..,count,actual
+2019-06-30,2019,somih,Victoria,..,count,actual
+2020-06-30,2020,somih,Victoria,..,count,actual
+2021-06-30,2021,somih,Victoria,..,count,actual
+2022-06-30,2022,somih,Victoria,..,count,actual
+2023-06-30,2023,somih,Victoria,..,count,actual
+2024-06-30,2024,somih,Victoria,..,count,actual
+2025-06-30,2025,somih,Victoria,..,count,actual
+2016-06-30,2016,somih,Western Australia,..,count,actual
+2017-06-30,2017,somih,Western Australia,..,count,actual
+2018-06-30,2018,somih,Western Australia,..,count,actual
+2019-06-30,2019,somih,Western Australia,..,count,actual
+2020-06-30,2020,somih,Western Australia,..,count,actual
+2021-06-30,2021,somih,Western Australia,..,count,actual
+2022-06-30,2022,somih,Western Australia,..,count,actual
+2023-06-30,2023,somih,Western Australia,..,count,actual
+2024-06-30,2024,somih,Western Australia,..,count,actual
+2025-06-30,2025,somih,Western Australia,..,count,actual

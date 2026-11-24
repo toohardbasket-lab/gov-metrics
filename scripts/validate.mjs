@@ -15,7 +15,7 @@ import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from '
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse as parseYaml } from 'yaml';
-import { deriveProblems, deriveYearEndedChange } from '../src/lib/derive.mjs';
+import { computeDerived, deriveInputs, deriveProblems, isValueCode } from '../src/lib/derive.mjs';
 import { STATE_ORDER } from '../src/lib/jurisdictions.mjs';
 
 // ---------------------------------------------------------------- settings
@@ -26,7 +26,7 @@ const STATUSES = ['actual', 'estimate', 'forecast'];
 // The units the site knows how to format. This is a copy of the list in src/lib/format.ts
 // (formatValue, formatAxis and formatTable). A check below fails if the two lists differ,
 // so a new unit has to be added in both places.
-const KNOWN_UNITS = ['aud_million', 'pct_gdp', 'pct', 'index'];
+const KNOWN_UNITS = ['aud_million', 'pct_gdp', 'pct', 'index', 'count', 'rate'];
 
 // How far apart consecutive rows must be. To add another frequency, add an entry here
 // whose `next` returns the date that should follow the one given (for example three months
@@ -223,8 +223,10 @@ function loadDataCsv(root, slug, F) {
     if (!isRealDate(date)) { F.fail(`${where}: "${date}" is not a real date in the form YYYY-MM-DD.`); good = false; }
     if (!series) { F.fail(`${where}: the series is empty.`); good = false; }
     if (!jurisdiction) { F.fail(`${where}: the jurisdiction is empty.`); good = false; }
-    const value = /^-?\d+(\.\d+)?$/.test(valueText) ? Number(valueText) : NaN;
-    if (!Number.isFinite(value)) { F.fail(`${where}: the value "${valueText}" is not a number.`); good = false; }
+    // a value is a number or one of the source's codes (.., na, np, -), which has no numeric value
+    const isCode = isValueCode(valueText);
+    const value = isCode ? NaN : /^-?\d+(\.\d+)?$/.test(valueText) ? Number(valueText) : NaN;
+    if (!isCode && !Number.isFinite(value)) { F.fail(`${where}: the value "${valueText}" is not a number or one of the codes .., na, np, -.`); good = false; }
     if (!STATUSES.includes(status)) { F.fail(`${where}: the status "${status}" is not one of ${STATUSES.join(', ')}.`); good = false; }
     if (!KNOWN_UNITS.includes(unit)) { F.fail(`${where}: the unit "${unit}" is not one the site can format (${KNOWN_UNITS.join(', ')}).`); good = false; }
     if (good) {
@@ -234,7 +236,7 @@ function loadDataCsv(root, slug, F) {
         good = false;
       } else seen.set(key, line);
     }
-    if (good) rows.push({ line, date, period, series, jurisdiction, value, valueText, unit, status });
+    if (good) rows.push({ line, date, period, series, jurisdiction, value, valueText, unit, status, isCode });
   });
   return { rows, sha };
 }
@@ -323,31 +325,30 @@ function checkSeries(slug, def, data, groups, F) {
   const inData = new Set(data.rows.map((r) => r.series));
   const isDerived = (s) => s !== undefined && s.derive !== undefined;
 
-  // 3a. a derived series (metric.yml `derive`) is worked out here, from a stored series, the same way
-  // the page works it out. It is never in data.csv. A period with no figure `lag` periods earlier has
-  // no derived figure (it is left out, not guessed).
-  const derivedGroups = new Map(); // "id|jurisdiction" -> rows, oldest first
-  for (const [id, s] of declared) {
-    if (!isDerived(s)) continue;
-    const src = declared.get(s.derive?.from);
-    const problems = deriveProblems(id, s.derive, src?.frequency, s.frequency);
+  // 3a. a derived series (metric.yml `derive`) is worked out here, from stored or other derived series, the
+  // same way the page works it out (src/lib/derive.mjs). It is never in data.csv. A date where an input is
+  // missing, unknown (na, np) or a code that cannot be used has no derived figure (left out, not guessed).
+  const derivedDefs = [...declared.values()].filter(isDerived);
+  let derivedGroups = new Map(); // "id|jurisdiction" -> rows, oldest first
+  let derivedOk = true;
+  for (const s of derivedDefs) {
+    const problems = deriveProblems(s.id, s.derive, (x) => declared.get(x)?.frequency, s.frequency);
     for (const m of problems) F.fail(`${yml}: ${m}`);
-    if (typeof s.derive?.from === 'string') {
-      if (!src) F.fail(`${yml}: series "${id}" is worked out from "${s.derive.from}", which is not in the "series" list.`);
-      else if (isDerived(src)) F.fail(`${yml}: series "${id}" is worked out from "${src.id}", which is itself derived. A derived series must be worked out from a stored series.`);
-      else if (!inData.has(src.id)) F.fail(`${yml}: series "${id}" is worked out from "${src.id}", which has no rows in data.csv.`);
+    if (problems.length > 0) derivedOk = false;
+    for (const src of deriveInputs(s.derive)) {
+      if (!declared.has(src)) { F.fail(`${yml}: series "${s.id}" is worked out from "${src}", which is not in the "series" list.`); derivedOk = false; }
+      else if (!isDerived(declared.get(src)) && !inData.has(src)) { F.fail(`${yml}: series "${s.id}" is worked out from "${src}", which has no rows in data.csv.`); derivedOk = false; }
     }
-    if (inData.has(id)) F.fail(`${path}: series "${id}" is derived in metric.yml, so it must not have rows in data.csv. Derived figures are worked out when the site is built.`);
-    if (s.frequency === undefined) F.fail(`${yml}: series "${id}" has no "frequency". Add one of: ${Object.keys(FREQUENCIES).join(', ')}.`);
-    if (problems.length > 0 || !src || isDerived(src) || !inData.has(src.id)) continue;
-    for (const [k, g] of groups) {
-      if (!k.startsWith(`${src.id}|`)) continue;
-      const jurisdiction = g[0].jurisdiction;
-      const lineOf = new Map(g.map((r) => [r.date, r.line]));
-      const rows = deriveYearEndedChange(g.map((r) => ({ date: r.date, period: r.period, valueText: r.valueText })), s.derive.lag, src.frequency)
-        .map((r) => ({ line: lineOf.get(r.date), date: r.date, period: r.period, series: id, jurisdiction, value: r.value, valueText: r.valueText, derivedFrom: `${src.id} ${r.current} on ${r.date} and ${r.earlier} on ${r.earlierDate}` }));
-      derivedGroups.set(`${id}|${jurisdiction}`, rows);
-    }
+    if (inData.has(s.id)) F.fail(`${path}: series "${s.id}" is derived in metric.yml, so it must not have rows in data.csv. Derived figures are worked out when the site is built.`);
+    if (s.frequency === undefined) F.fail(`${yml}: series "${s.id}" has no "frequency". Add one of: ${Object.keys(FREQUENCIES).join(', ')}.`);
+  }
+  if (derivedOk && derivedDefs.length > 0) {
+    const stored = new Map([...groups].map(([k, g]) => [k, g.map((r) => ({ date: r.date, period: r.period, valueText: r.valueText, unit: r.unit, line: r.line }))]));
+    const out = computeDerived([...declared.values()], stored);
+    for (const m of out.problems) F.fail(`${yml}: ${m}`);
+    const lineOf = new Map([...groups].map(([k, g]) => [k, new Map(g.map((r) => [r.date, r.line]))]));
+    derivedGroups = new Map([...out.groups].map(([k, rows]) => [k, rows.map((r) => ({ ...r, line: undefined, series: k.split('|')[0], jurisdiction: k.slice(k.indexOf('|') + 1) }))]));
+    void lineOf;
   }
 
   // 4. series match in both directions
@@ -383,6 +384,9 @@ function checkSeries(slug, def, data, groups, F) {
     const seriesGroups = isDerived(s)
       ? [...derivedGroups.entries()].filter(([k]) => k.startsWith(`${id}|`)).map(([, g]) => g)
       : [...groups.entries()].filter(([k]) => k.startsWith(`${id}|`)).map(([, g]) => g);
+    // rows holding a code (.., na, np, -) are dates with no figure: they keep their place in the schedule
+    // but have no value to range-check
+    const numericGroups = seriesGroups.map((g) => g.filter((r) => !r.isCode));
 
     // 5. frequency and gaps (a derived series takes its dates from the stored series, which is checked itself)
     const freq = FREQUENCIES[s.frequency];
@@ -423,7 +427,7 @@ function checkSeries(slug, def, data, groups, F) {
     const hasRange = p && typeof p === 'object' && isNum(p.min) && isNum(p.max) && p.min <= p.max;
     if (!hasRange) F.fail(`${yml}: series "${id}" needs "plausible" with a numeric min and max (min not above max).`);
     else {
-      for (const g of seriesGroups) {
+      for (const g of numericGroups) {
         for (const r of g) {
           if (r.value < p.min || r.value > p.max) {
             F.fail(r.derivedFrom
@@ -438,7 +442,7 @@ function checkSeries(slug, def, data, groups, F) {
       if (!isNum(s.max_step_pct) || s.max_step_pct <= 0) F.fail(`${yml}: series "${id}" has a "max_step_pct" that is not a positive number.`);
       else if (!isNum(floor) || floor < 0) F.fail(`${yml}: series "${id}" has a "max_step_floor" that is not a number of zero or more.`);
       else {
-        for (const g of seriesGroups) {
+        for (const g of numericGroups) {
           for (let i = 1; i < g.length; i++) {
             const prev = Math.abs(g[i - 1].value);
             if (prev < floor || prev === 0) continue;
@@ -451,6 +455,7 @@ function checkSeries(slug, def, data, groups, F) {
       }
     }
   }
+  return derivedGroups;
 }
 
 // 6b. a series that is a copy of another metric's series must equal it, row for row.
@@ -506,7 +511,7 @@ function checkCopies(root, slug, def, data, F) {
 //   national_label (its name in the read-out), heading, note, headers (the three column headings of the
 //   table of latest figures), and places: the eight jurisdictions in the fixed order NSW, Vic, Qld, WA, SA, Tas, ACT, NT, each with
 //   jurisdiction (full name as in data.csv), abbreviation and name (the place shown, such as the capital city).
-function checkStatePanel(slug, def, data, F) {
+function checkStatePanel(slug, def, data, derivedGroups, F) {
   const yml = `metrics/${slug}/metric.yml`;
   if (def.state_panel !== undefined && typeof def.state_panel !== 'boolean') F.fail(`${yml}: "state_panel" must be true or false.`);
   if (def.state_panel !== true) return;
@@ -516,7 +521,7 @@ function checkStatePanel(slug, def, data, F) {
     return;
   }
   for (const k of Object.keys(c)) {
-    if (!['series', 'national', 'national_label', 'heading', 'note', 'headers', 'places'].includes(k)) F.fail(`${yml}: "state_panel_config" has a field "${k}" that the checker does not know.`);
+    if (!['series', 'national', 'national_label', 'heading', 'note', 'headers', 'places', 'date_format', 'extra_columns'].includes(k)) F.fail(`${yml}: "state_panel_config" has a field "${k}" that the checker does not know.`);
   }
   for (const k of ['series', 'national', 'national_label', 'heading', 'note']) {
     if (typeof c[k] !== 'string' || c[k].trim() === '') F.fail(`${yml}: "state_panel_config" needs "${k}", as text.`);
@@ -535,9 +540,17 @@ function checkStatePanel(slug, def, data, F) {
     if (typeof got.name !== 'string' || got.name.trim() === '') F.fail(`${yml}: state panel place ${i + 1} (${want.jurisdiction}) has no "name" (the place shown, such as the capital city).`);
   });
   if (typeof c.series !== 'string') return;
-  const rowsFor = (j) => data.rows.filter((r) => r.series === c.series && r.jurisdiction === j);
-  if (!(Array.isArray(def.series) && def.series.some((x) => x?.id === c.series && x.derive === undefined))) {
-    F.fail(`${yml}: the state panel series "${c.series}" must be a stored series in the "series" list.`);
+  if (c.date_format !== undefined && !['period', 'month_year'].includes(c.date_format)) F.fail(`${yml}: "state_panel_config" has a "date_format" that is not period or month_year.`);
+  const declaredIds = new Set((Array.isArray(def.series) ? def.series : []).map((x) => x?.id));
+  if (c.extra_columns !== undefined) {
+    if (!Array.isArray(c.extra_columns) || c.extra_columns.some((x) => !x || typeof x.header !== 'string' || x.header.trim() === '' || typeof x.series !== 'string' || !declaredIds.has(x.series))) {
+      F.fail(`${yml}: "state_panel_config" has "extra_columns" that is not a list of {header, series} with a series from the "series" list.`);
+    }
+  }
+  // the series is stored (rows in data.csv) or derived (worked out, same code as the page)
+  const rowsFor = (j) => [...data.rows.filter((r) => r.series === c.series && r.jurisdiction === j && !r.isCode), ...(derivedGroups.get(`${c.series}|${j}`) ?? [])];
+  if (!declaredIds.has(c.series)) {
+    F.fail(`${yml}: the state panel series "${c.series}" must be in the "series" list.`);
     return;
   }
   const latest = new Map();
@@ -618,12 +631,15 @@ function checkLock(root, slug, def, groups, sha, F) {
     for (const r of g) {
       if (!Object.hasOwn(l.values, r.date)) continue; // a new date is not a revision
       const oldText = String(l.values[r.date]);
+      if (oldText === r.valueText) continue;
       const a = Number(oldText);
-      if (!Number.isFinite(a) || a === r.value) continue;
-      const why = usable ? revisionBreach(a, r.value, rev) : null;
+      // a figure that becomes a code, or a code that becomes a figure (or another code), is always a revision to check
+      const codeChange = isValueCode(oldText) || r.isCode;
+      if (!codeChange && (!Number.isFinite(a) || a === r.value)) continue;
+      const why = codeChange ? `a figure or code changed between "${oldText}" and "${r.valueText}"` : usable ? revisionBreach(a, r.value, rev) : null;
       if (!why) revised++;
       if (why) {
-        const short = `${csvPath}: ${l.series} (${l.jurisdiction}) on ${r.date} (${r.period}) was ${oldText} when last accepted and is now ${r.valueText}, a change of ${signed(r.value - a)} (${why})`;
+        const short = codeChange ? `${csvPath}: ${l.series} (${l.jurisdiction}) on ${r.date} (${r.period}) was ${oldText} when last accepted and is now ${r.valueText} (${why})` : `${csvPath}: ${l.series} (${l.jurisdiction}) on ${r.date} (${r.period}) was ${oldText} when last accepted and is now ${r.valueText}, a change of ${signed(r.value - a)} (${why})`;
         F.fail(`${short}. ${REVISION_HINT}`, 'revision', { short });
       }
     }
@@ -662,6 +678,14 @@ function checkSources(root, dirRel, F) {
       const okPath = typeof info.path === 'string' && /^metrics\/[a-z0-9-]+\/[A-Za-z0-9._-]+$/.test(info.path);
       if (!okPath) F.fail(`${manifestRel}: the entry for "${name}" has a "path" that is not a file inside a metrics folder.`);
       else if (typeof info.sha256 !== 'string' || !/^[0-9a-f]{64}$/.test(info.sha256) || !isNum(info.bytes)) F.fail(`${manifestRel}: the entry for "${name}" has no valid sha256 and bytes.`);
+      continue;
+    }
+    // An entry with "editions" is a note kept by a scraper that merges editions: for each stored period (a year),
+    // the edition of the source it last came from. It is not a file, so only its shape is checked.
+    if (info && typeof info === 'object' && info.editions !== undefined) {
+      const e = info.editions;
+      const okMap = e && typeof e === 'object' && !Array.isArray(e) && Object.keys(e).length > 0 && Object.values(e).every((v) => typeof v === 'string' && v !== '');
+      if (!okMap) F.fail(`${manifestRel}: the entry for "${name}" has "editions" that is not a non-empty map of period to edition.`);
       continue;
     }
     const file = join(dir, name);
@@ -740,6 +764,7 @@ function validateRoot(root) {
   const report = makeReport();
   const passes = []; // one line per metric that passed
   const locks = new Map(); // slug -> lock object to write on accept
+  const derivedGroupsOf = new Map(); // slug -> worked-out series (for the state panel check)
 
   const metricsDir = join(root, 'metrics');
   const slugs = existsSync(metricsDir)
@@ -758,9 +783,9 @@ function validateRoot(root) {
     const data = loadDataCsv(root, slug, F);
     if (data) {
       const groups = groupRows(data.rows);
-      if (def) checkSeries(slug, def, data, groups, F);
+      if (def) derivedGroupsOf.set(slug, checkSeries(slug, def, data, groups, F));
       if (def) checkCopies(root, slug, def, data, F);
-      if (def) checkStatePanel(slug, def, data, F);
+      if (def) checkStatePanel(slug, def, data, derivedGroupsOf.get(slug) ?? new Map(), F);
       checkLock(root, slug, def, groups, data.sha, F);
       locks.set(slug, lockFromGroups(groups, data.sha));
 

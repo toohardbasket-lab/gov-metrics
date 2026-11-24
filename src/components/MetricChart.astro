@@ -181,8 +181,9 @@ const first = chart.views[0];
         el('line', { x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: v === 0 ? 'var(--ink-3)' : 'var(--rule)', 'stroke-width': 1 });
         el('text', { x: L - 8, y: y(v) + 4, 'text-anchor': 'end', 'font-size': 12, fill: 'var(--ink-3)' }, formatAxis(view.unit, +v.toFixed(6)));
       }
-      // x ticks every five years
-      for (let yr = Math.ceil(xa / 5) * 5; yr <= X1; yr += 5) {
+            // x ticks: every five years on a long chart, every two or every year on a short one
+      const tickEvery = X1 - xa > 24 ? 5 : X1 - xa > 12 ? 2 : 1;
+      for (let yr = Math.ceil(xa / tickEvery) * tickEvery; yr <= X1; yr += tickEvery) {
         el('text', { x: x(yr), y: H - B + 18, 'text-anchor': 'middle', 'font-size': 12, fill: 'var(--ink-3)' }, yr);
       }
 
