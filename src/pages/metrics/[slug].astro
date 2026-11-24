@@ -1,6 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import MetricChart from '../../components/MetricChart.astro';
+import StatePanel from '../../components/StatePanel.astro';
 import { listMetricSlugs, loadMetric } from '../../lib/metrics';
 
 export function getStaticPaths() {
@@ -46,6 +47,12 @@ const d = m.def;
         {m.rich.targets.map((r) => (<><dt>{r.label}</dt><dd set:html={r.html} /></>))}
       </dl>
     </section>
+
+    {m.panel && (
+      <section class="card">
+        <StatePanel panel={m.panel} />
+      </section>
+    )}
 
     <section class="card">
       <h2>Sources and method</h2>

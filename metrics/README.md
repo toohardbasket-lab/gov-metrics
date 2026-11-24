@@ -1,6 +1,6 @@
 # Metrics
 
-Each metric has its own folder here. The folder name is the metric's short name (the "slug"), for example `commonwealth-debt`. The metrics so far are `commonwealth-debt`, built from figures parsed by code from Treasury's Word files, `unemployment-rate`, read by code from the ABS Data API and checked against the ABS Labour Force spreadsheet, `inflation`, three series (quarterly and monthly) checked against second sources, and `wages-and-prices`, the ABS Wage Price Index beside the inflation page's quarterly figures (see `scrapers/README.md`). Each is a draft until its owner has checked it.
+Each metric has its own folder here. The folder name is the metric's short name (the "slug"), for example `commonwealth-debt`. The metrics so far are `commonwealth-debt`, built from figures parsed by code from Treasury's Word files, `unemployment-rate`, read by code from the ABS Data API and checked against the ABS Labour Force spreadsheet, `inflation`, three series (quarterly and monthly) checked against second sources, `wages-and-prices`, the ABS Wage Price Index beside the inflation page's quarterly figures, and `rents`, the ABS rents index with a worked-out quarterly change, the monthly figure and a capital city panel (see `scrapers/README.md`). Each is a draft until its owner has checked it.
 
 Every folder that contains a `metric.yml` gets a page at `/metrics/<slug>/` and a link on the home page. The page is drawn entirely from the files in the folder, plus the shared lists in `shared/`. Nothing about any one metric is written into the site code.
 
@@ -29,7 +29,7 @@ The file is in "long" format: one row per date, series and jurisdiction. The hea
 | `series` | The series id from `metric.yml`, such as `gross_debt`. |
 | `jurisdiction` | Who the figure covers, such as `Commonwealth`, or a state or territory. |
 | `value` | The number, as published or computed in code. |
-| `unit` | What the number is measured in. The page knows `aud_million` (dollars, in millions), `pct_gdp` (per cent of GDP) and `pct` (per cent, such as a rate; shown as 4.9%). A new unit needs a line in `src/lib/format.ts`. |
+| `unit` | What the number is measured in. The page knows `aud_million` (dollars, in millions), `pct_gdp` (per cent of GDP), `pct` (per cent, such as a rate; shown as 4.9%) and `index` (an index number with one or two decimals, no % sign; shown as 103.3 or 7.07). A new unit needs a line in `src/lib/format.ts`. |
 | `status` | One of `actual`, `estimate` or `forecast`. |
 
 Every number must come from a file in `sources/`. Nothing is typed in by hand. The files must not contain quote marks or commas inside values; the page builder stops with an error if it finds a quote mark.
@@ -56,16 +56,55 @@ An unknown word, or one that cannot be worked out, stops the build. Do not type 
 | `draft`, `draft_banner` | If `draft` is true, the banner text is shown at the top and the home page adds "(draft)". |
 | `series` | Each series id, its label, definition and source table. |
 | `tiles` | The boxes above the chart. A tile with a `series` shows that series' latest value, with a `sub` series (and `suffix`) beneath. A tile with `text` and `sub_text` shows fixed words, such as the target status. A tile with a `series` may also have `sub_month: true` (the label stays plain and the month and year, such as October 2026, go beneath the figure) or `sub_quarter: true` (the same, but the quarter, such as September quarter 2026) and `months_back: 12` (the figure for the same month that many months before the latest, so 12 is a year earlier; it cannot be combined with `sub`). |
-| `views` | The chart's view buttons, in order. Each has an `id`, a `label`, a `caption`, and one to three `lines` (a series id and a label, and optionally `color: 1`, `2` or `3`, the series colour, which defaults to the line's position; set it so a series keeps its colour in every view). `derive: none` plots data.csv as it is. `derive: real` multiplies each value by the CPI of the latest June in the data divided by the CPI of that row's June, using `shared/cpi_june.csv`. Rows with no CPI figure are left out of that view. All lines in a view share one unit. Each line draws its own points, so a quarterly and a monthly series can share a chart; the hover read-out shows each line's value at its own nearest date, and "no figure" for a line with nothing near the cursor. Two optional settings per view: `from: 1983` starts the view in that year (the data before it is not drawn, and the axis starts there), and `target_band: {min: 2, max: 3, label: "Target band 2–3%"}` shades a band across the plot (pale blue with dashed edges, not a status colour) with its label and a legend entry. |
+| `views` | The chart's view buttons, in order. Each has an `id`, a `label`, a `caption`, and one to three `lines` (a series id and a label, and optionally `color: 1`, `2` or `3`, the series colour, which defaults to the line's position; set it so a series keeps its colour in every view). Each line may also name a `jurisdiction` (see below). `derive: none` plots data.csv as it is. `derive: real` multiplies each value by the CPI of the latest June in the data divided by the CPI of that row's June, using `shared/cpi_june.csv`. Rows with no CPI figure are left out of that view. All lines in a view share one unit. Each line draws its own points, so a quarterly and a monthly series can share a chart; the hover read-out shows each line's value at its own nearest date, and "no figure" for a line with nothing near the cursor. Two optional settings per view: `from: 1983` starts the view in that year (the data before it is not drawn, and the axis starts there), and `target_band: {min: 2, max: 3, label: "Target band 2–3%"}` shades a band across the plot (pale blue with dashed edges, not a status colour) with its label and a legend entry. |
 | `chart_alt`, `chart_source` | The chart's text description for screen readers, and the source line after each caption. |
-| `table` | The column headings of the full table and which series (and whether `derive: real`) each column shows. Optional: `period_format: month_year` shows each row's date as "September 2026" instead of the period label (use it when the series have different frequencies; there is one row for each date that has a figure in any series), and `missing: ""` sets what a cell with no figure shows (the default is n/a). |
+| `table` | The column headings of the full table and which series (and whether `derive: real`, and which `jurisdiction`) each column shows. Optional: `period_format: month_year` shows each row's date as "September 2026" instead of the period label (use it when the series have different frequencies; there is one row for each date that has a figure in any series), and `missing: ""` sets what a cell with no figure shows (the default is n/a). |
 | `meaning` | The "What the numbers mean" paragraphs. |
 | `targets` | Rows of the "Targets and forecasts" ledger. |
 | `sources_method`, `update`, `retrieved` | Rows of the "Sources and method" ledger, how often the data is updated, and the date it was retrieved. |
 | `read_with_care` | The "Read with care" list. |
 | `corrections_text` | The text of the page's Corrections section. |
 | `targets` (with dates) | The same `targets` list may also hold entries with a `label` and a `due` date (YYYY-MM-DD). The weekly report lists any that are due within 90 days or overdue. An entry with a `due` date still needs its `text`, because the page draws every entry in the list. Entries without `due`, like the ones now in the debt metric, are ignored by the report. Write each one with its keys on separate lines (or as one `{label: ..., due: ...}` line), because the report reads this list without a YAML library. |
-| `real_method`, `target`, `legal_limit`, `state_panel`, `inclusion_tests` | Notes kept in the definition file. Not drawn on the page yet. |
+| `state_panel`, `state_panel_config` | `state_panel: true` draws the state and territory panel under the targets (see below). `false` draws nothing. |
+| `real_method`, `target`, `legal_limit`, `inclusion_tests` | Notes kept in the definition file. Not drawn on the page yet. |
+
+### Jurisdictions in views, tiles and tables
+
+A series may have rows for more than one jurisdiction (for example `rents_monthly` for Australia and for each state and territory). Wherever such a series is used (a view line, a tile, a tile's `sub`, a table column) it must say which one with `jurisdiction: Australia`. A series with one jurisdiction needs nothing. The checker stops the build if a series with several jurisdictions is used without one, or if the jurisdiction named has no figures. Use the full state or territory name in data.csv (New South Wales, Victoria, Queensland, Western Australia, South Australia, Tasmania, Australian Capital Territory, Northern Territory).
+
+### Derived series
+
+A series that is worked out from a stored series is declared in `series` with a `derive` setting and is not in data.csv:
+
+```yaml
+- id: rents_quarterly
+  label: Rents, quarterly (worked out)
+  derive: {type: year_ended_change, from: rents_index_quarterly, lag: 4}
+  frequency: quarterly
+  plausible: {min: -20, max: 40}
+```
+
+`year_ended_change` is (value this period ÷ value `lag` periods earlier − 1) × 100, rounded half up to one decimal place (a tie goes away from zero, as the scrapers round). The sums are exact (whole numbers, no floating point) on the figures as written in data.csv. A period with no figure `lag` periods earlier (the start of the series, or a gap) has no derived figure: it is left out, never worked out from a different period. The same code (`src/lib/derive.mjs`) is used by the checker and the page, so they cannot disagree. A derived series is used in views, tiles and table columns like any other (its unit is `pct`), needs `frequency` (the same as the series it comes from, monthly or quarterly) and `plausible` (checked on the worked-out figures), needs no `revision` (nothing is stored to revise; the stored series carries it) and must not have rows in data.csv. Print the formula on the page, in "Sources and method".
+
+### The state and territory panel
+
+`state_panel: true` needs a `state_panel_config` (plan section 3):
+
+```yaml
+state_panel: true
+state_panel_config:
+  series: rents_monthly          # a stored series with one row set per jurisdiction
+  national: Australia            # drawn as the thin grey line on every small chart
+  national_label: Eight capital cities
+  heading: Capital cities
+  note: "..."                    # the words under the heading
+  headers: [Capital city, Month, Rents over twelve months]   # the three column headings of the table
+  places:                        # the eight, in this fixed order
+    - {jurisdiction: New South Wales, abbreviation: NSW, name: Sydney}
+    ...
+```
+
+The panel shows eight small charts in the fixed order NSW, Vic, Qld, WA, SA, Tas, ACT, NT, each labelled "name (abbreviation)", all on one y-axis scale (fitted to every place and the national line), no ranking colours, with the same government shading as the main chart, and under them a table of the latest figure for each place in the same order (not sorted by value). The checker refuses any other order or abbreviation, a place with no rows, and places that end in different months.
 
 ### Fields the checker needs on each series
 

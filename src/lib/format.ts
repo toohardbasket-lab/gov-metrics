@@ -7,6 +7,13 @@ function unknownUnit(unit: string): never {
   throw new Error(`Unknown unit "${unit}". Add it to src/lib/format.ts.`);
 }
 
+// An index number as the ABS gives it: one or two decimal places, no % sign (103.3, 7.07, 100.25).
+// The data holds at most two decimals, so the second is shown only when it is not zero.
+function indexText(v: number): string {
+  const s = v.toFixed(2);
+  return s.endsWith('0') ? s.slice(0, -1) : s;
+}
+
 // Read-outs, tiles and chart end labels.
 export function formatValue(unit: string, v: number): string {
   if (unit === 'aud_million') {
@@ -15,6 +22,7 @@ export function formatValue(unit: string, v: number): string {
   }
   if (unit === 'pct_gdp') return v.toFixed(1) + '%';
   if (unit === 'pct') return v.toFixed(1) + '%';
+  if (unit === 'index') return indexText(v);
   return unknownUnit(unit);
 }
 
@@ -23,6 +31,7 @@ export function formatAxis(unit: string, v: number): string {
   if (unit === 'aud_million') return (v < 0 ? '−$' : '$') + +Math.abs(v / 1000).toFixed(3) + 'b';
   if (unit === 'pct_gdp') return v + '%';
   if (unit === 'pct') return v + '%';
+  if (unit === 'index') return String(+v.toFixed(2));
   return unknownUnit(unit);
 }
 
@@ -31,6 +40,7 @@ export function formatTable(unit: string, v: number): string {
   if (unit === 'aud_million') return Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   if (unit === 'pct_gdp') return v.toFixed(1);
   if (unit === 'pct') return v.toFixed(1);
+  if (unit === 'index') return indexText(v);
   return unknownUnit(unit);
 }
 

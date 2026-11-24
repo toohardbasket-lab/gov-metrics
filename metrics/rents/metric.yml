@@ -1,0 +1,161 @@
+# Definition file for one metric. Everything the page shows, other than the numbers
+# in data.csv, comes from this file. See metrics/README.md for what each field does.
+# Words in braces, such as {last_year}, are filled in from the data when the page is built.
+slug: rents
+title: Rents
+theme: Housing and homelessness
+jurisdiction: Australia
+description: "How fast rents are rising over twelve months, each quarter since 1973, with each capital city since 2023."
+lede: "How much rents rose over the previous twelve months, each quarter since 1973 and each month since July 2023, with each capital city below."
+
+draft: true
+draft_banner: "Draft, not for publication. The figures are read from the ABS by code and have not yet had the human check the plan requires."
+
+# {latest_period} names the period of the latest row of this series (the monthly figure), because the
+# quarterly index and the monthly figures end on the same date.
+latest_period_series: rents_monthly
+
+# Three series. rents_index_quarterly and rents_monthly are stored in data.csv. rents_quarterly is not
+# stored: the ABS publishes no quarterly twelve-month change for rents, so it is worked out from the stored
+# index when the page is built and when the data is checked (derive), with the same code in both places.
+# rents_monthly holds one row per month for Australia (the eight capitals together) and for each state and
+# territory (its capital city, in the jurisdiction column). A line, tile or column that uses it names the
+# jurisdiction. The validator (npm run validate) stops the build if a quarter or month is missing, a date
+# is not the last day of its quarter or month, or a value falls outside the plausible range.
+series:
+  - id: rents_index_quarterly
+    label: Rents index (quarterly)
+    definition: Consumer Price Index, rents, weighted average of the eight capital cities, quarterly, original. Index numbers, stored exactly as the ABS gives them (at most two decimal places).
+    source_table: ABS, Consumer Price Index, Australia, Table 18, series A2331876F (Data API CPI 1.115522.10.50.Q)
+    frequency: quarterly
+    plausible: {min: 1, max: 500}
+    # Revision tolerance: the CPI is not revised, so any change to a past figure blocks until the owner accepts it. (If the ABS re-bases the index, every quarter changes and must be accepted once.)
+    revision: {max_abs: 0.01}
+  - id: rents_quarterly
+    label: Rents, quarterly (worked out)
+    definition: Change in the rents index over twelve months, worked out by this site from rents_index_quarterly as (index this quarter / index four quarters earlier - 1) x 100, rounded half up to one decimal place. Not stored in data.csv. The first figure is for 1973-Q3.
+    source_table: Worked out from the ABS rents index (Table 18, series A2331876F)
+    derive: {type: year_ended_change, from: rents_index_quarterly, lag: 4}
+    frequency: quarterly
+    plausible: {min: -20, max: 40}
+  - id: rents_monthly
+    label: Rents, monthly CPI
+    definition: Published change in the rents part of the monthly Consumer Price Index over twelve months, original. Australia is the weighted average of the eight capital cities; each state and territory row is its capital city.
+    source_table: ABS, Consumer Price Index, Australia, Table 3 (Australia, series A130390095C) and Table 11 (capital cities)
+    frequency: monthly
+    plausible: {min: -20, max: 40}
+    revision: {max_abs: 0.1}
+
+# The headline figures above the chart. Values are read from data.csv (or worked out from it).
+# sub_month: true puts the month of the figure beneath it; sub_quarter: true puts the quarter.
+tiles:
+  - label: Rents, monthly CPI
+    series: rents_monthly
+    jurisdiction: Australia
+    sub_month: true
+  - label: Rents, quarterly (worked out)
+    series: rents_quarterly
+    sub_quarter: true
+  - label: Target status
+    text: No numeric target
+    sub_text: Shown for context only
+
+# The chart. Each line uses its own points, so the quarterly and monthly lines share one chart.
+# color picks the series colour (1 blue, 2 orange) so a series keeps its colour.
+views:
+  - id: growth
+    label: Rents
+    derive: none
+    lines:
+      - series: rents_quarterly
+        label: Rents, quarterly (worked out)
+        color: 1
+      - series: rents_monthly
+        jurisdiction: Australia
+        label: Rents, monthly CPI
+        color: 2
+    caption: Per cent change over twelve months. Quarterly figures from 1973 are worked out from the ABS rents index; monthly figures from July 2023 are published by the ABS.
+chart_alt: "Line chart of the rise in rents over twelve months, 1973 to {last_year}. The full figures are in the table below."
+chart_source: "Source: ABS, Consumer Price Index, Australia. Latest month: {latest_period}."
+
+# The full table. Newest first, one row for each date that has a figure in any series. Australia only:
+# the capital cities are in the panel under the chart.
+table:
+  period_header: Quarter or month ending
+  period_format: month_year
+  missing: ""
+  columns:
+    - header: "Rents index (quarterly)"
+      series: rents_index_quarterly
+    - header: "Rents, quarterly % (worked out)"
+      series: rents_quarterly
+    - header: "Rents, monthly CPI %"
+      series: rents_monthly
+      jurisdiction: Australia
+
+meaning:
+  - "**Rents** here is the rise in the rents part of the Consumer Price Index over the previous twelve months. It measures what tenants pay for the same kinds of dwellings, including tenants who stay in the same home, not only the asking rents for new leases."
+  - "The figures cover rented homes in the eight capital cities. They show how fast rents are rising, not whether rent is affordable."
+
+# Targets and forecasts ledger.
+targets:
+  - label: Target
+    text: "No numeric target."
+
+# The state and territory panel (plan section 3). The places are in the fixed order NSW, Vic, Qld, WA, SA,
+# Tas, ACT, NT. jurisdiction is the name in data.csv; name is the place shown (here the capital city).
+state_panel: true
+state_panel_config:
+  series: rents_monthly
+  national: Australia
+  national_label: Eight capital cities
+  heading: Capital cities
+  note: "Each chart uses the same scale. The grey line is the eight-capital figure. The ABS publishes these city figures only from July 2023."
+  headers: [Capital city, Month, Rents over twelve months]
+  places:
+    - {jurisdiction: New South Wales, abbreviation: NSW, name: Sydney}
+    - {jurisdiction: Victoria, abbreviation: Vic, name: Melbourne}
+    - {jurisdiction: Queensland, abbreviation: Qld, name: Brisbane}
+    - {jurisdiction: Western Australia, abbreviation: WA, name: Perth}
+    - {jurisdiction: South Australia, abbreviation: SA, name: Adelaide}
+    - {jurisdiction: Tasmania, abbreviation: Tas, name: Hobart}
+    - {jurisdiction: Australian Capital Territory, abbreviation: ACT, name: Canberra}
+    - {jurisdiction: Northern Territory, abbreviation: NT, name: Darwin}
+
+# Sources and method ledger. {link} is replaced by the link; {update} and {retrieved}
+# by the fields below.
+update: "Monthly, when the ABS publishes the monthly Consumer Price Index, usually late in the following month. The quarterly index is published after each quarter."
+retrieved: 2026-11-24
+sources_method:
+  - label: Rents index (quarterly)
+    link:
+      label: ABS, Consumer Price Index, Australia
+      url: https://www.abs.gov.au/statistics/economy/price-indexes-and-inflation/consumer-price-index-australia/latest-release
+    text: "{link}, read from the ABS Data API (CPI 1.115522.10.50.Q) and checked quarter by quarter against Table 18, series A2331876F."
+  - label: Rents, quarterly (worked out)
+    text: "Worked out by this site from the quarterly index: (index this quarter ÷ index four quarters earlier − 1) × 100, rounded to one decimal place."
+  - label: Rents, monthly CPI
+    link:
+      label: ABS, Consumer Price Index, Australia
+      url: https://www.abs.gov.au/statistics/economy/price-indexes-and-inflation/consumer-price-index-australia/latest-release
+    text: "{link}, read from the ABS Data API (CPI 3.115522.10.50.M) and checked month by month against Table 3, series A130390095C."
+  - label: Capital cities
+    link:
+      label: ABS, Consumer Price Index, Australia
+      url: https://www.abs.gov.au/statistics/economy/price-indexes-and-inflation/consumer-price-index-australia/latest-release
+    text: "{link}, read from the ABS Data API (CPI 3.115522.10.1-8.M) and checked month by month against Table 11."
+  - label: Updated
+    text: "{update} Data retrieved {retrieved}."
+
+read_with_care:
+  - "The ABS no longer publishes a quarterly twelve-month change for rents, so this site works it out from the ABS's quarterly rents index, using the formula under Sources and method. For the early years the index is published with fewer significant digits, so a worked-out figure can differ by 0.1 point from the one published at the time."
+  - "The ABS publishes twelve-month rents figures from the monthly CPI only from July 2023, so the monthly line and the capital city charts are short. Monthly and quarterly figures cover different periods and can differ for the same date."
+  - "Rents are measured after Commonwealth Rent Assistance. When the government raises Rent Assistance, the rent measured for tenants who receive it falls, which pulls the figure down, as in September 2023 and September 2024."
+  - "The measure includes tenants who stay in the same home, whose rents change less often, so it rises and falls more slowly than advertised rents for new leases."
+  - "This page shows how fast rents are rising, not whether housing is affordable. Affordability also depends on incomes, and the official measure comes from a survey published with a long delay."
+  - "Government shading starts on the day each government was sworn in. Recessions and crises are marked on every chart on this site using the same list. The marks give context and do not assign cause."
+
+corrections_text: None yet. Every correction to this page will be listed here with its date and what changed.
+
+# Fields kept from the worked-example definition file.
+inclusion_tests: {outcome: true, official: true, history: true, ongoing: true, no_editorial_choice: "the ABS's rents measure, the only official national series"}

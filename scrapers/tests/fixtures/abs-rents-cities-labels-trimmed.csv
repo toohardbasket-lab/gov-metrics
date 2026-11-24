@@ -1,0 +1,25 @@
+DATAFLOW,MEASURE: Measure,INDEX: Index,TSEST: Adjustment Type,REGION: Region,FREQ: Frequency,TIME_PERIOD: Time Period,OBS_VALUE,UNIT_MEASURE: Unit of Measure,OBS_STATUS: Observation Status,DECIMALS: Decimals,OBS_COMMENT: Observation Comment,BASE_PERIOD: Reference Base Period
+ABS:CPI(2.0.0),3: Percentage change from previous year,115522: Rents,10: Original,2: Melbourne,M: Monthly,2025-07,3.9,PCT: Percent,,,,25: Sep 2025 = 100.0
+ABS:CPI(2.0.0),3: Percentage change from previous year,115522: Rents,10: Original,2: Melbourne,M: Monthly,2025-08,3.6,PCT: Percent,,,,25: Sep 2025 = 100.0
+ABS:CPI(2.0.0),3: Percentage change from previous year,115522: Rents,10: Original,2: Melbourne,M: Monthly,2025-09,3.6,PCT: Percent,,,,25: Sep 2025 = 100.0
+ABS:CPI(2.0.0),3: Percentage change from previous year,115522: Rents,10: Original,4: Adelaide,M: Monthly,2025-07,4.5,PCT: Percent,,,,25: Sep 2025 = 100.0
+ABS:CPI(2.0.0),3: Percentage change from previous year,115522: Rents,10: Original,4: Adelaide,M: Monthly,2025-08,4.3,PCT: Percent,,,,25: Sep 2025 = 100.0
+ABS:CPI(2.0.0),3: Percentage change from previous year,115522: Rents,10: Original,4: Adelaide,M: Monthly,2025-09,4.6,PCT: Percent,,,,25: Sep 2025 = 100.0
+ABS:CPI(2.0.0),3: Percentage change from previous year,115522: Rents,10: Original,1: Sydney,M: Monthly,2025-07,3.4,PCT: Percent,,,,25: Sep 2025 = 100.0
+ABS:CPI(2.0.0),3: Percentage change from previous year,115522: Rents,10: Original,1: Sydney,M: Monthly,2025-08,3.2,PCT: Percent,,,,25: Sep 2025 = 100.0
+ABS:CPI(2.0.0),3: Percentage change from previous year,115522: Rents,10: Original,1: Sydney,M: Monthly,2025-09,3.2,PCT: Percent,,,,25: Sep 2025 = 100.0
+ABS:CPI(2.0.0),3: Percentage change from previous year,115522: Rents,10: Original,8: Canberra,M: Monthly,2025-07,0.5,PCT: Percent,,,,25: Sep 2025 = 100.0
+ABS:CPI(2.0.0),3: Percentage change from previous year,115522: Rents,10: Original,8: Canberra,M: Monthly,2025-08,0.5,PCT: Percent,,,,25: Sep 2025 = 100.0
+ABS:CPI(2.0.0),3: Percentage change from previous year,115522: Rents,10: Original,8: Canberra,M: Monthly,2025-09,0.7,PCT: Percent,,,,25: Sep 2025 = 100.0
+ABS:CPI(2.0.0),3: Percentage change from previous year,115522: Rents,10: Original,6: Hobart,M: Monthly,2025-07,-0.7,PCT: Percent,,,,25: Sep 2025 = 100.0
+ABS:CPI(2.0.0),3: Percentage change from previous year,115522: Rents,10: Original,6: Hobart,M: Monthly,2025-08,-0.6,PCT: Percent,,,,25: Sep 2025 = 100.0
+ABS:CPI(2.0.0),3: Percentage change from previous year,115522: Rents,10: Original,6: Hobart,M: Monthly,2025-09,0.2,PCT: Percent,,,,25: Sep 2025 = 100.0
+ABS:CPI(2.0.0),3: Percentage change from previous year,115522: Rents,10: Original,5: Perth,M: Monthly,2025-07,6.7,PCT: Percent,,,,25: Sep 2025 = 100.0
+ABS:CPI(2.0.0),3: Percentage change from previous year,115522: Rents,10: Original,5: Perth,M: Monthly,2025-08,6.2,PCT: Percent,,,,25: Sep 2025 = 100.0
+ABS:CPI(2.0.0),3: Percentage change from previous year,115522: Rents,10: Original,5: Perth,M: Monthly,2025-09,6.3,PCT: Percent,,,,25: Sep 2025 = 100.0
+ABS:CPI(2.0.0),3: Percentage change from previous year,115522: Rents,10: Original,7: Darwin,M: Monthly,2025-07,2.6,PCT: Percent,,,,25: Sep 2025 = 100.0
+ABS:CPI(2.0.0),3: Percentage change from previous year,115522: Rents,10: Original,7: Darwin,M: Monthly,2025-08,2.7,PCT: Percent,,,,25: Sep 2025 = 100.0
+ABS:CPI(2.0.0),3: Percentage change from previous year,115522: Rents,10: Original,7: Darwin,M: Monthly,2025-09,3.1,PCT: Percent,,,,25: Sep 2025 = 100.0
+ABS:CPI(2.0.0),3: Percentage change from previous year,115522: Rents,10: Original,3: Brisbane,M: Monthly,2025-07,4.5,PCT: Percent,,,,25: Sep 2025 = 100.0
+ABS:CPI(2.0.0),3: Percentage change from previous year,115522: Rents,10: Original,3: Brisbane,M: Monthly,2025-08,4.3,PCT: Percent,,,,25: Sep 2025 = 100.0
+ABS:CPI(2.0.0),3: Percentage change from previous year,115522: Rents,10: Original,3: Brisbane,M: Monthly,2025-09,4.6,PCT: Percent,,,,25: Sep 2025 = 100.0

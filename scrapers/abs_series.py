@@ -282,6 +282,7 @@ def parse_spreadsheet_series(raw, series_id, sheet="Data1", expected_meta=None, 
     A, and one row per month beneath the Series ID row, dated the first of the month.
     `expected_meta` maps text found in column A (for example "Series Type") to the text the column
     must hold, and the key "description" stands for row 1. Whitespace is ignored when comparing.
+    The key "description_contains" checks that row 1 of the column contains the given text.
 
     Returns {period: number text}, where the number text is the repr of the number in the file.
     A month with an empty cell is left out. Refuses if the sheet or the column is not found, the
@@ -316,6 +317,11 @@ def parse_spreadsheet_series(raw, series_id, sheet="Data1", expected_meta=None, 
     col = cols[0]
     labelled = {_norm(r[0]): r for r in rows[:id_row] if r and r[0] is not None}
     for key, want in (expected_meta or {}).items():
+        if key == "description_contains":
+            got = rows[0][col] if len(rows[0]) > col else None
+            if _norm(want) not in _norm(got):
+                raise ScrapeError(f"{label}: column {series_id} has the header {_norm(got)!r}, which does not contain {_norm(want)!r}. This is not the series asked for.")
+            continue
         if key == "description":
             got = rows[0][col] if len(rows[0]) > col else None
         else:
@@ -380,6 +386,49 @@ def find_series_id_by_header(raw, must_contain, sheet="Data1", label="the ABS sp
     if not sid:
         raise ScrapeError(f"{label}: the column found for {must_contain} has no series ID")
     return sid
+
+
+def find_series_ids_by_header(raw, must_contain, series_type=None, sheets=None, label="the ABS spreadsheet"):
+    """Like find_series_id_by_header, but looks in several sheets and returns [(sheet, series ID)] for
+    every column whose row 1 header contains every text in `must_contain` (whitespace ignored) and, if
+    `series_type` is given, whose 'Series Type' row equals it. `sheets` is a list of sheet names; by
+    default every sheet whose name starts with "Data" (the big ABS tables spread their columns over
+    Data1, Data2, ...). Several columns may match (the ABS sometimes repeats a header with a different
+    series ID); the caller decides how many are expected. Returns [] if none match."""
+    import openpyxl
+
+    try:
+        wb = openpyxl.load_workbook(io.BytesIO(raw), read_only=True, data_only=True)
+    except Exception as e:
+        raise ScrapeError(f"{label} could not be opened as an Excel file: {e}") from None
+    needles = [_norm(t) for t in must_contain]
+    found = []
+    try:
+        names = sheets if sheets is not None else [n for n in wb.sheetnames if n.startswith("Data")]
+        if not names:
+            raise ScrapeError(f"{label} has no Data sheets; it has {wb.sheetnames}")
+        for sheet in names:
+            if sheet not in wb.sheetnames:
+                raise ScrapeError(f"{label} has no sheet {sheet!r}; it has {wb.sheetnames}")
+            rows = list(wb[sheet].iter_rows(values_only=True))
+            id_rows = [i for i, r in enumerate(rows[:30]) if r and _norm(r[0]) == "Series ID"]
+            if len(id_rows) != 1:
+                raise ScrapeError(f"{label}: expected one 'Series ID' row in the first 30 rows of {sheet}, found {len(id_rows)}")
+            type_rows = [r for r in rows[:id_rows[0]] if r and _norm(r[0]) == "Series Type"]
+            if series_type is not None and len(type_rows) != 1:
+                raise ScrapeError(f"{label}: expected one 'Series Type' row above the Series ID row of {sheet}, found {len(type_rows)}")
+            for j, h in enumerate(rows[0]):
+                if not all(n in _norm(h) for n in needles):
+                    continue
+                if series_type is not None and (len(type_rows[0]) <= j or _norm(type_rows[0][j]) != _norm(series_type)):
+                    continue
+                sid = _norm(rows[id_rows[0]][j]) if len(rows[id_rows[0]]) > j else ""
+                if not sid:
+                    raise ScrapeError(f"{label}: a column matching {must_contain} in {sheet} has no series ID")
+                found.append((sheet, sid))
+    finally:
+        wb.close()
+    return found
 
 
 # ---------------------------------------------------------------- the second-source check
