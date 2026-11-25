@@ -30,7 +30,7 @@ No `..`, `np` or `-` in the selected figures. So the ACT chart in the state pane
 
 **History.** Each RoGS edition carries ten years. When a later edition drops the earliest year, the scraper keeps the stored rows for that year unchanged and takes the years in both from the new edition; the checker's revision test (1 percentage point, 2 days) then decides whether a changed past figure is accepted. `sources/manifest.json` holds a `rogs-editions` entry that records, for each stored year, the edition it last came from (all ten years are from the 2026 edition now).
 
-The page is a draft until the human check below is done.
+The check required before publication (plan rule 8.8) is recorded below; it was done by Claude at Alan's request, not by a person.
 
 ## What the scraper checked (run of 24 November 2026)
 
@@ -78,12 +78,41 @@ States and territories, 2024-25, in the page's fixed order:
 - Chart lines: emergency view colours 1 and 2 (blue, orange), surgery view colours 3 and 4 (plum, green), so each series keeps its colour.
 - The lede and chart description use `{first_period}` (added by the lead model on 24 November 2026), so they read "since 2015-16" and "2015-16 to 2024-25".
 
-## Human check (plan rule 8.8)
+## Check under plan rule 8.8: done by Claude, not by a person
 
-Checked by:
+At Alan's request (25 November 2026: "You do the checks"), this check was done by Claude, the lead model, not by a person.
 
-Date:
+Date: 25 November 2026
 
-Against:
+Method: the figures shown on the built page (the table at the foot of the page) were compared with official files downloaded again for this check, read by separate code written for the check, not the scraper's code. The latest figure and five other dates chosen at random (fixed seed "2026-11-25-hospital-waits"). Worked-out figures were recalculated from the official figures. A planted error in a page cell was caught by the same check.
 
-Points checked:
+Against: Productivity Commission RoGS 2026 section 12 dataset, tables 12A.13, 12A.18 and 12A.23
+
+Result: 24 figures compared, all matched.
+
+| Point | Page |
+|---|---|
+| 2024-25 seen on time | 67 |
+| 2024-25 4 hours | 53.4 |
+| 2024-25 surgery 50th percentile | 45 |
+| 2024-25 surgery 90th percentile | 329 |
+| 2020-21 seen on time | 71 |
+| 2020-21 4 hours | 67.0 |
+| 2020-21 surgery 50th percentile | 48 |
+| 2020-21 surgery 90th percentile | 348 |
+| 2021-22 seen on time | 67 |
+| 2021-22 4 hours | 60.9 |
+| 2021-22 surgery 50th percentile | 40 |
+| 2021-22 surgery 90th percentile | 323 |
+| 2017-18 seen on time | 72 |
+| 2017-18 4 hours | 71.1 |
+| 2017-18 surgery 50th percentile | 41 |
+| 2017-18 surgery 90th percentile | 270 |
+| 2023-24 seen on time | 67 |
+| 2023-24 4 hours | 55.0 |
+| 2023-24 surgery 50th percentile | 46 |
+| 2023-24 surgery 90th percentile | 329 |
+| 2022-23 seen on time | 65 |
+| 2022-23 4 hours | 55.8 |
+| 2022-23 surgery 50th percentile | 49 |
+| 2022-23 surgery 90th percentile | 361 |

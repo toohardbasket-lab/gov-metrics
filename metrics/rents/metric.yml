@@ -8,7 +8,7 @@ jurisdiction: Australia
 description: "How fast rents are rising over twelve months, each quarter since 1973, with each capital city since 2023."
 lede: "How much rents rose over the previous twelve months, each quarter since 1973 and each month since July 2023, with each capital city below."
 
-draft: true
+draft: false
 draft_banner: "Draft, not for publication. The figures are read from the ABS by code and have not yet had the human check the plan requires."
 
 # {latest_period} names the period of the latest row of this series (the monthly figure), because the

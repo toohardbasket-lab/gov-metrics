@@ -25,7 +25,7 @@ Second source, used only as a check: the RoGS Excel tables (`sources/rogs-2026-p
 
 **History.** Each RoGS edition carries only some years (three Censuses and five financial years in the 2026 edition). When a later edition drops a year, the scraper keeps the stored rows for it unchanged and takes the years in both from the new edition; the checker's revision test then decides whether a changed past figure is accepted. `sources/manifest.json` holds a `rogs-editions` entry recording the edition each stored period last came from (all from the 2026 edition now).
 
-The page is a draft until the human check below is done.
+The check required before publication (plan rule 8.8) is recorded below; it was done by Claude at Alan's request, not by a person.
 
 ## What the scraper checked (run of 24 November 2026)
 
@@ -72,12 +72,53 @@ States and territories, in the page's fixed order:
 - The three service views start their axis in 2020 (`from: 2020`) so their five points are not squeezed to the right of an axis that starts at the first Census.
 - The page has two tables (a list under `table`): the Census table and the financial-year table. Each has a row for every date on which one of its own columns has a figure.
 
-## Human check (plan rule 8.8)
+## Check under plan rule 8.8: done by Claude, not by a person
 
-Checked by:
+At Alan's request (25 November 2026: "You do the checks"), this check was done by Claude, the lead model, not by a person.
 
-Date:
+Date: 25 November 2026
 
-Against:
+Method: the figures shown on the built page (the table at the foot of the page) were compared with official files downloaded again for this check, read by separate code written for the check, not the scraper's code. All three Censuses and all five financial years were checked, Australia figures. Worked-out figures were recalculated from the official figures. A planted error in a page cell was caught by the same check.
 
-Points checked:
+Against: Productivity Commission RoGS 2026 section 19 dataset, tables 19A.2, 19A.10 and 19A.11
+
+Result: 36 figures compared, all matched.
+
+| Point | Page |
+|---|---|
+| 2021 Census number | 122494 |
+| 2021 Census rate | 48.2 |
+| 2016 Census number | 116427 |
+| 2016 Census rate | 49.8 |
+| 2011 Census number | 102439 |
+| 2011 Census rate | 47.6 |
+| 2024-25 clients | 288970 |
+| 2024-25 unmet % | 33.2 |
+| 2024-25 unassisted part 1 | 232.0 |
+| 2024-25 unassisted part 2 | 79.4 |
+| 2024-25 unassisted part 3 | 41.7 |
+| 2024-25 unassisted total (recomputed) | 353.1 |
+| 2023-24 clients | 280078 |
+| 2023-24 unmet % | 32.8 |
+| 2023-24 unassisted part 1 | 208.6 |
+| 2023-24 unassisted part 2 | 62.9 |
+| 2023-24 unassisted part 3 | 28.5 |
+| 2023-24 unassisted total (recomputed) | 300.0 |
+| 2022-23 clients | 273648 |
+| 2022-23 unmet % | 34.9 |
+| 2022-23 unassisted part 1 | 213.6 |
+| 2022-23 unassisted part 2 | 58.2 |
+| 2022-23 unassisted part 3 | 22.7 |
+| 2022-23 unassisted total (recomputed) | 294.5 |
+| 2021-22 clients | 272694 |
+| 2021-22 unmet % | 33.9 |
+| 2021-22 unassisted part 1 | 203.2 |
+| 2021-22 unassisted part 2 | 59.9 |
+| 2021-22 unassisted part 3 | 24.8 |
+| 2021-22 unassisted total (recomputed) | 287.9 |
+| 2020-21 clients | 278275 |
+| 2020-21 unmet % | 32.3 |
+| 2020-21 unassisted part 1 | 226.3 |
+| 2020-21 unassisted part 2 | 60.4 |
+| 2020-21 unassisted part 3 | 25.7 |
+| 2020-21 unassisted total (recomputed) | 312.4 |

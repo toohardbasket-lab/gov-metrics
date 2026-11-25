@@ -8,7 +8,7 @@ jurisdiction: Australia
 description: "How many people are homeless on Census night, and how many people specialist homelessness services help and turn away each year."
 lede: "People counted as homeless at each Census since {first_year}, and the people helped, and not helped, by specialist homelessness services each financial year since {first_period:clients}."
 
-draft: true
+draft: false
 draft_banner: "Draft, not for publication. The figures are read from the Productivity Commission by code and have not yet had the human check the plan requires."
 
 # Eight series. Seven are stored in data.csv, one row per date and jurisdiction (Australia and each state and

@@ -8,7 +8,7 @@ jurisdiction: Australia
 description: How fast pay rates are rising compared with prices, each quarter since 1998.
 lede: "How fast hourly pay rates rose over the previous twelve months, compared with how fast prices rose, each quarter since {first_year}."
 
-draft: true
+draft: false
 draft_banner: "Draft, not for publication. The figures are read from the ABS and the Reserve Bank by code and have not yet had the human check the plan requires."
 
 # {latest_period} names the period of the latest row of this series. Prices can run one quarter

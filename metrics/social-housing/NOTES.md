@@ -25,7 +25,7 @@ Second sources, used only as checks:
 
 **History.** Each RoGS edition carries ten years. When a later edition drops the earliest year, the scraper keeps the stored rows for that year unchanged and takes the years in both from the new edition; the checker's revision test (2 per cent) then decides whether a change to a past figure is accepted. `sources/manifest.json` holds a `rogs-editions` entry that records, for each stored year, the edition it last came from (all ten years are from the 2026 edition now). The raw files of an older edition stay in `sources/` and in the manifest.
 
-The page is a draft until the human check below is done.
+The check required before publication (plan rule 8.8) is recorded below; it was done by Claude at Alan's request, not by a person.
 
 ## What the scraper checked (run of 24 November 2026)
 
@@ -59,12 +59,59 @@ Latest values, Australia, 30 June 2025 (and 2016 for comparison):
 - Plausible ranges: dwellings 0 to 1,000,000; population 0 to 40,000,000; the worked-out total 0 to 1,000,000; the worked-out rate 0 to 200 (the real range is about 12.2 to 51.2 per 1,000). No step check.
 - The state panel series is the derived `per_1000_people`; its extra column is the derived total. Chart lines: five on the dwellings view, colours 1 to 5 (blue, orange, plum, green, violet).
 
-## Human check (plan rule 8.8)
+## Check under plan rule 8.8: done by Claude, not by a person
 
-Checked by:
+At Alan's request (25 November 2026: "You do the checks"), this check was done by Claude, the lead model, not by a person.
 
-Date:
+Date: 25 November 2026
 
-Against:
+Method: the figures shown on the built page (the table at the foot of the page) were compared with official files downloaded again for this check, read by separate code written for the check, not the scraper's code. The latest figure and five other dates chosen at random (fixed seed "2026-11-25-social-housing"). Worked-out figures were recalculated from the official figures. A planted error in a page cell was caught by the same check.
 
-Points checked:
+Against: Productivity Commission RoGS 2026 section 18 dataset, table 18A.3; ABS Data API ERP_Q (population)
+
+Result: 42 figures compared, all matched.
+
+| Point | Page |
+|---|---|
+| 2025 public | 296541 |
+| 2025 community | 118425 |
+| 2025 SOMIH | 17163 |
+| 2025 ICH | 18478 |
+| 2025 total (recomputed) | 450607 |
+| 2025 population | 27601739 |
+| 2025 per 1,000 (recomputed) | 16.3 |
+| 2022 public | 297600 |
+| 2022 community | 112843 |
+| 2022 SOMIH | 14291 |
+| 2022 ICH | 16302 |
+| 2022 total (recomputed) | 441036 |
+| 2022 population | 26018721 |
+| 2022 per 1,000 (recomputed) | 17.0 |
+| 2019 public | 305191 |
+| 2019 community | 100205 |
+| 2019 SOMIH | 14662 |
+| 2019 ICH | 16193 |
+| 2019 total (recomputed) | 436251 |
+| 2019 population | 25334826 |
+| 2019 per 1,000 (recomputed) | 17.2 |
+| 2017 public | 319913 |
+| 2017 community | 82902 |
+| 2017 SOMIH | 14921 |
+| 2017 ICH | 16030 |
+| 2017 total (recomputed) | 433766 |
+| 2017 population | 24592588 |
+| 2017 per 1,000 (recomputed) | 17.6 |
+| 2018 public | 316231 |
+| 2018 community | 87819 |
+| 2018 SOMIH | 14686 |
+| 2018 ICH | 15766 |
+| 2018 total (recomputed) | 434502 |
+| 2018 population | 24963258 |
+| 2018 per 1,000 (recomputed) | 17.4 |
+| 2020 public | 300403 |
+| 2020 community | 103895 |
+| 2020 SOMIH | 14639 |
+| 2020 ICH | 15053 |
+| 2020 total (recomputed) | 433990 |
+| 2020 population | 25649248 |
+| 2020 per 1,000 (recomputed) | 16.9 |

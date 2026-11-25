@@ -12,7 +12,7 @@ Three series, all read by code. No figure is typed or edited by hand. The scrape
 
 Second sources used only as checks: the ABS quarterly CPI index (`CPI 1.10001.10.50.Q`, `sources/abs-cpi-1.10001.10.50.Q.csv`) and the ABS Table 1 spreadsheet (`sources/abs-cpi-640101.xlsx`; the address comes from the CPI "latest release" page each time).
 
-**Rounding.** The ABS leaves the DECIMALS cell empty for the `CPI` and `CPI_Q` dataflows (the Labour Force dataflow fills it), so "round to DECIMALS" cannot be applied literally. The scraper instead accepts an ABS percentage figure only if its own text already has at most one decimal place and writes it with exactly one ("4" becomes "4.0"). A figure with more places is refused, never rounded. Every figure in the three downloads already has one place or fewer. G1 figures are held to the same rule. The page is a draft until the human check below is done.
+**Rounding.** The ABS leaves the DECIMALS cell empty for the `CPI` and `CPI_Q` dataflows (the Labour Force dataflow fills it), so "round to DECIMALS" cannot be applied literally. The scraper instead accepts an ABS percentage figure only if its own text already has at most one decimal place and writes it with exactly one ("4" becomes "4.0"). A figure with more places is refused, never rounded. Every figure in the three downloads already has one place or fewer. G1 figures are held to the same rule. The check required before publication (plan rule 8.8) is recorded below; it was done by Claude at Alan's request, not by a person.
 
 ## What the scraper checked (run of 24 November 2026)
 
@@ -72,12 +72,32 @@ Cross-checks (all must pass or nothing is written):
 - Revision tolerances: headline 0.1 points (headline CPI is not revised, so any change blocks); trimmed mean 0.3 points (seasonally adjusted and re-estimated).
 - `{latest_period}` in the chart source line names the latest period of `headline_monthly` (set by `latest_period_series`), because three series end on 30 September 2026.
 
-## Human check (plan rule 8.8)
+## Check under plan rule 8.8: done by Claude, not by a person
 
-Checked by:
+At Alan's request (25 November 2026: "You do the checks"), this check was done by Claude, the lead model, not by a person.
 
-Date:
+Date: 25 November 2026
 
-Against:
+Method: the figures shown on the built page (the table at the foot of the page) were compared with official files downloaded again for this check, read by separate code written for the check, not the scraper's code. The latest figure and five other dates chosen at random (fixed seeds "2026-11-25-inflation-q" and "2026-11-25-inflation-m"), for the quarterly and the monthly series, were checked; worked-out figures were recalculated from the official figures. A planted error in a page cell was caught by the same check.
 
-Points checked:
+Against: Reserve Bank table G1 (series GCPIAGYP, GCPIOCPMTMYP); ABS CPI October 2026 Table 1 (series A130393721F); ABS Data API CPI_Q for trimmed mean quarters before 2002
+
+Result: 15 figures compared, all matched.
+
+| Point | Page |
+|---|---|
+| September 2026 quarterly CPI | 3.9 |
+| September 2026 trimmed mean | 3.7 |
+| September 2007 quarterly CPI | 1.9 |
+| September 2007 trimmed mean | 2.9 |
+| March 1976 quarterly CPI | 13.1 |
+| September 1999 quarterly CPI | 1.7 |
+| September 1999 trimmed mean | 2.2 |
+| September 1959 quarterly CPI | 2.2 |
+| September 1966 quarterly CPI | 2.6 |
+| September 2026 monthly CPI | 4.3 |
+| July 2026 monthly CPI | 3.5 |
+| August 2025 monthly CPI | 3.2 |
+| February 2026 monthly CPI | 3.7 |
+| April 2026 monthly CPI | 4.2 |
+| December 2025 monthly CPI | 3.8 |

@@ -17,7 +17,7 @@ Second source used only as a check for wages: the ABS Table 1 spreadsheet (`sour
 
 **Price growth.** The validator (`copy_of` in `metric.yml`) checks on every run that each `price_growth` row equals the inflation page's `headline_quarterly` row for the same date. In `run_all.py` the inflation scraper runs first; if it fails, this scraper is skipped and reported as failed. The scraper refuses if the inflation file is missing, has no figure for the first wage quarter, has a quarter missing from there on, or ends before the latest wage quarter.
 
-The page is a draft until the human check below is done.
+The check required before publication (plan rule 8.8) is recorded below; it was done by Claude at Alan's request, not by a person.
 
 ## What the scraper checked (run of 24 November 2026)
 
@@ -34,12 +34,29 @@ The page is a draft until the human check below is done.
 - `{latest_period}` in the chart source line names the latest period of `wage_growth` (set by `latest_period_series`). Prices can run one quarter ahead of wages; the table leaves the wage cell blank for such a quarter.
 - Government forecast row: "Not yet added". To be filled from the latest Budget or Mid-Year Economic and Fiscal Outlook before publication.
 
-## Human check (plan rule 8.8)
+## Check under plan rule 8.8: done by Claude, not by a person
 
-Checked by:
+At Alan's request (25 November 2026: "You do the checks"), this check was done by Claude, the lead model, not by a person.
 
-Date:
+Date: 25 November 2026
 
-Against:
+Method: the figures shown on the built page (the table at the foot of the page) were compared with official files downloaded again for this check, read by separate code written for the check, not the scraper's code. The latest figure and five other dates chosen at random (fixed seed "2026-11-25-wages-and-prices"). Worked-out figures were recalculated from the official figures. A planted error in a page cell was caught by the same check.
 
-Points checked:
+Against: ABS Wage Price Index September 2026 Table 1 (series A83895396W); Reserve Bank table G1 (series GCPIAGYP)
+
+Result: 12 figures compared, all matched.
+
+| Point | Page |
+|---|---|
+| September 2026 wage growth | 3.5 |
+| September 2026 price growth | 3.9 |
+| September 2022 wage growth | 3.1 |
+| September 2022 price growth | 7.3 |
+| December 2022 wage growth | 3.3 |
+| December 2022 price growth | 7.9 |
+| June 1999 wage growth | 3.1 |
+| June 1999 price growth | 1.1 |
+| December 2001 wage growth | 3.4 |
+| December 2001 price growth | 3.1 |
+| September 2013 wage growth | 2.6 |
+| September 2013 price growth | 2.2 |

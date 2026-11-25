@@ -23,7 +23,7 @@ Second sources, used only as checks (the addresses come from the CPI "latest rel
 
 **Index base.** The API's reference base period is September 2025 = 100.0. If the ABS re-bases the index, every quarter changes and each must be accepted once with `npm run accept-data -- --accept-revisions`.
 
-The page is a draft until the human check below is done.
+The check required before publication (plan rule 8.8) is recorded below; it was done by Claude at Alan's request, not by a person.
 
 ## What the scraper checked (run of 24 November 2026)
 
@@ -44,12 +44,43 @@ The page is a draft until the human check below is done.
 - The state and territory panel (`state_panel: true`, `state_panel_config`): places in the fixed order NSW, Vic, Qld, WA, SA, Tas, ACT, NT; the checker refuses any other order. The panel's note says the ABS publishes city figures only from July 2023.
 - No numeric target, so no status chip.
 
-## Human check (plan rule 8.8)
+## Check under plan rule 8.8: done by Claude, not by a person
 
-Checked by:
+At Alan's request (25 November 2026: "You do the checks"), this check was done by Claude, the lead model, not by a person.
 
-Date:
+Date: 25 November 2026
 
-Against:
+Method: the figures shown on the built page (the table at the foot of the page) were compared with official files downloaded again for this check, read by separate code written for the check, not the scraper's code. The latest figure and five other dates chosen at random (fixed seed) for the quarterly and monthly series, and the latest figure for every capital city. Worked-out figures were recalculated from the official figures. A planted error in a page cell was caught by the same check.
 
-Points checked:
+Against: ABS CPI October 2026 Tables 18 (A2331876F), 3 (A130390095C) and 11 (each capital city)
+
+Result: 26 figures compared, all matched.
+
+| Point | Page |
+|---|---|
+| September 2026 index | 103.3 |
+| September 2026 quarterly % (recomputed from index) | 3.6 |
+| December 1979 index | 14.92 |
+| December 1979 quarterly % (recomputed from index) | 7.6 |
+| September 1989 index | 35.7 |
+| September 1989 quarterly % (recomputed from index) | 9.0 |
+| December 2023 index | 90.8 |
+| December 2023 quarterly % (recomputed from index) | 7.3 |
+| September 2017 index | 81.43 |
+| September 2017 quarterly % (recomputed from index) | 0.5 |
+| March 2012 index | 73.49 |
+| March 2012 quarterly % (recomputed from index) | 4.4 |
+| September 2026 monthly | 3.6 |
+| February 2025 monthly | 5.5 |
+| September 2023 monthly | 7.5 |
+| March 2025 monthly | 5.2 |
+| September 2025 monthly | 3.8 |
+| May 2026 monthly | 3.6 |
+| Sydney September 2026 | 3.5 |
+| Melbourne September 2026 | 2.5 |
+| Brisbane September 2026 | 4.6 |
+| Perth September 2026 | 5.3 |
+| Adelaide September 2026 | 4.0 |
+| Hobart September 2026 | 3.2 |
+| Canberra September 2026 | 1.4 |
+| Darwin September 2026 | 6.5 |

@@ -8,7 +8,7 @@ jurisdiction: Commonwealth
 description: How much the Australian Government owes at 30 June each year.
 lede: "How much the Australian Government owes, each 30 June since 1971, in three views: dollars of the day, {real_base} prices, and as a share of the economy."
 
-draft: true
+draft: false
 draft_banner: "Draft, not for publication. The figures are read from the Treasury file by code and have not yet had the human check the plan requires."
 
 # Each series needs a frequency (annual) and a plausible range. The validator (npm run validate)

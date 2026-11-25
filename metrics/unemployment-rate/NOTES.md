@@ -6,7 +6,7 @@ The figures in `data.csv` are read by code from the ABS Data API (dataflow `ABS,
 
 The scraper (`scrapers/unemployment_rate.py`) also downloads the ABS Labour Force spreadsheet, Table 1 (`sources/abs-lf-62020001.xlsx`; the address comes from the Labour Force "latest release" page each time), reads column A84423050A ("Unemployment rate ; Persons ;", seasonally adjusted) and refuses to write anything unless every month in both agrees after the same rounding and both end on the same month. The web address, date retrieved and checksum of each source file are in `sources/manifest.json`.
 
-The page is a draft until the human check below is done.
+The human check (plan rule 8.8) was done by Alan on 23 November 2026; see below.
 
 ## What the scraper checked (run of 23 November 2026)
 

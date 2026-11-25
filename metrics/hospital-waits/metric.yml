@@ -8,7 +8,7 @@ jurisdiction: Australia
 description: "How quickly public hospital emergency departments see patients, and how long people wait for elective surgery, each year since 2015-16."
 lede: "How quickly public hospital emergency departments see patients, and how long people wait for planned surgery, each financial year since {first_period}."
 
-draft: true
+draft: false
 draft_banner: "Draft, not for publication. The figures are read from the Productivity Commission by code and have not yet had the human check the plan requires."
 
 # Four series, all stored in data.csv, one row per financial year and jurisdiction (Australia and each state and

@@ -8,7 +8,7 @@ jurisdiction: Australia
 description: How much consumer prices rose over twelve months, each quarter since 1950, against the 2 to 3 per cent target.
 lede: "How much consumer prices rose over the previous twelve months, each quarter since {first_year} and each month since April 2025, with the 2 to 3 per cent target band shaded."
 
-draft: true
+draft: false
 draft_banner: "Draft, not for publication. The figures are read from the ABS and the Reserve Bank by code and have not yet had the human check the plan requires."
 
 # {latest_period} names the period of the latest row of this series (the monthly CPI), because

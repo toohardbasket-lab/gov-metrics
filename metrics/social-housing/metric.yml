@@ -8,7 +8,7 @@ jurisdiction: Australia
 description: "How many social housing homes there are, at 30 June each year since 2016, in total and per 1,000 people."
 lede: "Social housing dwellings at 30 June each year since {first_year}: public housing, community housing and Indigenous housing, in total and per 1,000 residents."
 
-draft: true
+draft: false
 draft_banner: "Draft, not for publication. The figures are read from the Productivity Commission and the ABS by code and have not yet had the human check the plan requires."
 
 # Seven series. The four dwelling series and population are stored in data.csv, one row per year and
