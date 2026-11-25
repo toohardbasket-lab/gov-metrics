@@ -35,6 +35,7 @@ REGISTRY = [
     ("new_homes", "new_homes.py"),  # copies the population from the social housing page: must run after social_housing
     ("hospital_waits", "hospital_waits.py"),  # RoGS section 12; downloads everything itself
     ("homelessness", "homelessness.py"),  # RoGS section 19; downloads everything itself
+    ("bulk_billing", "bulk_billing.py"),  # RoGS section 10; downloads everything itself
 ]
 
 # A scraper that copies another scraper's output. If the one it depends on failed in this run, it is

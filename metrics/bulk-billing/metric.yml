@@ -1,0 +1,120 @@
+# Definition file for one metric. Everything the page shows, other than the numbers
+# in data.csv, comes from this file. See metrics/README.md for what each field does.
+# Words in braces, such as {latest_period}, are filled in from the data when the page is built.
+slug: bulk-billing
+title: Bulk billing
+theme: Health
+jurisdiction: Australia
+description: "The share of GP visits that are bulk billed, against the target of 9 in 10 by 2030."
+lede: "The share of GP visits bulk billed each financial year since {first_period}, against the government's target of 9 in 10 by 2030."
+
+draft: false
+draft_banner: "Draft, not for publication. The figures are read from the Productivity Commission by code and have not yet had the check the plan requires."
+
+# The status of the target (plan section 4). No official body rates progress against this target and the yearly
+# figures end before the policy began, so the status is "Too early to say", set by this site under its own rule. It is
+# in this form so a future Targets page can read it; the third tile reads the status word from here. The target is
+# "by 2030" without a day (see Read with care), so due is the last day of 2030, the latest date the wording allows.
+# It must be a real date; it is not a date the government has set. Update the status by hand when the 2025-26 figure
+# is published.
+status:
+  status: Too early to say
+  assessed_by: "This site, under its on-track rule"
+  assessed_on: "2026-11"
+  due: "2030-12-31"
+
+# One series, stored in data.csv: one row per financial year, Australia only (bulk billing is a Commonwealth program,
+# so there is no state panel). The date is 30 June of the second year of the financial year (2024-25 is 2025-06-30);
+# the period column keeps the Commission's label.
+series:
+  - id: gp_bulk_billed_pct
+    label: GP visits bulk billed
+    definition: The share of non-referred GP attendances (GP visits) that were bulk billed, all ages, all people, all areas of Australia. Per cent, one decimal place as published. The rate counts visits, not people.
+    source_table: Productivity Commission, Report on Government Services, table 10A.28 (Non-referred attendances that were bulk billed, by age), All ages, All people, All areas, from Medicare Benefits Schedule statistics
+    frequency: annual
+    plausible: {min: 0, max: 100}
+    # Revision tolerance: Medicare figures are close to final when the Commission publishes them. A change of more than 0.3 points to a past year blocks until the owner accepts it.
+    revision: {max_abs: 0.3}
+
+# The headline figures above the chart. Values are read from data.csv. sub_period puts the financial year beneath.
+tiles:
+  - label: GP visits bulk billed
+    series: gp_bulk_billed_pct
+    sub_period: true
+  - label: Target
+    text: "90%"
+    sub_text: "9 in 10 GP visits by 2030"
+  - label: Target status
+    from_status: true
+    sub_text: Figures so far end before the policy began
+
+# The chart. to ends the axis on 30 June 2030; reference_lines draw a horizontal line at a value in the target colour.
+views:
+  - id: rate
+    label: GP visits bulk billed
+    derive: none
+    to: "2030-06-30"
+    lines:
+      - series: gp_bulk_billed_pct
+        label: GP visits bulk billed
+        color: 1
+    reference_lines:
+      - {value: 90, label: "Target: 9 in 10 by 2030", style: solid}
+    caption: Per cent of non-referred GP attendances (GP visits) that were bulk billed, each financial year.
+chart_alt: "Line chart of the share of GP visits bulk billed each financial year, {first_period} to {latest_period}, with the 90 per cent target. The full figures are in the table below."
+chart_source: "Source: Productivity Commission, Report on Government Services, Primary and community health, table 10A.28 (from Medicare data). Latest year: {latest_period}."
+
+# The full table. Newest first.
+table:
+  period_header: Financial year
+  columns:
+    - header: "GP visits bulk billed %"
+      series: gp_bulk_billed_pct
+
+meaning:
+  - "A GP visit is **bulk billed** when the doctor accepts the Medicare benefit as full payment, so the patient pays nothing. The rate is the share of all GP visits (non-referred attendances) that were bulk billed."
+  - "From 1 November 2025 the government extended its bulk billing incentive payments to all patients and began paying an extra incentive to practices that bulk bill every patient. The yearly figures on this page so far end in June 2025, before that change."
+
+# Targets and forecasts ledger.
+targets:
+  - label: Target
+    text: "9 in 10 GP visits bulk billed by 2030, announced in the 2025-26 Budget (March 2025) with the expanded bulk billing incentives. {link}"
+    link:
+      label: "Department of Health, Budget 2025-26: More bulk billing"
+      url: https://www.health.gov.au/sites/default/files/2025-03/budget-2025-26-strengthening-medicare-more-bulk-billing.pdf
+  - label: Latest official figure
+    text: "The Department of Health reports 84.1 per cent of GP visits bulk billed in the April to June quarter 2026. This quarterly figure is quoted by hand from the Department's published snapshot, because its data cannot be downloaded automatically; it is not in the chart. {link}"
+    link:
+      label: "Department of Health, National GP Bulk Billing Snapshot, April to June 2026"
+      url: https://www.health.gov.au/sites/default/files/2026-08/national-gp-bulk-billing-snapshot-april-to-june-2026_0.pdf
+  - label: Target status
+    text: "Too early to say. No official body rates progress against this target, and the yearly figures on this page end before the expanded incentives began on 1 November 2025, so the site's straight-line test cannot yet be applied fairly. The status will be set when the 2025-26 figure is published (expected January 2027)."
+
+# No state and territory panel: bulk billing is a Commonwealth program (plan section 3).
+state_panel: false
+
+# Sources and method ledger. {link} is replaced by the link; {update} and {retrieved}
+# by the fields below.
+update: "Each year, when the Productivity Commission publishes the primary and community health section of the Report on Government Services (recently in January). The quarterly figure in Targets is updated by hand."
+retrieved: 2026-11-25
+sources_method:
+  - label: GP visits bulk billed
+    link:
+      label: Productivity Commission, Report on Government Services, Primary and community health
+      url: https://www.pc.gov.au/ongoing/report-on-government-services/health/primary-and-community-health/
+    text: "{link}, table 10A.28 (all ages, all areas), from Medicare Benefits Schedule data, read from the Commission's CSV dataset and checked against its Excel tables."
+  - label: Updated
+    text: "{update} Data retrieved {retrieved}."
+
+read_with_care:
+  - "The rate counts visits, not people. A person who visits often counts many times, and the Department also publishes the share of patients who were bulk billed for every visit, which is lower."
+  - "The target does not say whether 2030 means the calendar year or the 2029-30 financial year."
+  - "The high rates of 2019-20 to 2021-22 were lifted by COVID-19 vaccine assessments, which had to be bulk billed. The Department of Health says these items were introduced in late February 2021, were most used in 2021-22, and affected the bulk billing rate; the AIHW counts over 19 million of them in 2021, about one GP visit in ten. Part of the fall after 2021-22 reflects the end of those services. The figures on this page include them, as the Productivity Commission's table does."
+  - "A high national rate can sit alongside low rates in some areas. The Department publishes rates by region."
+  - "Each edition of the Report on Government Services carries only recent years. Older years stay on this page when a new edition drops them, and a revised past figure is checked before it is accepted."
+  - "Government shading starts on the day each government was sworn in. Recessions and crises are marked on every chart on this site using the same list. The marks give context and do not assign cause."
+
+corrections_text: None yet. Every correction to this page will be listed here with its date and what changed.
+
+# Fields kept from the worked-example definition file.
+inclusion_tests: {outcome: true, official: true, history: true, ongoing: true, no_editorial_choice: "the standard Medicare measure, which the target uses"}

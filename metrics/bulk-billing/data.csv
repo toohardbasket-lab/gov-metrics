@@ -1,0 +1,11 @@
+date,period,series,jurisdiction,value,unit,status
+2016-06-30,2015-16,gp_bulk_billed_pct,Australia,85.1,pct,actual
+2017-06-30,2016-17,gp_bulk_billed_pct,Australia,85.7,pct,actual
+2018-06-30,2017-18,gp_bulk_billed_pct,Australia,86.1,pct,actual
+2019-06-30,2018-19,gp_bulk_billed_pct,Australia,86.2,pct,actual
+2020-06-30,2019-20,gp_bulk_billed_pct,Australia,87.5,pct,actual
+2021-06-30,2020-21,gp_bulk_billed_pct,Australia,88.8,pct,actual
+2022-06-30,2021-22,gp_bulk_billed_pct,Australia,88.3,pct,actual
+2023-06-30,2022-23,gp_bulk_billed_pct,Australia,80.2,pct,actual
+2024-06-30,2023-24,gp_bulk_billed_pct,Australia,77.3,pct,actual
+2025-06-30,2024-25,gp_bulk_billed_pct,Australia,77.9,pct,actual

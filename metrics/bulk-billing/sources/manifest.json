@@ -1,0 +1,28 @@
+{
+  "rogs-2026-parte-section10-primary-and-community-health-data-tables_0.xlsx": {
+    "bytes": 1024226,
+    "retrieved": "2026-11-25",
+    "sha256": "99c6ff08e0a48026b780370aa4d02a8edb36b1b11049dd6ce92087005481a36c",
+    "url": "https://assets.pc.gov.au/2026-01/rogs-2026-parte-section10-primary-and-community-health-data-tables_0.xlsx?VersionId=dhbsbDjTKGQMTdhUt6hXYhyRTwePk28I"
+  },
+  "rogs-2026-parte-section10-primary-and-community-health-dataset_0.csv": {
+    "bytes": 3422482,
+    "retrieved": "2026-11-25",
+    "sha256": "f15e3d7b8b0c1df7870b1d390f062823c20a1ea98e43fa1117c6d2529902f957",
+    "url": "https://assets.pc.gov.au/2026-01/rogs-2026-parte-section10-primary-and-community-health-dataset_0.csv?VersionId=skSVcIjTxjuNWGWtKhp75L9zKdEohB9W"
+  },
+  "rogs-editions": {
+    "editions": {
+      "2015-16": "2026",
+      "2016-17": "2026",
+      "2017-18": "2026",
+      "2018-19": "2026",
+      "2019-20": "2026",
+      "2020-21": "2026",
+      "2021-22": "2026",
+      "2022-23": "2026",
+      "2023-24": "2026",
+      "2024-25": "2026"
+    }
+  }
+}
