@@ -200,6 +200,9 @@ function loadDefinition(root, slug, F) {
   if (def.series !== undefined && def.series !== null && !Array.isArray(def.series)) F.fail(`${path}: "series" must be a list.`);
   if (def.views !== undefined && def.views !== null && !Array.isArray(def.views)) F.fail(`${path}: "views" must be a list.`);
   if (Array.isArray(def.views)) {
+    for (const v of def.views) if (v && v.zero_line !== undefined && typeof v.zero_line !== 'boolean') F.fail(`${path}: view "${v.id}" has a "zero_line" that is not true or false.`);
+  }
+  if (Array.isArray(def.views)) {
     for (const v of def.views) if (v && v.markers !== undefined && typeof v.markers !== 'boolean') F.fail(`${path}: view "${v.id}" has a "markers" that is not true or false.`);
   }
   if (Array.isArray(def.views)) {

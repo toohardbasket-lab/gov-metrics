@@ -79,6 +79,7 @@ export interface MetricDef {
     from?: number;
     to?: string;
     markers?: boolean;
+    zero_line?: boolean;
     target_band?: { min: number; max: number; label: string };
     reference_lines?: { value: number; label: string; style: 'solid' | 'dashed' }[];
     caption: string;
@@ -126,6 +127,7 @@ export interface ChartView {
   from?: number;
   to?: string; // the last date the axis shows (the date of the last point drawn is at most this)
   markers?: boolean; // draw a marker on every point
+  zeroLine?: boolean; // draw a clear line at zero (for a series that crosses zero)
   band?: { min: number; max: number; label: string };
   referenceLines?: { value: number; label: string; style: 'solid' | 'dashed' }[]; // horizontal lines at a value (solid: the current target, dashed: a superseded one)
   lines: ChartLine[];
@@ -374,6 +376,7 @@ export function loadMetric(slug: string): Metric {
       ...(v.from !== undefined ? { from: v.from } : {}),
       ...(v.to !== undefined ? { to: v.to } : {}),
       ...(v.markers === true ? { markers: true } : {}),
+      ...(v.zero_line === true ? { zeroLine: true } : {}),
       ...(refs !== undefined ? { referenceLines: refs.map((r) => ({ value: r.value, label: fill(r.label), style: r.style })) } : {}),
       ...(b !== undefined ? { band: { min: b.min, max: b.max, label: b.label } } : {}),
       lines,

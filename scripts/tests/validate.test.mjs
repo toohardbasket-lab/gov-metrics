@@ -748,6 +748,7 @@ failCase('panel: markers that is not true or false', () => editFile(hlYml(), (t)
 failCase('panel: a figure above the fixed scale (the Northern Territory in 2011 is 723.7)', () => editFile(hlYml(), (t) => t.replace('y_range: {min: 0, max: 800}', 'y_range: {min: 0, max: 700}')), /the state panel scale is fixed at 0 to 700 \("y_range"\), but census_homeless_rate for "Northern Territory" on 2011-08-09 is 723\.7, outside it/);
 failCase('panel: the places end on different Censuses', () => hl((l) => l.includes(',census_homeless_rate,Tasmania,') && l.startsWith('2021-08-10'), () => null), /the places in the state panel do not all end on the same date/);
 failCase('views: markers that is not true or false', () => editFile(hlYml(), (t) => t.replace('    markers: true\n    lines:', '    markers: 1\n    lines:')), /view "census" has a "markers" that is not true or false/);
+failCase('views: zero_line that is not true or false', () => editFile(ymlPath('budget-balance'), (t) => t.replace('    zero_line: true\n    lines:\n      - series: ucb_pct_gdp', '    zero_line: 1\n    lines:\n      - series: ucb_pct_gdp')), /view "share_of_gdp" has a "zero_line" that is not true or false/);
 failCase('the per_day unit is refused if format.ts cannot format it', () => editFile(p('src', 'lib', 'format.ts'), (t) => t.replaceAll("unit === 'per_day'", "unit === 'perday'")), /src\/lib\/format\.ts: formats the units .* but scripts\/validate\.mjs lists/);
 
 // ---- derive.mjs directly: sums, ratios, codes, chained series

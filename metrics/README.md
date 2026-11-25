@@ -111,6 +111,8 @@ Three more pieces of the same kind (used by `new-homes`):
 - `derive: {type: straight_line, start: {date: 2024-06-30, value: 0}, end: {date: 2029-06-30, value: 1200000}, jurisdiction: Australia, unit: count}` writes one value for each period after `start` up to `end`, evenly spaced by the number of periods (not days), exact, rounded half away from zero to `decimals` (default 0). It needs no source series.
 - A `ratio` may have `denominator_date: 2024-06-30` to divide every date by the denominator's single figure for that date.
 
+A view may set `zero_line: true` to draw a clear line at zero (darker and thicker than the gridlines) when its values are positive in some years and negative in others, such as a surplus and a deficit.
+
 View settings: `to: "2029-06-30"` ends the view's axis on that date (a view without it keeps sharing the common axis); `reference_lines: [{value, label, style: solid|dashed}]` draws a horizontal line in the target colour with a legend entry; a line in `lines` may have `dash: true`. A metric may have `status: {status, assessed_by, assessed_on, due}` where `status` is one of Met, On track, Behind, Missed, Too early to say, quoting an official assessment; a tile with `from_status: true` shows it. `sub_prefix` works with `sub_quarter`, `sub_month` and `sub_date` as well as `sub_period`.
 
 

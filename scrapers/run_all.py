@@ -26,6 +26,7 @@ ROOT = HERE.parent
 REGISTRY = [
     ("cpi_june", "cpi_june.py"),
     ("commonwealth_debt", "commonwealth_debt.py"),
+    ("budget_balance", "budget_balance.py"),  # reads Table B.1 of the same Final Budget Outcome file; imports the debt scraper's helpers, downloads for itself
     ("unemployment_rate", "unemployment_rate.py"),
     ("inflation", "inflation.py"),
     ("wages_and_prices", "wages_and_prices.py"),  # copies the inflation page's figures: must run after inflation

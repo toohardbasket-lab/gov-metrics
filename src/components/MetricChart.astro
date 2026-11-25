@@ -80,7 +80,7 @@ const first = chart.views[0];
   type Ref = { value: number; label: string; style: 'solid' | 'dashed' };
   type View = {
     id: string; label: string; caption: string; unit: string;
-    from?: number; to?: string; markers?: boolean; band?: { min: number; max: number; label: string }; referenceLines?: Ref[];
+    from?: number; to?: string; markers?: boolean; zeroLine?: boolean; band?: { min: number; max: number; label: string }; referenceLines?: Ref[];
     lines: Line[];
   };
   type Chart = {
@@ -198,6 +198,10 @@ const first = chart.views[0];
       for (let v = y0; v <= y1 + 1e-9; v += step) {
         el('line', { x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: v === 0 ? 'var(--ink-3)' : 'var(--rule)', 'stroke-width': 1 });
         el('text', { x: L - 8, y: y(v) + 4, 'text-anchor': 'end', 'font-size': 12, fill: 'var(--ink-3)' }, formatAxis(view.unit, +v.toFixed(6)));
+      }
+      // A view with zero_line: true draws a clear line at zero, darker and thicker than the gridlines, under the data.
+      if (view.zeroLine && y0 <= 0 && y1 >= 0) {
+        el('line', { x1: L, x2: W - R, y1: y(0), y2: y(0), stroke: 'var(--ink-2)', 'stroke-width': 2 });
       }
             // x ticks: every five years on a long chart, every two or every year on a short one
       const tickEvery = xb - xa > 24 ? 5 : xb - xa > 12 ? 2 : 1;
