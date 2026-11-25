@@ -55,7 +55,10 @@ export function formatAxis(unit: string, v: number): string {
   if (unit === 'pct_gdp') return v + '%';
   if (unit === 'pct') return v + '%';
   if (unit === 'index') return String(+v.toFixed(2));
-  if (unit === 'count') return Math.abs(v) >= 1000 ? +(v / 1000).toFixed(1) + 'k' : String(v);
+  if (unit === 'count') {
+    if (Math.abs(v) >= 1000000) return +(v / 1000000).toFixed(2) + 'm';
+    return Math.abs(v) >= 1000 ? +(v / 1000).toFixed(1) + 'k' : String(v);
+  }
   if (unit === 'rate') return String(+v.toFixed(1));
   if (unit === 'days') return countText(v) + ' days';
   if (unit === 'per_day') return countText(v) + ' a day';

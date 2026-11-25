@@ -6,6 +6,7 @@ import { formatDate, formatMonthYear, formatQuarterYear, formatTable, formatValu
 import { escapeHtml, fillPlain, richText } from './text';
 import { computeDerived, isValueCode } from './derive.mjs';
 import { STATE_ORDER } from './jurisdictions.mjs';
+import { STATUS_WORDS } from './status.mjs';
 
 const ROOT = process.cwd();
 // The most lines one view can draw: the page defines this many series colours (--series-1 to --series-5).
@@ -38,7 +39,9 @@ export interface MetricDef {
   latest_period_series?: string;
   draft?: boolean;
   draft_banner?: string;
-  series: { id: string; label: string; frequency?: string; decimals?: number; derive?: { type: string; from?: string | string[]; lag?: number; numerator?: string; denominator?: string; factor?: number; decimals?: number; unit?: string } }[];
+  series: { id: string; label: string; frequency?: string; decimals?: number; derive?: { type: string; from?: string | string[]; lag?: number; start?: string | { date: string; value: number }; end?: { date: string; value: number }; jurisdiction?: string; numerator?: string; denominator?: string; denominator_date?: string; factor?: number; decimals?: number; unit?: string } }[];
+  // The official status of the target, in a form a future Targets page can read (plan section 4). `status` is one of STATUS_WORDS.
+  status?: { status: string; assessed_by: string; assessed_on: string; due: string };
   state_panel?: boolean;
   state_panel_config?: {
     series: string;
@@ -65,16 +68,19 @@ export interface MetricDef {
     sub_period?: boolean;
     sub_prefix?: string;
     text?: string;
+    from_status?: boolean; // the tile shows the status word from the metric's `status` block
     sub_text?: string;
   }[];
   views: {
     id: string;
     label: string;
     derive: 'none' | 'real';
-    lines: { series: string; jurisdiction?: string; label: string; color?: number }[];
+    lines: { series: string; jurisdiction?: string; label: string; color?: number; dash?: boolean }[];
     from?: number;
+    to?: string;
     markers?: boolean;
     target_band?: { min: number; max: number; label: string };
+    reference_lines?: { value: number; label: string; style: 'solid' | 'dashed' }[];
     caption: string;
   }[];
   chart_alt: string;
@@ -108,6 +114,7 @@ interface DataRow {
 export interface ChartLine {
   label: string;
   color: number;
+  dash?: boolean; // draw this line dashed
   decimals?: number; // decimal places to show for this line's figures (the series' `decimals`), if it sets any
   points: { date: string; period: string; value: number }[];
 }
@@ -117,8 +124,10 @@ export interface ChartView {
   caption: string;
   unit: string;
   from?: number;
+  to?: string; // the last date the axis shows (the date of the last point drawn is at most this)
   markers?: boolean; // draw a marker on every point
   band?: { min: number; max: number; label: string };
+  referenceLines?: { value: number; label: string; style: 'solid' | 'dashed' }[]; // horizontal lines at a value (solid: the current target, dashed: a superseded one)
   lines: ChartLine[];
 }
 export interface ChartData {
@@ -327,31 +336,45 @@ export function loadMetric(slug: string): Metric {
     need(units.size === 1, slug, `view "${v.id}" mixes units; one scale per view`);
     const latestJune = v.derive === 'real' ? latestJuneFor(v.lines) : undefined;
     if (v.from !== undefined) need(Number.isInteger(v.from) && v.from > 1000 && v.from < 3000, slug, `view "${v.id}" has a "from" that is not a year`);
+    if (v.to !== undefined) need(typeof v.to === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v.to), slug, `view "${v.id}" has a "to" that is not a date written YYYY-MM-DD`);
+    const refs = v.reference_lines;
+    if (refs !== undefined) {
+      need(Array.isArray(refs) && refs.length > 0, slug, `view "${v.id}" has a reference_lines that is not a list`);
+      for (const r of refs) {
+        need(typeof r?.value === 'number' && Number.isFinite(r.value), slug, `view "${v.id}" has a reference line whose value is not a number`);
+        need(typeof r.label === 'string' && r.label.trim() !== '', slug, `view "${v.id}" has a reference line with no label`);
+        need(r.style === 'solid' || r.style === 'dashed', slug, `view "${v.id}" has a reference line whose style is not solid or dashed`);
+      }
+    }
     const b = v.target_band;
     if (b !== undefined) {
       need(typeof b.min === 'number' && typeof b.max === 'number' && b.min < b.max, slug, `view "${v.id}" has a target_band whose min and max are not numbers with min below max`);
       need(typeof b.label === 'string' && b.label.trim() !== '', slug, `view "${v.id}" has a target_band with no label`);
     }
     const firstDate = v.from !== undefined ? `${v.from}-01-01` : '0000-01-01';
+    const lastDate = v.to !== undefined ? v.to : '9999-12-31';
     const lines: ChartLine[] = v.lines.map((l, i) => {
       const color = l.color ?? i + 1;
       need(Number.isInteger(color) && color >= 1 && color <= MAX_LINES, slug, `view "${v.id}" has a line colour that is not a whole number from 1 to ${MAX_LINES}`);
       const points: ChartLine['points'] = [];
       const own = rowsOf(l.series, l.jurisdiction, `view "${v.id}"`);
       for (const date of [...own.keys()].sort()) {
-        if (date < firstDate) continue;
+        if (date < firstDate || date > lastDate) continue;
         const value = valueFor(l.series, l.jurisdiction, date, v.derive, latestJune);
         if (value === undefined) continue;
         points.push({ date, period: own.get(date)!.period, value });
       }
       need(points.length > 0, slug, `view "${v.id}" has no points for series "${l.series}"${v.from !== undefined ? ` from ${v.from}` : ''}`);
       const decimals = decimalsOf(l.series);
-      return { label: l.label, color, ...(decimals !== undefined ? { decimals } : {}), points };
+      need(l.dash === undefined || typeof l.dash === 'boolean', slug, `view "${v.id}" has a line whose dash is not true or false`);
+      return { label: l.label, color, ...(l.dash === true ? { dash: true } : {}), ...(decimals !== undefined ? { decimals } : {}), points };
     });
     return {
       id: v.id, label: fill(v.label), caption: fill(v.caption), unit: [...units][0],
       ...(v.from !== undefined ? { from: v.from } : {}),
+      ...(v.to !== undefined ? { to: v.to } : {}),
       ...(v.markers === true ? { markers: true } : {}),
+      ...(refs !== undefined ? { referenceLines: refs.map((r) => ({ value: r.value, label: fill(r.label), style: r.style })) } : {}),
       ...(b !== undefined ? { band: { min: b.min, max: b.max, label: b.label } } : {}),
       lines,
     };
@@ -401,9 +424,16 @@ export function loadMetric(slug: string): Metric {
       need([t.sub_date, t.sub_month, t.sub_quarter, t.sub_period].filter(Boolean).length <= 1, slug, `tile "${t.label}" can have only one of sub_date, sub_month, sub_quarter and sub_period`);
       if (t.sub_date) sub = formatDate(r.date);
       if (t.sub_period) sub = (t.sub_prefix ?? '') + r.period; // the source's own period label, such as 2024-25 (sub_prefix: "Census " gives "Census 2021")
-      need(t.sub_prefix === undefined || (t.sub_period && typeof t.sub_prefix === 'string'), slug, `tile "${t.label}" has a sub_prefix without sub_period (or one that is not text)`);
+      need(t.sub_prefix === undefined || (typeof t.sub_prefix === 'string' && (t.sub_period || t.sub_quarter || t.sub_month || t.sub_date)), slug, `tile "${t.label}" has a sub_prefix without sub_period, sub_quarter, sub_month or sub_date (or one that is not text)`);
+      if (t.sub_prefix !== undefined && !t.sub_period) sub = t.sub_prefix + sub; // words before the month, quarter or date
       const key = t.sub_month || t.sub_quarter || t.sub_date || t.sub_period ? t.label : `${t.label}, ${formatDate(r.date)}`;
       return { key, value: formatValue(r.unit, r.value, decimalsOf(t.series)), sub, isText: false };
+    }
+    if (t.from_status === true) {
+      // a status tile: the status word from the metric's `status` block, and a sub-text, in the plain text style
+      need(def.status !== undefined && STATUS_WORDS.includes(def.status.status), slug, `tile "${t.label}" reads the status but the metric has no "status" block with one of ${STATUS_WORDS.join(', ')}`);
+      need(t.text === undefined, slug, `tile "${t.label}" has from_status and text`);
+      return { key: t.label, value: def.status!.status, sub: t.sub_text ?? '', isText: true };
     }
     need(t.text !== undefined, slug, `tile "${t.label}" needs either series or text`);
     return { key: t.label, value: t.text!, sub: t.sub_text ?? '', isText: true };

@@ -1,0 +1,211 @@
+# Definition file for one metric. Everything the page shows, other than the numbers
+# in data.csv, comes from this file. See metrics/README.md for what each field does.
+# Words in braces, such as {latest_period}, are filled in from the data when the page is built.
+slug: new-homes
+title: New homes
+theme: Housing and homelessness
+jurisdiction: Australia
+description: "New homes completed each quarter, and progress towards the target of 1.2 million new homes in the five years to June 2029."
+lede: "Homes completed since the National Housing Accord began on 1 July 2024, against the target of 1.2 million by 30 June 2029, and new homes completed each quarter since {first_year}."
+
+draft: false
+draft_banner: "Draft, not for publication. The figures are read from the ABS by code and have not yet had the check the plan requires."
+
+# The official status of the target (plan section 4: an official assessment is quoted where one exists). It is in this
+# form so a future Targets page can read it; the third tile reads the status word from here.
+status:
+  status: Behind
+  assessed_by: "National Housing Supply and Affordability Council"
+  assessed_on: "2026-08"
+  due: "2029-06-30"
+
+latest_period_series: completions
+
+# Five series. completions and population_june_2024 are stored in data.csv, one row per quarter (or date) and
+# jurisdiction (Australia and each state and territory). accord_completed, accord_per_1000 and pace_line are not
+# stored: the site works them out when the page is built and when the data is checked (derive), with the same code
+# in both places. The checker stops the build if a quarter is missing, a date is not the last day of a quarter or
+# a value falls outside the plausible range.
+series:
+  - id: completions
+    label: Homes completed each quarter
+    definition: Dwelling units completed in the quarter, all buildings, total work, total sectors (private and public), seasonally adjusted. Count of dwellings. Australia and each state and territory.
+    source_table: ABS, Building Activity, Australia, Table 37 (Australia) and Table 38 (states and territories), seasonally adjusted (Data API BUILDING_ACTIVITY M7.<region>.CUR.TOT.9.TOT.20.Q)
+    frequency: quarterly
+    plausible: {min: 0, max: 100000}
+    # Revision tolerance: the ABS revises recent quarters as late returns arrive and re-estimates seasonal adjustment, so past quarters move a little. A change of more than 3 per cent blocks until the owner accepts it.
+    # max_abs is required by the checker; 1 makes the per cent limit decide for counts of 100 or more (pct_floor), and any change of more than 1 blocks a count below 100.
+    revision: {max_abs: 1, max_pct: 3, pct_floor: 100}
+  - id: population_june_2024
+    label: Population at 30 June 2024
+    definition: Estimated resident population at 30 June 2024, persons, all ages, Australia and each state and territory. Copied from the social housing page's population series, so the two pages cannot disagree.
+    source_table: ABS, National, state and territory population (the same figures as the social housing page, series population on 30 June 2024)
+    copy_of: {metric: social-housing, series: population}
+    frequency: annual
+    plausible: {min: 0, max: 40000000}
+    revision: {max_abs: 1, max_pct: 1}
+  - id: accord_completed
+    label: Homes completed since July 2024 (worked out)
+    definition: The running total of homes completed each quarter from the September quarter 2024 (the first quarter of the National Housing Accord, which began on 1 July 2024) to the quarter shown, for each jurisdiction. Blank before the September quarter 2024, and blank after any quarter with no figure. Not stored in data.csv.
+    source_table: Worked out from completions
+    derive: {type: cumulative_sum, from: completions, start: 2024-09-30}
+    frequency: quarterly
+    plausible: {min: 0, max: 1500000}
+  - id: accord_per_1000
+    label: Homes completed since July 2024 per 1,000 residents (worked out)
+    definition: Homes completed since July 2024 divided by the estimated resident population at 30 June 2024, times 1,000, rounded half up to one decimal place. Not stored in data.csv.
+    source_table: Worked out from accord_completed and population_june_2024
+    derive: {type: ratio, numerator: accord_completed, denominator: population_june_2024, denominator_date: 2024-06-30, factor: 1000, decimals: 1, unit: rate}
+    frequency: quarterly
+    plausible: {min: 0, max: 100}
+  - id: pace_line
+    label: Straight-line pace to 1.2 million (worked out)
+    definition: The even pace that would reach 1,200,000 homes by 30 June 2029, starting from 0 at 30 June 2024, at the end of each quarter from 30 September 2024 to 30 June 2029 (60,000 a quarter). Australia only. Not stored in data.csv.
+    source_table: Worked out from the target (1,200,000 by 30 June 2029) in this file
+    derive: {type: straight_line, start: {date: 2024-06-30, value: 0}, end: {date: 2029-06-30, value: 1200000}, jurisdiction: Australia, unit: count}
+    frequency: quarterly
+    plausible: {min: 0, max: 1200000}
+
+# The headline figures above the chart. Values are read from data.csv (or worked out from it).
+tiles:
+  - label: Homes completed since July 2024
+    series: accord_completed
+    jurisdiction: Australia
+    sub_quarter: true
+    sub_prefix: "to "
+  - label: Completed in the latest quarter
+    series: completions
+    jurisdiction: Australia
+    sub_quarter: true
+  - label: Target status
+    from_status: true
+    sub_text: Council expects December quarter 2030
+
+# The chart. color keeps a series the same colour in every view (1 blue, 2 orange, 3 plum, 4 green, 5 violet).
+# to ends the axis on that date; dash draws a line dashed; reference_lines draw horizontal lines at a value in the
+# target colour (solid for the current target, dashed for a superseded one).
+views:
+  - id: accord
+    label: Progress to target
+    derive: none
+    from: 2024
+    to: "2029-06-30"
+    lines:
+      - series: accord_completed
+        jurisdiction: Australia
+        label: Homes completed since July 2024 (worked out)
+        color: 1
+      - series: pace_line
+        jurisdiction: Australia
+        label: Straight-line pace to 1.2 million (worked out)
+        color: 2
+        dash: true
+    reference_lines:
+      - {value: 1200000, label: "Target: 1.2 million by June 2029 (set August 2023)", style: solid}
+      - {value: 1000000, label: "Original target: 1 million (set October 2022)", style: dashed}
+    caption: Dwellings completed, seasonally adjusted, added up quarter by quarter from the September quarter 2024. The dashed line is the even pace that would reach 1.2 million by June 2029.
+  - id: quarterly
+    label: Each quarter
+    derive: none
+    lines:
+      - series: completions
+        jurisdiction: Australia
+        label: Homes completed each quarter
+        color: 1
+    caption: Dwelling units completed each quarter, seasonally adjusted, all kinds of building.
+chart_alt: "Line chart of new homes completed. The full figures are in the table below."
+chart_source: "Source: ABS, Building Activity, Australia (dwelling units completed, seasonally adjusted). Latest quarter: {latest_period}."
+
+# The full table. Newest first. Australia only: the states and territories are in the panel under the targets.
+# Only quarters with a completions figure are listed. missing: "" leaves a cell blank where a series has no figure.
+table:
+  period_header: Quarter ending
+  period_format: month_year
+  missing: ""
+  columns:
+    - header: "Completed in quarter"
+      series: completions
+      jurisdiction: Australia
+    - header: "Completed since July 2024 (worked out)"
+      series: accord_completed
+      jurisdiction: Australia
+    - header: "Straight-line pace (worked out)"
+      series: pace_line
+      jurisdiction: Australia
+
+meaning:
+  - "**Homes completed** counts new dwellings finished in the quarter: houses, townhouses and apartments, including dwellings created by converting or extending existing buildings. It is the ABS measure the National Housing Supply and Affordability Council uses to track the target."
+  - "The target counts homes completed in the five years from 1 July 2024 to 30 June 2029. Reaching 1.2 million at an even pace would need 60,000 completions a quarter."
+
+# Targets and forecasts ledger.
+targets:
+  - label: Current target
+    text: "1.2 million new well-located homes over five years from 1 July 2024, agreed by National Cabinet on 16 August 2023 under the National Housing Accord. {link}"
+    link:
+      label: National Cabinet, 16 August 2023
+      url: https://pmtranscripts.pmc.gov.au/node/40913
+  - label: Original target
+    text: "One million new well-located homes over five years from mid-2024, the initial aspirational target of the National Housing Accord (October 2022). {link}"
+    link:
+      label: Treasury, National Housing Accord
+      url: https://treasury.gov.au/policy-topics/housing/accord
+  - label: Official assessment
+    text: "The National Housing Supply and Affordability Council, a statutory body, estimates the 1.2 million target will be reached in the December quarter 2030, eighteen months after the deadline (Quarterly Report, August 2026). This page therefore shows the target as Behind. {link}"
+    link:
+      label: National Housing Supply and Affordability Council, Quarterly Report, August 2026
+      url: https://nhsac.gov.au/reports-and-submissions/quarterly-report-august-2026
+  - label: How the status is set
+    text: "Under this site's rule, an official assessment is quoted where one exists. The straight-line pace on the chart is shown for context only."
+
+# The state and territory panel (plan section 3), in the fixed order NSW, Vic, Qld, WA, SA, Tas, ACT, NT.
+# The rate is worked out (derived); the extra column beside it is the worked-out running total.
+state_panel: true
+state_panel_config:
+  series: accord_per_1000
+  national: Australia
+  national_label: Australia
+  heading: States and territories
+  note: "Each chart uses the same scale: homes completed since July 2024 per 1,000 residents at 30 June 2024. The grey line is Australia. Each state's share of the 1.2 million target is set by agreement and not published as a number by the Council, so the charts show the pace of building, not each state's progress against its share."
+  headers: ["State or territory", "Quarter ending", "Per 1,000 residents (worked out)"]
+  date_format: month_year
+  markers: true
+  extra_columns:
+    - {header: "Completed since July 2024 (worked out)", series: accord_completed}
+  places:
+    - {jurisdiction: New South Wales, abbreviation: NSW, name: New South Wales}
+    - {jurisdiction: Victoria, abbreviation: Vic, name: Victoria}
+    - {jurisdiction: Queensland, abbreviation: Qld, name: Queensland}
+    - {jurisdiction: Western Australia, abbreviation: WA, name: Western Australia}
+    - {jurisdiction: South Australia, abbreviation: SA, name: South Australia}
+    - {jurisdiction: Tasmania, abbreviation: Tas, name: Tasmania}
+    - {jurisdiction: Australian Capital Territory, abbreviation: ACT, name: Australian Capital Territory}
+    - {jurisdiction: Northern Territory, abbreviation: NT, name: Northern Territory}
+
+# Sources and method ledger. {link} is replaced by the link; {update} and {retrieved}
+# by the fields below.
+update: "Each quarter, when the ABS publishes Building Activity, Australia, about three months after the quarter ends. The Council's assessment is updated by hand when it publishes a new quarterly report."
+retrieved: 2026-11-25
+sources_method:
+  - label: Homes completed
+    link:
+      label: ABS, Building Activity, Australia
+      url: https://www.abs.gov.au/statistics/industry/building-and-construction/building-activity-australia/latest-release
+    text: "{link}: dwelling units completed, all buildings, total sectors, seasonally adjusted, read from the ABS Data API (BUILDING_ACTIVITY M7.*.CUR.TOT.9.TOT.20.Q) and checked against the ABS spreadsheets."
+  - label: Population
+    text: "Estimated resident population at 30 June 2024, the same figures as the social housing page (ABS, National, state and territory population)."
+  - label: Worked out
+    text: "Completed since July 2024 = the sum of quarterly completions from the September quarter 2024 to the quarter shown. Per 1,000 residents = that sum ÷ population at 30 June 2024 × 1,000. Straight-line pace = 1,200,000 × quarters since 30 June 2024 ÷ 20."
+  - label: Updated
+    text: "{update} Data retrieved {retrieved}."
+
+read_with_care:
+  - "Seasonally adjusted figures are re-estimated each quarter, and recent quarters are revised as late building returns arrive, so the running total can change slightly."
+  - "The Council counts completions the same way, but publishes its own figures with a delay; small differences from this page can come from revisions made since its report."
+  - "Completions count new dwellings, not the net addition to the housing stock. Homes demolished are not subtracted."
+  - "The Council's estimate of when the target will be met comes from its own forecasting model and is uncertain. This page quotes it and does not make its own forecast."
+  - "Government shading starts on the day each government was sworn in. Recessions and crises are marked on every chart on this site using the same list. The marks give context and do not assign cause."
+
+corrections_text: None yet. Every correction to this page will be listed here with its date and what changed.
+
+# Fields kept from the worked-example definition file.
+inclusion_tests: {outcome: true, official: true, history: true, ongoing: true, no_editorial_choice: "the ABS measure the Council uses to track the target"}

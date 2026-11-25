@@ -115,10 +115,12 @@ def split_by_region(raw, label="the population response"):
     return out
 
 
-def check_names(raw_labels, raw_plain, label="the population response with labels"):
+def check_names(raw_labels, raw_plain, label="the population response with labels", expect=None, noun="population"):
     """The same request made with labels gives 'code: name' cells. Every region code must carry the expected
-    name, the measure, sex and age must be the expected ones, and the labelled response must hold exactly the
-    same figures as the plain one. Returns {code: name}."""
+    name, the other dimensions must be the expected ones (`expect`: column -> 'code: name'; the default is the
+    population's measure, sex and age), and the labelled response must hold exactly the same figures as the
+    plain one. `noun` only words the messages. Returns {code: name}."""
+    expect = LABEL_EXPECT if expect is None else expect
     try:
         rows = list(csv.reader(io.StringIO(raw_labels.decode("utf-8-sig"))))
     except UnicodeDecodeError as e:
@@ -143,7 +145,7 @@ def check_names(raw_labels, raw_plain, label="the population response with label
             raise ScrapeError(f"{label}: line {n}: {r[c_reg]!r} is not in the form 'code: name'")
         if names.setdefault(code, name.strip()) != name.strip():
             raise ScrapeError(f"{label}: REGION {code} is called both {names[code]!r} and {name!r}")
-        for key in LABEL_EXPECT:
+        for key in expect:
             constant.setdefault(key, set()).add(r[col(key)])
         key = (code, r[c_time])
         if key in labelled:
@@ -151,8 +153,8 @@ def check_names(raw_labels, raw_plain, label="the population response with label
         labelled[key] = r[c_val].strip()
     if names != REGIONS:
         diffs = [f"{c}: {names.get(c)!r} (expected {REGIONS[c]!r})" for c in sorted(REGIONS) if names.get(c) != REGIONS[c]]
-        raise ScrapeError(f"the population region codes are not named as expected: {'; '.join(diffs)}")
-    for key, want in LABEL_EXPECT.items():
+        raise ScrapeError(f"the {noun} region codes are not named as expected: {'; '.join(diffs)}")
+    for key, want in expect.items():
         if constant.get(key) != {want}:
             raise ScrapeError(f"{label}: {key} is {sorted(constant.get(key, []))}, expected only {want!r}")
     plain = {(r["REGION"], r["TIME_PERIOD"]): r["OBS_VALUE"].strip() for r in csv.DictReader(io.StringIO(raw_plain.decode("utf-8-sig")))}

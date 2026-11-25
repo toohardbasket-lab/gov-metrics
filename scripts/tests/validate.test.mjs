@@ -11,7 +11,7 @@ import { createHash } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { computeDerived, deriveYearEndedChange, isValueCode, ratioText, shiftPeriods, sumText, yearEndedChangeText } from '../../src/lib/derive.mjs';
+import { computeDerived, deriveProblems, deriveYearEndedChange, isPeriodEnd, isRealIsoDate, isValueCode, periodLabel, periodsBetween, ratioText, shiftPeriods, sumText, yearEndedChangeText } from '../../src/lib/derive.mjs';
 
 const REPO = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const VALIDATE = join(REPO, 'scripts', 'validate.mjs');
@@ -806,6 +806,117 @@ plainCase('computeDerived refuses a loop, an unknown input and mixed units', () 
   return check('loop', loop.problems.some((m) => /worked out from itself/.test(m)), loop.problems.join(';'))
     && check('unknown', unknown.problems.some((m) => /"zz", which is not in the "series" list/.test(m)), unknown.problems.join(';'))
     && check('mixed', mixed.problems.some((m) => /different units \(count, pct\)/.test(m)), mixed.problems.join(';'));
+});
+
+
+// ---- new homes: cumulative_sum, straight_line and a ratio with a fixed denominator date; reference lines, dashed lines, the axis end and the status block
+const NH = 'new-homes';
+const nhRow = (date, series, jur) => (l) => l.startsWith(`${date},`) && l.includes(`,${series},${jur},`);
+const nh = (match, fn) => editRows(match, fn, NH);
+const nhYml = () => ymlPath(NH);
+plainCase('new homes: the clean copy passes', () => {
+  const r = run();
+  return check('nh clean', r.code === 0 && /PASS new-homes: 1521 rows, 2 series, 1984-09-30 to 2026-06-30/.test(r.out), `exit ${r.code}\n${r.out}`);
+});
+failCase('new homes: a past Australia quarter changed by 5 per cent blocks (tolerance 3 per cent)', () => nh(nhRow('2025-03-31', 'completions', 'Australia'), (l) => setValue(l, String(Math.round(Number(l.split(',')[4]) * 1.05)))),
+  /completions \(Australia\) on 2025-03-31 \(2025-Q1\) was \d+ when last accepted and is now \d+, a change of \+\d+ \(the change is more than 1 and more than 3 per cent\)/);
+plainCase('new homes: a 2 per cent change to a past quarter passes with a warning', () => {
+  nh(nhRow('2025-03-31', 'completions', 'Australia'), (l) => setValue(l, String(Math.round(Number(l.split(',')[4]) * 1.02))));
+  const r = run();
+  return check('2 per cent', r.code === 0 && /WARNING: metrics\/new-homes\/data\.csv: data has changed since it was last accepted \(1 accepted figure revised/.test(r.out), `exit ${r.code}\n${r.out}`);
+});
+failCase('new homes: a population row that differs from the social housing page blocks (copy_of)', () => nh(nhRow('2024-06-30', 'population_june_2024', 'Victoria'), (l) => setValue(l, String(Number(l.split(',')[4]) + 1))),
+  /new-homes\/data\.csv: line \d+, population_june_2024 \(Victoria\) on 2024-06-30 is \d+ \(count\), but the social-housing page's population for that date is \d+\. population_june_2024 must equal population on the social-housing page/);
+failCase('new homes: the social housing population changes and the copy does not', () => editRows(nhRow('2024-06-30', 'population', 'Australia'), (l) => setValue(l, String(Number(l.split(',')[4]) + 1)), SH),
+  /population_june_2024 \(Australia\) on 2024-06-30 is \d+ \(count\), but the social-housing page's population for that date is \d+/);
+failCase('new homes: the population has no row on the social housing page', () => editRows(nhRow('2024-06-30', 'population', 'Tasmania'), () => null, SH), /population_june_2024 \(Tasmania\) on 2024-06-30 .*but metrics\/social-housing\/data\.csv has no population row for 2024-06-30/);
+failCase('new homes: a quarter missing inside a state', () => nh(nhRow('2025-03-31', 'completions', 'Victoria'), () => null), /completions \(Victoria\) is missing 2025-03-31; the rows jump from 2024-12-31 to 2025-06-30/);
+failCase('new homes: a quarter dated off the quarter end', () => nh(nhRow('2025-03-31', 'completions', 'Australia'), (l) => l.replace('2025-03-31', '2025-03-30')), /completions \(Australia\) on 2025-03-30 is not the last day of March, June, September or December/);
+failCase('new homes: a completions figure outside the plausible range', () => nh(nhRow('2025-03-31', 'completions', 'Australia'), (l) => setValue(l, '100001')), /completions \(Australia\) on 2025-03-31 is 100001, outside the plausible range 0 to 100000/);
+failCase('new homes: the population missing for a state (rows fall against the lock)', () => nh(nhRow('2024-06-30', 'population_june_2024', 'Tasmania'), () => null), /population_june_2024 \(Tasmania\) had 1 rows when the data was last accepted but has none now/);
+failCase('new homes: a worked-out running total outside its plausible range', () => editFile(nhYml(), (t) => t.replace('plausible: {min: 0, max: 1500000}', 'plausible: {min: 0, max: 1000}')), /accord_completed \(Australia\) on 2024-09-30, worked out from the running total of completions from 2024-09-30 to 2024-09-30, is \d+, outside the plausible range 0 to 1000/);
+failCase('new homes: the straight-line pace outside its plausible range', () => editFile(nhYml(), (t) => t.replace('plausible: {min: 0, max: 1200000}', 'plausible: {min: 0, max: 1000000}')), /pace_line \(Australia\) on 2029-06-30, worked out from a straight line from 0 on 2024-06-30 to 1200000 on 2029-06-30, 20 of 20 periods, is 1200000, outside the plausible range 0 to 1000000/);
+failCase('new homes: a derived series stored in data.csv (cumulative)', () => editFile(dataPath(NH), (t) => t + '2026-06-30,2026-Q2,accord_completed,Australia,355817,count,actual\n'), /series "accord_completed" is derived in metric\.yml, so it must not have rows in data\.csv/);
+failCase('derive: cumulative_sum start that is not the last day of a quarter', () => editFile(nhYml(), (t) => t.replace('start: 2024-09-30}', 'start: 2024-09-29}')), /series "accord_completed" has a "derive" "start" that is not a real date|starts its running total on 2024-09-29, which is not the last day of a quarter/);
+failCase('derive: cumulative_sum start is not a date', () => editFile(nhYml(), (t) => t.replace('start: 2024-09-30}', 'start: September}')), /series "accord_completed" has a "derive" "start" that is not a real date written YYYY-MM-DD/);
+failCase('derive: cumulative_sum from a series that is not there', () => editFile(nhYml(), (t) => t.replace('type: cumulative_sum, from: completions', 'type: cumulative_sum, from: nonesuch')), /series "accord_completed" is worked out from "nonesuch", which is not in the "series" list/);
+failCase('derive: straight_line with an end date before the start', () => editFile(nhYml(), (t) => t.replace('end: {date: 2029-06-30, value: 1200000}', 'end: {date: 2023-06-30, value: 1200000}')), /series "pace_line" has a "derive" whose "end" date is not after its "start" date/);
+failCase('derive: straight_line dates that are not quarter ends', () => editFile(nhYml(), (t) => t.replace('start: {date: 2024-06-30, value: 0}', 'start: {date: 2024-07-01, value: 0}')), /series "pace_line" has a "derive" "start" date 2024-07-01, which is not the last day of a quarter/);
+failCase('derive: straight_line with no jurisdiction', () => editFile(nhYml(), (t) => t.replace(', jurisdiction: Australia, unit: count}', ', unit: count}')), /series "pace_line" has a "derive" of type straight_line with no "jurisdiction"/);
+failCase('derive: straight_line with a value that is not a number', () => editFile(nhYml(), (t) => t.replace('value: 1200000}, jurisdiction', 'value: lots}, jurisdiction')), /series "pace_line" has a "derive" "end" with a "value" that is not a plain number/);
+failCase('derive: straight_line with a field the checker does not know', () => editFile(nhYml(), (t) => t.replace(', jurisdiction: Australia, unit: count}', ', jurisdiction: Australia, unit: count, curve: 2}')), /series "pace_line" has a "derive" field "curve" that the checker does not know for type straight_line/);
+failCase('derive: ratio with a denominator_date that is not a date', () => editFile(nhYml(), (t) => t.replace('denominator_date: 2024-06-30', 'denominator_date: June')), /series "accord_per_1000" has a "derive" "denominator_date" that is not a real date written YYYY-MM-DD/);
+failCase('derive: ratio with a fixed denominator date is still checked for the numerator frequency', () => editFile(nhYml(), (t) => t.replace('    frequency: quarterly\n    plausible: {min: 0, max: 100}', '    frequency: monthly\n    plausible: {min: 0, max: 100}')), /series "accord_per_1000" says it is monthly but "accord_completed", which it is worked out from, is quarterly/);
+failCase('view: a reference line with a style that is not solid or dashed', () => editFile(nhYml(), (t) => t.replace('style: solid}', 'style: red}')), /view "accord" has a reference line whose "style" is not solid or dashed/);
+failCase('view: a reference line with no label', () => editFile(nhYml(), (t) => t.replace('label: "Original target: 1 million (set October 2022)", ', 'label: "", ')), /view "accord" has a reference line with no "label"/);
+failCase('view: a reference line whose value is not a number', () => editFile(nhYml(), (t) => t.replace('value: 1000000,', 'value: lots,')), /view "accord" has a reference line whose "value" is not a number/);
+failCase('view: a reference line with a field the checker does not know', () => editFile(nhYml(), (t) => t.replace('style: dashed}', 'style: dashed, colour: red}')), /view "accord" has a reference line that is not \{value, label, style\}/);
+failCase('view: reference_lines that is not a list', () => editFile(nhYml(), (t) => t.replace('    reference_lines:\n      - {value: 1200000, label: "Target: 1.2 million by June 2029 (set August 2023)", style: solid}\n      - {value: 1000000, label: "Original target: 1 million (set October 2022)", style: dashed}\n', '    reference_lines: 1200000\n')), /view "accord" has "reference_lines" that is not a list of \{value, label, style\}/);
+failCase('view: a "to" that is not a date', () => editFile(nhYml(), (t) => t.replace('to: "2029-06-30"', 'to: "June 2029"')), /view "accord" has a "to" that is not a real date written YYYY-MM-DD/);
+failCase('view: a "to" before the "from" year', () => editFile(nhYml(), (t) => t.replace('to: "2029-06-30"', 'to: "2023-06-30"')), /view "accord" has a "to" date that is not after its "from" year/);
+failCase('view: a dash that is not true or false', () => editFile(nhYml(), (t) => t.replace('dash: true', 'dash: sometimes')), /view "accord" has a line whose "dash" is not true or false/);
+failCase('status: a word that is not one of the five', () => editFile(nhYml(), (t) => t.replace('  status: Behind', '  status: Late')), /status "Late" is not one of Met, On track, Behind, Missed, Too early to say/);
+failCase('status: no assessed_by', () => editFile(nhYml(), (t) => t.replace('  assessed_by: "National Housing Supply and Affordability Council"\n', '')), /"status" needs "assessed_by", as text/);
+failCase('status: an assessed_on that is not a month or date', () => editFile(nhYml(), (t) => t.replace('assessed_on: "2026-08"', 'assessed_on: "August 2026"')), /"status" needs "assessed_on", a month YYYY-MM or a date YYYY-MM-DD/);
+failCase('status: a due date that is not real', () => editFile(nhYml(), (t) => t.replace('due: "2029-06-30"', 'due: "2029-02-30"')), /"status" needs "due", a real date written YYYY-MM-DD/);
+failCase('status: a field the checker does not know', () => editFile(nhYml(), (t) => t.replace('  due: "2029-06-30"', '  due: "2029-06-30"\n  rating: amber')), /"status" must be \{status, assessed_by, assessed_on, due\}/);
+failCase('status: a status tile with no status block', () => editFile(nhYml(), (t) => t.replace(/status:\n  status: Behind\n  assessed_by: .*\n  assessed_on: .*\n  due: .*\n/, '')), /tile "Target status" has "from_status" but metric\.yml has no "status" block/);
+failCase('status: a status tile that also has text', () => editFile(nhYml(), (t) => t.replace('    from_status: true\n', '    from_status: true\n    text: Behind\n')), /tile "Target status" has "from_status" and also "text" or "series"/);
+plainCase('derive: cumulative_sum adds from the start date, is blank before it and stops at a gap or an unknown code', () => {
+  const put = (rows) => new Map([['c|X', rows.map(([date, v]) => ({ date, period: date.slice(0, 7), valueText: v, unit: 'count' }))]]);
+  const series = [{ id: 'c', frequency: 'quarterly' }, { id: 't', frequency: 'quarterly', derive: { type: 'cumulative_sum', from: 'c', start: '2024-09-30' } }];
+  const show = (out) => (out.groups.get('t|X') ?? []).map((r) => `${r.date}=${r.valueText}`).join(' ');
+  const base = put([['2024-06-30', '5'], ['2024-09-30', '10'], ['2024-12-31', '20'], ['2025-03-31', '30'], ['2025-06-30', '40']]);
+  const ok = computeDerived(series, base);
+  const gap = computeDerived(series, put([['2024-06-30', '5'], ['2024-09-30', '10'], ['2025-03-31', '30'], ['2025-06-30', '40']]));
+  const code = computeDerived(series, put([['2024-09-30', '10'], ['2024-12-31', 'na'], ['2025-03-31', '30']]));
+  const zero = computeDerived(series, put([['2024-09-30', '10'], ['2024-12-31', '..'], ['2025-03-31', '30']]));
+  const noStart = computeDerived(series, put([['2024-12-31', '20'], ['2025-03-31', '30']]));
+  const dec = computeDerived(series, put([['2024-09-30', '0.1'], ['2024-12-31', '0.2']]));
+  return check('cumulative ok', show(ok) === '2024-09-30=10 2024-12-31=30 2025-03-31=60 2025-06-30=100' && ok.problems.length === 0, show(ok))
+    && check('cumulative gap', show(gap) === '2024-09-30=10' && gap.blanks.some((b) => b.date === '2024-12-31' && /no figure for 2024-12-31/.test(b.reason)), `${show(gap)} ${JSON.stringify(gap.blanks)}`)
+    && check('cumulative later dates blank after a gap', gap.blanks.some((b) => b.date === '2025-06-30' && /blank after 2024-12-31/.test(b.reason)), JSON.stringify(gap.blanks))
+    && check('cumulative unknown code', show(code) === '2024-09-30=10' && code.blanks.some((b) => b.date === '2024-12-31') && code.blanks.some((b) => b.date === '2025-03-31'), `${show(code)} ${JSON.stringify(code.blanks)}`)
+    && check('cumulative zero code', show(zero) === '2024-09-30=10 2024-12-31=10 2025-03-31=40', show(zero))
+    && check('cumulative needs the start quarter', show(noStart) === '' && noStart.blanks.some((b) => b.date === '2024-12-31'), `${show(noStart)} ${JSON.stringify(noStart.blanks)}`)
+    && check('cumulative exact decimals', show(dec) === '2024-09-30=0.1 2024-12-31=0.3', show(dec));
+});
+plainCase('derive: straight_line is exact, rounds half away from zero and has one figure per period after the start', () => {
+  const mk = (derive, frequency = 'quarterly') => computeDerived([{ id: 'p', frequency, derive: { type: 'straight_line', jurisdiction: 'A', unit: 'count', ...derive } }], new Map());
+  const vals = (out) => (out.groups.get('p|A') ?? []).map((r) => `${r.date}=${r.valueText}`).join(' ');
+  const target = mk({ start: { date: '2024-06-30', value: 0 }, end: { date: '2029-06-30', value: 1200000 } });
+  const rows = target.groups.get('p|A');
+  const third = mk({ start: { date: '2024-06-30', value: 0 }, end: { date: '2025-03-31', value: 100 } });
+  const down = mk({ start: { date: '2024-06-30', value: 10 }, end: { date: '2025-03-31', value: 0 } });
+  const neg = mk({ start: { date: '2024-06-30', value: 0 }, end: { date: '2025-03-31', value: -100 } });
+  const dec = mk({ start: { date: '2024-06-30', value: 0 }, end: { date: '2024-12-31', value: 1 }, decimals: 2 });
+  const monthly = mk({ start: { date: '2024-01-31', value: 0 }, end: { date: '2024-04-30', value: 3 } }, 'monthly');
+  return check('line count', rows.length === 20 && rows[0].date === '2024-09-30' && rows[0].valueText === '60000' && rows[7].date === '2026-06-30' && rows[7].valueText === '480000' && rows[19].date === '2029-06-30' && rows[19].valueText === '1200000', JSON.stringify([rows.length, rows[0], rows[7], rows[19]]))
+    && check('line period labels', rows[0].period === '2024-Q3' && rows[19].period === '2029-Q2' && rows[0].unit === 'count', `${rows[0].period} ${rows[19].period}`)
+    && check('line third', vals(third) === '2024-09-30=33 2024-12-31=67 2025-03-31=100', vals(third))
+    && check('line down', vals(down) === '2024-09-30=7 2024-12-31=3 2025-03-31=0', vals(down))
+    && check('line negative rounds away from zero', vals(neg) === '2024-09-30=-33 2024-12-31=-67 2025-03-31=-100', vals(neg))
+    && check('line decimals', vals(dec) === '2024-09-30=0.50 2024-12-31=1.00', vals(dec))
+    && check('line monthly', vals(monthly) === '2024-02-29=1 2024-03-31=2 2024-04-30=3', vals(monthly))
+    && check('line no problems', target.problems.length === 0, target.problems.join(';'));
+});
+plainCase('derive: a ratio with a fixed denominator date divides every date by the one figure and blanks if it is missing', () => {
+  const put = (id, j, rows) => [`${id}|${j}`, rows.map(([date, v]) => ({ date, period: date.slice(0, 7), valueText: v, unit: 'count' }))];
+  const stored = new Map([put('n', 'X', [['2024-09-30', '10'], ['2024-12-31', '30']]), put('d', 'X', [['2024-06-30', '2000'], ['2023-06-30', '1']]), put('n', 'Y', [['2024-09-30', '10']]), put('d', 'Y', [['2023-06-30', '5']])]);
+  const series = [{ id: 'n', frequency: 'quarterly' }, { id: 'd', frequency: 'annual' }, { id: 'r', frequency: 'quarterly', derive: { type: 'ratio', numerator: 'n', denominator: 'd', denominator_date: '2024-06-30', factor: 1000, decimals: 1, unit: 'rate' } }];
+  const out = computeDerived(series, stored);
+  const show = (k) => (out.groups.get(k) ?? []).map((r) => `${r.date}=${r.valueText}${r.unit}`).join(' ');
+  return check('fixed X', show('r|X') === '2024-09-30=5.0rate 2024-12-31=15.0rate', show('r|X'))
+    && check('fixed Y blank', show('r|Y') === '' && out.blanks.some((b) => b.series === 'r' && b.jurisdiction === 'Y' && /d has no figure for 2024-06-30/.test(b.reason)), JSON.stringify(out.blanks))
+    && check('fixed derivedFrom', /d 2000 \(d on 2024-06-30\)/.test(out.groups.get('r|X')[0].derivedFrom), out.groups.get('r|X')[0].derivedFrom)
+    && check('fixed problems', deriveProblems('r', series[2].derive, (x) => series.find((s) => s.id === x)?.frequency, 'quarterly').length === 0, 'the annual denominator is not on the quarterly schedule and that is allowed');
+});
+plainCase('derive: the period helpers', () => {
+  return check('isPeriodEnd', isPeriodEnd('2024-09-30', 'quarterly') && isPeriodEnd('2024-02-29', 'monthly') && !isPeriodEnd('2024-09-29', 'quarterly') && !isPeriodEnd('2024-10-31', 'quarterly') && !isPeriodEnd('2024-02-30', 'monthly') && !isPeriodEnd('2024-09-30', 'annual'), 'period ends')
+    && check('periodsBetween', periodsBetween('2024-06-30', '2029-06-30', 'quarterly') === 20 && periodsBetween('2024-06-30', '2024-06-30', 'quarterly') === 0 && periodsBetween('2029-06-30', '2024-06-30', 'quarterly') === null && periodsBetween('2024-01-31', '2024-04-30', 'monthly') === 3, 'periods')
+    && check('periodLabel', periodLabel('2026-06-30', 'quarterly') === '2026-Q2' && periodLabel('2026-02-28', 'monthly') === '2026-02', 'labels')
+    && check('isRealIsoDate', isRealIsoDate('2024-02-29') && !isRealIsoDate('2023-02-29') && !isRealIsoDate('2024-2-9') && !isRealIsoDate(20240229), 'dates')
+    && check('shiftPeriods forward', shiftPeriods('2024-06-30', -1, 'quarterly') === '2024-09-30' && shiftPeriods('2024-12-31', -1, 'quarterly') === '2025-03-31', 'forward');
 });
 
 rmSync(base, { recursive: true, force: true });

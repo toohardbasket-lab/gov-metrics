@@ -1,0 +1,33 @@
+{
+  "abs-building-activity-87520037.xlsx": {
+    "bytes": 79317,
+    "retrieved": "2026-11-25",
+    "sha256": "6d24c23e34a544dc67563035d63ace3b1dc808a60a0ea3f5a0cbb44f43219507",
+    "url": "https://www.abs.gov.au/statistics/industry/building-and-construction/building-activity-australia/jun-2026/87520037.xlsx"
+  },
+  "abs-building-activity-87520038.xlsx": {
+    "bytes": 174195,
+    "retrieved": "2026-11-25",
+    "sha256": "9511473cf1e81e516616ec6034fe1557ef0f400842f44d50216bb2e88389392b",
+    "url": "https://www.abs.gov.au/statistics/industry/building-and-construction/building-activity-australia/jun-2026/87520038.xlsx"
+  },
+  "abs-building_activity-M7.1-8-AUS.CUR.TOT.9.TOT.20.Q-with-labels.csv": {
+    "bytes": 335132,
+    "retrieved": "2026-11-25",
+    "sha256": "a29b56fb51a9758b476b90a28b552cad1bd8957a72340d7ad3d9516af0840b03",
+    "url": "https://data.api.abs.gov.au/rest/data/ABS,BUILDING_ACTIVITY/M7.AUS+1+2+3+4+5+6+7+8.CUR.TOT.9.TOT.20.Q"
+  },
+  "abs-building_activity-M7.1-8-AUS.CUR.TOT.9.TOT.20.Q.csv": {
+    "bytes": 113838,
+    "retrieved": "2026-11-25",
+    "sha256": "96f29ce883a2f0aacbd163f827accc6ca74d30dfb9997baf66387d15ea8b7084",
+    "url": "https://data.api.abs.gov.au/rest/data/ABS,BUILDING_ACTIVITY/M7.AUS+1+2+3+4+5+6+7+8.CUR.TOT.9.TOT.20.Q"
+  },
+  "copied-from-metrics-social-housing-data.csv": {
+    "bytes": 29581,
+    "path": "metrics/social-housing/data.csv",
+    "retrieved": "2026-11-25",
+    "series": "population",
+    "sha256": "830ecdeda81cd878cd3dc989fbdb652693d882c21bde0630c16dce0977e4b3a9"
+  }
+}

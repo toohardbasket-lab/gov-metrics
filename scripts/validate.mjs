@@ -15,7 +15,8 @@ import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from '
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse as parseYaml } from 'yaml';
-import { computeDerived, deriveInputs, deriveProblems, isValueCode } from '../src/lib/derive.mjs';
+import { computeDerived, deriveInputs, deriveProblems, isRealIsoDate, isValueCode } from '../src/lib/derive.mjs';
+import { STATUS_WORDS } from '../src/lib/status.mjs';
 import { STATE_ORDER } from '../src/lib/jurisdictions.mjs';
 
 // ---------------------------------------------------------------- settings
@@ -200,6 +201,50 @@ function loadDefinition(root, slug, F) {
   if (def.views !== undefined && def.views !== null && !Array.isArray(def.views)) F.fail(`${path}: "views" must be a list.`);
   if (Array.isArray(def.views)) {
     for (const v of def.views) if (v && v.markers !== undefined && typeof v.markers !== 'boolean') F.fail(`${path}: view "${v.id}" has a "markers" that is not true or false.`);
+  }
+  if (Array.isArray(def.views)) {
+    for (const v of def.views) {
+      if (!v || typeof v !== 'object') continue;
+      // `to`: the last date the axis shows; `reference_lines`: horizontal lines at a value (a target); `dash` on a line
+      if (v.to !== undefined && !isRealIsoDate(v.to)) F.fail(`${path}: view "${v.id}" has a "to" that is not a real date written YYYY-MM-DD.`);
+      if (v.to !== undefined && isRealIsoDate(v.to) && Number.isInteger(v.from) && v.to <= `${v.from}-01-01`) F.fail(`${path}: view "${v.id}" has a "to" date that is not after its "from" year.`);
+      if (v.reference_lines !== undefined) {
+        if (!Array.isArray(v.reference_lines) || v.reference_lines.length === 0) F.fail(`${path}: view "${v.id}" has "reference_lines" that is not a list of {value, label, style}.`);
+        else {
+          for (const r of v.reference_lines) {
+            if (!r || typeof r !== 'object' || Array.isArray(r) || Object.keys(r).some((k) => !['value', 'label', 'style'].includes(k))) { F.fail(`${path}: view "${v.id}" has a reference line that is not {value, label, style}.`); continue; }
+            if (!isNum(r.value)) F.fail(`${path}: view "${v.id}" has a reference line whose "value" is not a number.`);
+            if (typeof r.label !== 'string' || r.label.trim() === '') F.fail(`${path}: view "${v.id}" has a reference line with no "label".`);
+            if (r.style !== 'solid' && r.style !== 'dashed') F.fail(`${path}: view "${v.id}" has a reference line whose "style" is not solid or dashed.`);
+          }
+        }
+      }
+      for (const l of Array.isArray(v.lines) ? v.lines : []) {
+        if (l && l.dash !== undefined && typeof l.dash !== 'boolean') F.fail(`${path}: view "${v.id}" has a line whose "dash" is not true or false.`);
+      }
+    }
+  }
+  // `status`: the official status of the target, in a form a Targets page can read (plan section 4)
+  if (def.status !== undefined) {
+    const st = def.status;
+    if (!st || typeof st !== 'object' || Array.isArray(st) || Object.keys(st).some((k) => !['status', 'assessed_by', 'assessed_on', 'due'].includes(k))) {
+      F.fail(`${path}: "status" must be {status, assessed_by, assessed_on, due}.`);
+    } else {
+      if (!STATUS_WORDS.includes(st.status)) F.fail(`${path}: status "${st.status}" is not one of ${STATUS_WORDS.join(', ')}.`);
+      if (typeof st.assessed_by !== 'string' || st.assessed_by.trim() === '') F.fail(`${path}: "status" needs "assessed_by", as text (who rated it).`);
+      if (typeof st.assessed_on !== 'string' || !/^\d{4}-(0[1-9]|1[0-2])(-\d{2})?$/.test(st.assessed_on) || (st.assessed_on.length === 10 && !isRealIsoDate(st.assessed_on))) F.fail(`${path}: "status" needs "assessed_on", a month YYYY-MM or a date YYYY-MM-DD, written as text.`);
+      if (!isRealIsoDate(st.due)) F.fail(`${path}: "status" needs "due", a real date written YYYY-MM-DD.`);
+    }
+  }
+  if (Array.isArray(def.tiles)) {
+    for (const t of def.tiles) {
+      if (!t || typeof t !== 'object') continue;
+      if (t.from_status !== undefined) {
+        if (t.from_status !== true) F.fail(`${path}: tile "${t.label}" has a "from_status" that is not true.`);
+        else if (def.status === undefined) F.fail(`${path}: tile "${t.label}" has "from_status" but metric.yml has no "status" block.`);
+        if (t.text !== undefined || t.series !== undefined) F.fail(`${path}: tile "${t.label}" has "from_status" and also "text" or "series". A status tile shows only the status word and its sub_text.`);
+      }
+    }
   }
   if (def.table !== undefined && def.table !== null && (Array.isArray(def.table) ? def.table.length === 0 || def.table.some((t) => !t || typeof t !== 'object' || Array.isArray(t)) : typeof def.table !== 'object')) {
     F.fail(`${path}: "table" must be one table or a list of tables (each with period_header and columns).`);

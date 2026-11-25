@@ -319,10 +319,12 @@ def test_source_change_alone_does_not_set_the_flag():
 
 
 def test_run_all_registry_and_status():
-    assert [n for n, _ in run_all.REGISTRY] == ["cpi_june", "commonwealth_debt", "unemployment_rate", "inflation", "wages_and_prices", "rents", "social_housing", "hospital_waits", "homelessness"]
+    assert [n for n, _ in run_all.REGISTRY] == ["cpi_june", "commonwealth_debt", "unemployment_rate", "inflation", "wages_and_prices", "rents", "social_housing", "new_homes", "hospital_waits", "homelessness"]
     # the scraper that copies the inflation page's figures must come after the inflation scraper
     names = [n for n, _ in run_all.REGISTRY]
-    assert run_all.DEPENDS_ON == {"wages_and_prices": "inflation"} and names.index("inflation") < names.index("wages_and_prices")
+    assert run_all.DEPENDS_ON == {"wages_and_prices": "inflation", "new_homes": "social_housing"} and names.index("inflation") < names.index("wages_and_prices")
+    # the scraper that copies the social housing page's population must come after the social housing scraper
+    assert names.index("social_housing") < names.index("new_homes")
     # a script that fails and a script that works, run without touching the network
     with tempfile.TemporaryDirectory() as tmp:
         good = Path(tmp) / "good.py"

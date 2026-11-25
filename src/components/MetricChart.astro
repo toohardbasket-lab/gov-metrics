@@ -20,10 +20,15 @@ const first = chart.views[0];
   <div class="legend">
     <span class="legend-series" data-legend-series>
       {first.lines.map((l) => (
-        <span><span class="sw" style={`background:var(--series-${l.color})`}></span>{l.label}</span>
+        <span><span class={l.dash ? 'sw sw-dash' : 'sw'} style={l.dash ? `--c:var(--series-${l.color})` : `background:var(--series-${l.color})`}></span>{l.label}</span>
       ))}
     </span>
     <span data-legend-target hidden={!first.band}><span class="sw sw-target"></span><span data-legend-target-label>{first.band?.label}</span></span>
+    <span class="legend-refs" data-legend-refs>
+      {(first.referenceLines ?? []).map((r) => (
+        <span><span class={r.style === 'dashed' ? 'sw sw-ref dashed' : 'sw sw-ref'}></span>{r.label}</span>
+      ))}
+    </span>
     <span><span class="sw sw-band"></span>Shading marks a change of governing party</span>
   </div>
   <div class="chartwrap" data-chartwrap>
@@ -43,6 +48,11 @@ const first = chart.views[0];
   .metric-chart .legend-series { display: contents; }
   .metric-chart .legend-series > span { margin-right: 0; }
   .metric-chart .sw { display: inline-block; width: 18px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+  .metric-chart .legend-refs { display: contents; }
+  /* A dashed series: the swatch is a dashed stroke in the line's colour (--c). A reference line (a target) is a stroke in the target colour, solid for the current target and dashed for a superseded one. */
+  .metric-chart .sw-dash { background: none !important; height: 0; border-top: 3px dashed var(--c); border-radius: 0; }
+  .metric-chart .sw-ref { background: none !important; height: 0; border-top: 2px solid var(--target-band-edge); border-radius: 0; }
+  .metric-chart .sw-ref.dashed { border-top: 2px dashed var(--target-band-edge); }
   .metric-chart .sw-band { background: var(--band); height: 12px; border: 1px solid var(--rule); }
   .metric-chart .sw-target { background: var(--target-band-fill); height: 12px; border: 1px dashed var(--target-band-edge); border-radius: 0; }
   .metric-chart [hidden] { display: none; }
@@ -66,10 +76,11 @@ const first = chart.views[0];
   const EVENT_FLIP_FROM = 0.8;  // marks in the last fifth of the plot get their label on the left
 
   type Pt = { date: string; period: string; value: number };
-  type Line = { label: string; color: number; decimals?: number; points: Pt[] };
+  type Line = { label: string; color: number; dash?: boolean; decimals?: number; points: Pt[] };
+  type Ref = { value: number; label: string; style: 'solid' | 'dashed' };
   type View = {
     id: string; label: string; caption: string; unit: string;
-    from?: number; markers?: boolean; band?: { min: number; max: number; label: string };
+    from?: number; to?: string; markers?: boolean; band?: { min: number; max: number; label: string }; referenceLines?: Ref[];
     lines: Line[];
   };
   type Chart = {
@@ -105,11 +116,14 @@ const first = chart.views[0];
     const legend = root.querySelector<HTMLElement>('[data-legend-series]')!;
     const legendTarget = root.querySelector<HTMLElement>('[data-legend-target]')!;
     const legendTargetLabel = root.querySelector<HTMLElement>('[data-legend-target-label]')!;
+    const legendRefs = root.querySelector<HTMLElement>('[data-legend-refs]')!;
     const buttons = [...root.querySelectorAll<HTMLButtonElement>('button[data-view]')];
 
     const allDates = chart.views.flatMap((v) => v.lines.flatMap((l) => l.points.map((p) => decimalYear(p.date))));
     const X0 = Math.min(...allDates) - PAD_BEFORE;
-    const X1 = Math.max(...allDates) + PAD_AFTER;
+    // The views share one axis. A view with `to` ends its own axis on that date, so its points do not stretch the shared axis.
+    const sharedDates = chart.views.filter((v) => v.to === undefined).flatMap((v) => v.lines.flatMap((l) => l.points.map((p) => decimalYear(p.date))));
+    const X1 = Math.max(...(sharedDates.length > 0 ? sharedDates : allDates)) + PAD_AFTER;
     const plotW = W - L - R;
 
     function el(name: string, attrs: Record<string, string | number>, text?: string | number) {
@@ -125,15 +139,19 @@ const first = chart.views[0];
       // Each line has its own points (lines may have different frequencies). A view with `from`
       // starts its axis at that year; the others share one axis across views.
       const xa = view.from !== undefined ? view.from : X0;
+      const xb = view.to !== undefined ? decimalYear(view.to) : X1;
       const lineRows = view.lines.map((l) => l.points.map((p) => ({ ...p, t: decimalYear(p.date) })));
       const vals = lineRows.flatMap((rows) => rows.map((r) => r.value));
       const band = view.band;
-      const lo = band ? Math.min(0, ...vals, band.min) : Math.min(0, ...vals);
-      const hi = band ? Math.max(...vals, band.max) : Math.max(...vals);
-      const step = niceStep(Math.max(...vals) - Math.min(0, ...vals));
+      const refs = view.referenceLines ?? [];
+      const refVals = refs.map((r) => r.value);
+      // The scale has to take in the band and the reference lines as well as the data.
+      const lo = Math.min(0, ...vals, ...(band ? [band.min] : []), ...refVals);
+      const hi = Math.max(...vals, ...(band ? [band.max] : []), ...refVals);
+      const step = niceStep(Math.max(...vals, ...refVals) - Math.min(0, ...vals));
       const y0 = Math.floor(lo / step) * step;
       const y1 = Math.ceil(hi / step) * step;
-      const x = (t: number) => L + (t - xa) / (X1 - xa) * plotW;
+      const x = (t: number) => L + (t - xa) / (xb - xa) * plotW;
       const y = (v: number) => T + (y1 - v) / (y1 - y0) * (H - T - B);
       const pix = lineRows.map((rows) => rows.map((r) => [x(r.t), y(r.value)] as [number, number]));
       const lineHits = (b: Box) => pix.some((pts) => pts.some((p, k) => k > 0 && segmentHitsBox(pts[k - 1][0], pts[k - 1][1], p[0], p[1], b)));
@@ -144,8 +162,8 @@ const first = chart.views[0];
       // Government bands, from shared/governments.csv. The first band shown is unshaded; shading alternates from there.
       const gov = chart.governments.map((g, i) => {
         const a = decimalYear(g.date);
-        const b = i + 1 < chart.governments.length ? decimalYear(chart.governments[i + 1].date) : X1;
-        return { party: g.party, a: Math.max(a, xa), b: Math.min(b, X1), raw: a, vis: b > xa && a < X1 };
+        const b = i + 1 < chart.governments.length ? decimalYear(chart.governments[i + 1].date) : xb;
+        return { party: g.party, a: Math.max(a, xa), b: Math.min(b, xb), raw: a, vis: b > xa && a < xb };
       }).filter((g) => g.vis);
       gov.forEach((g, j) => {
         const wpx = x(g.b) - x(g.a);
@@ -182,15 +200,36 @@ const first = chart.views[0];
         el('text', { x: L - 8, y: y(v) + 4, 'text-anchor': 'end', 'font-size': 12, fill: 'var(--ink-3)' }, formatAxis(view.unit, +v.toFixed(6)));
       }
             // x ticks: every five years on a long chart, every two or every year on a short one
-      const tickEvery = X1 - xa > 24 ? 5 : X1 - xa > 12 ? 2 : 1;
-      for (let yr = Math.ceil(xa / tickEvery) * tickEvery; yr <= X1; yr += tickEvery) {
+      const tickEvery = xb - xa > 24 ? 5 : xb - xa > 12 ? 2 : 1;
+      for (let yr = Math.ceil(xa / tickEvery) * tickEvery; yr <= xb; yr += tickEvery) {
         el('text', { x: x(yr), y: H - B + 18, 'text-anchor': 'middle', 'font-size': 12, fill: 'var(--ink-3)' }, yr);
       }
+
+      // Reference lines (a target): a horizontal line across the plot at a value, in the target colour (the one the
+      // inflation band uses, never red or green). Solid for the current target, dashed for a superseded one. The label
+      // sits just above the line, or below it, at the first spot where no data line or other label is in the way.
+      refs.forEach((rf) => {
+        const yy = y(rf.value);
+        el('line', { x1: L, x2: W - R, y1: yy, y2: yy, stroke: 'var(--target-band-edge)', 'stroke-width': 2, ...(rf.style === 'dashed' ? { 'stroke-dasharray': '7 5' } : {}) });
+        const rl = el('text', { x: L + 6, y: yy - 5, 'text-anchor': 'start', 'font-size': 11.5, fill: 'var(--ink-2)', stroke: 'var(--card)', 'stroke-width': 3, 'paint-order': 'stroke', 'stroke-opacity': 0.85 }, rf.label);
+        const len = measure(rl, rf.label, 6.5);
+        let chosen: { bx: number; by: number } | null = null;
+        for (const by of [yy - 5, yy + 14]) {
+          for (let bx = L + 6; bx + len <= W - R - 6 && !chosen; bx += 20) {
+            const box = { x0: bx, x1: bx + len, y0: by - 12, y1: by + 4 };
+            if (by - 12 >= T && by + 4 <= H - B && !lineHits(box) && !placedLabels.some((q) => boxesOverlap(q, box, 0))) chosen = { bx, by };
+          }
+          if (chosen) break;
+        }
+        const at = chosen ?? { bx: L + 6, by: yy - 5 };
+        rl.setAttribute('x', String(at.bx)); rl.setAttribute('y', String(at.by));
+        placedLabels.push({ x0: at.bx, x1: at.bx + len, y0: at.by - 12, y1: at.by + 4 });
+      });
 
       // Event marks, from shared/events.csv. Placed right to left. A label goes to the right of its mark,
       // or to the left in the last fifth of the plot. If it would overlap a label already placed, it drops a row.
       const placed: { x0: number; x1: number; row: number }[] = [];
-      chart.events.filter((e) => { const t = decimalYear(e.date); return t >= xa && t <= X1; }).reverse().forEach((e) => {
+      chart.events.filter((e) => { const t = decimalYear(e.date); return t >= xa && t <= xb; }).reverse().forEach((e) => {
         const ex = x(decimalYear(e.date));
         el('line', { x1: ex, x2: ex, y1: T + 14, y2: H - B, stroke: 'var(--ink-3)', 'stroke-width': 1, 'stroke-dasharray': '3 4' });
         const flip = ex > L + EVENT_FLIP_FROM * plotW;
@@ -205,7 +244,7 @@ const first = chart.views[0];
 
       // Lines and end points.
       view.lines.forEach((l, i) => {
-        el('path', { d: pix[i].map((p, k) => (k ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(''), fill: 'none', stroke: `var(--series-${l.color})`, 'stroke-width': 2, 'stroke-linejoin': 'round' });
+        el('path', { d: pix[i].map((p, k) => (k ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(''), fill: 'none', stroke: `var(--series-${l.color})`, 'stroke-width': 2, 'stroke-linejoin': 'round', ...(l.dash ? { 'stroke-dasharray': '8 5' } : {}) });
       });
       // A view with markers: true draws a small marker on every point (for a series with only a few points).
       if (view.markers) {
@@ -264,7 +303,7 @@ const first = chart.views[0];
       const spacing = lineRows.map((rows) => (rows.length > 1 ? (rows[rows.length - 1].t - rows[0].t) / (rows.length - 1) : 1));
       function move(ev: PointerEvent) {
         const b = svg.getBoundingClientRect(), px = (ev.clientX - b.left) / b.width * W;
-        const t = xa + (px - L) / plotW * (X1 - xa);
+        const t = xa + (px - L) / plotW * (xb - xa);
         const near = lineRows.map((rows) => {
           let r = rows[0];
           for (const q of rows) if (Math.abs(q.t - t) < Math.abs(r.t - t)) r = q;
@@ -308,9 +347,16 @@ const first = chart.views[0];
       legend.replaceChildren(...view.lines.map((l) => {
         const wrap = document.createElement('span');
         const sw = document.createElement('span');
-        sw.className = 'sw';
-        sw.style.background = `var(--series-${l.color})`;
+        if (l.dash) { sw.className = 'sw sw-dash'; sw.style.setProperty('--c', `var(--series-${l.color})`); }
+        else { sw.className = 'sw'; sw.style.background = `var(--series-${l.color})`; }
         wrap.append(sw, l.label);
+        return wrap;
+      }));
+      legendRefs.replaceChildren(...refs.map((rf) => {
+        const wrap = document.createElement('span');
+        const sw = document.createElement('span');
+        sw.className = rf.style === 'dashed' ? 'sw sw-ref dashed' : 'sw sw-ref';
+        wrap.append(sw, rf.label);
         return wrap;
       }));
       legendTarget.hidden = !band;

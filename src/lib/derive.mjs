@@ -18,6 +18,19 @@
 // ratio: numerator / denominator x factor, rounded half up to `decimals` places, shown in `unit`.
 //   derive: {type: ratio, numerator: total_social_housing, denominator: population, factor: 1000, decimals: 1, unit: rate}
 //
+// cumulative_sum: a running total of one series, per jurisdiction, from a start date.
+//   derive: {type: cumulative_sum, from: completions, start: 2024-09-30}
+//   The total at a date is the sum of the figures from `start` up to and including that date. There is no
+//   figure before `start`. If a date from `start` on has no figure (a gap), or a code that makes it unknown
+//   (na, np), every later total is blank: the total is never worked out across a gap.
+// straight_line: the even pace from one point to another, one figure at the end of each period (month or
+//   quarter, the series' own `frequency`) after the start date up to the end date. It reads no stored series.
+//   derive: {type: straight_line, start: {date: 2024-06-30, value: 0}, end: {date: 2029-06-30, value: 1200000}, jurisdiction: Australia, unit: count, decimals: 0}
+//   The value k periods after the start is start + (end - start) x k / n, where n is the number of periods from
+//   the start date to the end date, rounded half away from zero to `decimals` places (default 0).
+// A ratio may divide by the figure at one fixed date instead of the figure at each date:
+//   derive: {type: ratio, numerator: accord_completed, denominator: population_june_2024, denominator_date: 2024-06-30, factor: 1000, decimals: 1, unit: rate}
+//
 // Codes. A stored value may be a code the source uses instead of a number (see VALUE_CODES). In a sum,
 // `..` (not applicable) and `-` (nil, or rounded to zero) count as zero; `na` (not available) and `np`
 // (not published) make that total blank: the total is unknown and is never guessed. A date with no row
@@ -25,7 +38,7 @@
 // not above zero makes the ratio blank. A blank figure is left out (it has no row), and the reason is
 // returned in `blanks` so it can be reported. Derived series may be worked out from other derived series.
 
-export const DERIVE_TYPES = ['year_ended_change', 'sum', 'ratio'];
+export const DERIVE_TYPES = ['year_ended_change', 'sum', 'ratio', 'cumulative_sum', 'straight_line'];
 // What a stored value may be instead of a number. Used by the checker, the page and (as text) the scrapers.
 export const VALUE_CODES = ['..', 'na', 'np', '-'];
 export const ZERO_CODES = ['..', '-'];
@@ -96,7 +109,46 @@ export function deriveInputs(derive) {
   if (derive.type === 'year_ended_change') return typeof derive.from === 'string' ? [derive.from] : [];
   if (derive.type === 'sum') return Array.isArray(derive.from) ? derive.from.filter((x) => typeof x === 'string') : [];
   if (derive.type === 'ratio') return [derive.numerator, derive.denominator].filter((x) => typeof x === 'string');
-  return [];
+  if (derive.type === 'cumulative_sum') return typeof derive.from === 'string' ? [derive.from] : [];
+  return []; // straight_line reads no series
+}
+
+// The inputs whose schedule (frequency) must match the derived series' own. A ratio with a fixed denominator date
+// divides by a figure at one date, so only its numerator is on the schedule.
+function scheduledInputs(derive) {
+  if (derive?.type === 'ratio' && derive.denominator_date !== undefined) return typeof derive.numerator === 'string' ? [derive.numerator] : [];
+  return deriveInputs(derive);
+}
+
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+export function isRealIsoDate(text) {
+  if (typeof text !== 'string' || !ISO_DATE.test(text)) return false;
+  const [y, m, d] = text.split('-').map(Number);
+  const t = new Date(Date.UTC(y, m - 1, d));
+  return t.getUTCFullYear() === y && t.getUTCMonth() === m - 1 && t.getUTCDate() === d;
+}
+
+// Is this date the last day of a period of the given frequency (month, or quarter)?
+export function isPeriodEnd(iso, frequency) {
+  const step = DERIVE_FREQUENCIES[frequency];
+  if (!step || !isRealIsoDate(iso)) return false;
+  const [y, m, d] = iso.split('-').map(Number);
+  return m % step === 0 && d === new Date(Date.UTC(y, m, 0)).getUTCDate();
+}
+
+// The number of periods from `a` to `b` (both period ends, b not before a), or null.
+export function periodsBetween(a, b, frequency) {
+  if (!isPeriodEnd(a, frequency) || !isPeriodEnd(b, frequency) || b < a) return null;
+  let n = 0;
+  let d = a;
+  while (d < b && n < 100000) { d = shiftPeriods(d, -1, frequency); n++; }
+  return d === b ? n : null;
+}
+
+// The label of the period that ends on `iso`: 2026-Q2 for a quarter, 2026-06 for a month.
+export function periodLabel(iso, frequency) {
+  const [y, m] = iso.split('-');
+  return frequency === 'quarterly' ? `${y}-Q${Number(m) / 3}` : `${y}-${m}`;
 }
 
 // Problems with a series' `derive` setting, as a list of plain-words messages (empty if fine).
@@ -105,7 +157,7 @@ export function deriveInputs(derive) {
 export function deriveProblems(id, derive, freqOf, ownFrequency) {
   const bad = [];
   if (!derive || typeof derive !== 'object' || Array.isArray(derive)) return [`series "${id}" has a "derive" that is not a set of fields. Use for example "derive: {type: year_ended_change, from: <series id>, lag: 4}".`];
-  const KNOWN = { year_ended_change: ['type', 'from', 'lag'], sum: ['type', 'from'], ratio: ['type', 'numerator', 'denominator', 'factor', 'decimals', 'unit'] };
+  const KNOWN = { year_ended_change: ['type', 'from', 'lag'], sum: ['type', 'from'], ratio: ['type', 'numerator', 'denominator', 'denominator_date', 'factor', 'decimals', 'unit'], cumulative_sum: ['type', 'from', 'start'], straight_line: ['type', 'start', 'end', 'jurisdiction', 'unit', 'decimals'] };
   if (!DERIVE_TYPES.includes(derive.type)) {
     bad.push(`series "${id}" has derive type "${derive.type}", which the site does not know. Known: ${DERIVE_TYPES.join(', ')}.`);
     return bad;
@@ -118,6 +170,31 @@ export function deriveProblems(id, derive, freqOf, ownFrequency) {
     if (!Number.isInteger(derive.lag) || derive.lag < 1) bad.push(`series "${id}" has a "derive" "lag" that is not a whole number of periods above zero.`);
     const f = typeof derive.from === 'string' ? freqOf(derive.from) : undefined;
     if (f !== undefined && !DERIVE_FREQUENCIES[f]) bad.push(`series "${id}" is worked out from a ${f} series; year_ended_change supports ${Object.keys(DERIVE_FREQUENCIES).join(' and ')}.`);
+  } else if (derive.type === 'cumulative_sum') {
+    if (typeof derive.from !== 'string' || derive.from === '') bad.push(`series "${id}" has a "derive" of type cumulative_sum with no "from" (the series it adds up).`);
+    if (!isRealIsoDate(derive.start)) bad.push(`series "${id}" has a "derive" "start" that is not a real date written YYYY-MM-DD (the first date of the running total).`);
+    const f = typeof derive.from === 'string' ? freqOf(derive.from) : undefined;
+    if (f !== undefined && !DERIVE_FREQUENCIES[f]) bad.push(`series "${id}" adds up a ${f} series; cumulative_sum supports ${Object.keys(DERIVE_FREQUENCIES).join(' and ')}.`);
+    else if (f !== undefined && isRealIsoDate(derive.start) && !isPeriodEnd(derive.start, f)) bad.push(`series "${id}" starts its running total on ${derive.start}, which is not the last day of a ${f === 'monthly' ? 'month' : 'quarter'}.`);
+  } else if (derive.type === 'straight_line') {
+    const f = ownFrequency;
+    if (!DERIVE_FREQUENCIES[f]) bad.push(`series "${id}" is a straight_line and needs "frequency" to be ${Object.keys(DERIVE_FREQUENCIES).join(' or ')} (the periods it has a figure for).`);
+    const point = (k) => {
+      const p = derive[k];
+      if (!p || typeof p !== 'object' || Array.isArray(p) || Object.keys(p).some((x) => x !== 'date' && x !== 'value')) { bad.push(`series "${id}" has a "derive" "${k}" that is not {date: YYYY-MM-DD, value: <number>}.`); return null; }
+      let ok = true;
+      if (!isRealIsoDate(p.date)) { bad.push(`series "${id}" has a "derive" "${k}" with a "date" that is not a real date written YYYY-MM-DD.`); ok = false; }
+      else if (DERIVE_FREQUENCIES[f] && !isPeriodEnd(p.date, f)) { bad.push(`series "${id}" has a "derive" "${k}" date ${p.date}, which is not the last day of a ${f === 'monthly' ? 'month' : 'quarter'}.`); ok = false; }
+      if (typeof p.value !== 'number' || !Number.isFinite(p.value) || parseDecimal(String(p.value)) === null) { bad.push(`series "${id}" has a "derive" "${k}" with a "value" that is not a plain number.`); ok = false; }
+      return ok ? p : null;
+    };
+    const a = point('start');
+    const b = point('end');
+    if (a && b && DERIVE_FREQUENCIES[f] && periodsBetween(a.date, b.date, f) === null) bad.push(`series "${id}" has a "derive" whose "end" date is not after its "start" date.`);
+    else if (a && b && periodsBetween(a.date, b.date, f) === 0) bad.push(`series "${id}" has a "derive" whose "end" date is the same as its "start" date.`);
+    if (typeof derive.jurisdiction !== 'string' || derive.jurisdiction.trim() === '') bad.push(`series "${id}" has a "derive" of type straight_line with no "jurisdiction" (the jurisdiction its figures are for).`);
+    if (typeof derive.unit !== 'string' || derive.unit === '') bad.push(`series "${id}" has a "derive" of type straight_line with no "unit" (the unit its figures are shown in).`);
+    if (derive.decimals !== undefined && (!Number.isInteger(derive.decimals) || derive.decimals < 0 || derive.decimals > 6)) bad.push(`series "${id}" has a "derive" "decimals" that is not a whole number from 0 to 6.`);
   } else if (derive.type === 'sum') {
     if (!Array.isArray(derive.from) || derive.from.length < 2 || derive.from.some((x) => typeof x !== 'string' || x === '')) bad.push(`series "${id}" has a "derive" of type sum whose "from" is not a list of at least two series ids.`);
     else if (new Set(derive.from).size !== derive.from.length) bad.push(`series "${id}" has a "derive" of type sum that lists a series twice.`);
@@ -129,13 +206,17 @@ export function deriveProblems(id, derive, freqOf, ownFrequency) {
     if (!Number.isInteger(derive.factor) || derive.factor < 1) bad.push(`series "${id}" has a "derive" "factor" that is not a whole number above zero.`);
     if (!Number.isInteger(derive.decimals) || derive.decimals < 0 || derive.decimals > 6) bad.push(`series "${id}" has a "derive" "decimals" that is not a whole number from 0 to 6.`);
     if (typeof derive.unit !== 'string' || derive.unit === '') bad.push(`series "${id}" has a "derive" of type ratio with no "unit" (the unit its figures are shown in).`);
+    if (derive.denominator_date !== undefined && !isRealIsoDate(derive.denominator_date)) bad.push(`series "${id}" has a "derive" "denominator_date" that is not a real date written YYYY-MM-DD.`);
   }
-  if (derive.type !== 'year_ended_change') {
-    // sum and ratio take the same period from each input, so every input must be on the same schedule
-    for (const src of deriveInputs(derive)) {
+  if (derive.type === 'sum' || derive.type === 'ratio' || derive.type === 'cumulative_sum') {
+    // these take the same period from each input, so every input must be on the same schedule
+    // (a ratio with a fixed denominator date has only its numerator on the schedule)
+    for (const src of scheduledInputs(derive)) {
       const f = freqOf(src);
       if (f !== undefined && ownFrequency !== undefined && f !== ownFrequency) bad.push(`series "${id}" says it is ${ownFrequency} but "${src}", which it is worked out from, is ${f}.`);
     }
+  } else if (derive.type === 'straight_line') {
+    // nothing to compare: it reads no series
   } else {
     const f = typeof derive.from === 'string' ? freqOf(derive.from) : undefined;
     if (f !== undefined && ownFrequency !== undefined && f !== ownFrequency) bad.push(`series "${id}" says it is ${ownFrequency} but the series it is worked out from is ${f}.`);
@@ -229,10 +310,11 @@ export function computeDerived(seriesList, stored) {
       if (!t) { problems.push(`series "${id}" is worked out from "${src}", which is not in the "series" list.`); ok = false; }
       else if (t.derive !== undefined) { if (!work(src)) ok = false; }
     }
-    if (!ok || inputs.length === 0 || !DERIVE_TYPES.includes(s.derive?.type)) { state.set(id, 'failed'); return false; }
+    if (!ok || (inputs.length === 0 && s.derive?.type !== 'straight_line') || !DERIVE_TYPES.includes(s.derive?.type)) { state.set(id, 'failed'); return false; }
     const d = s.derive;
     const js = new Set();
-    for (const src of d.type === 'year_ended_change' ? inputs : inputs) for (const j of jurisdictionsOf(src)) js.add(j);
+    if (d.type === 'straight_line') js.add(d.jurisdiction);
+    for (const src of inputs) for (const j of jurisdictionsOf(src)) js.add(j);
     for (const j of [...js].sort()) {
       const rows = [];
       if (d.type === 'year_ended_change') {
@@ -241,9 +323,47 @@ export function computeDerived(seriesList, stored) {
         for (const r of deriveYearEndedChange(src.map((x) => ({ date: x.date, period: x.period, valueText: x.valueText })), d.lag, freq)) {
           rows.push({ date: r.date, period: r.period, valueText: r.valueText, value: r.value, unit: 'pct', derivedFrom: `${d.from} ${r.current} on ${r.date} and ${r.earlier} on ${r.earlierDate}` });
         }
+      } else if (d.type === 'cumulative_sum') {
+        // a running total from d.start; a date with no figure, or an unknown code, blanks that date and every later one
+        const freq = byId.get(d.from)?.frequency;
+        if (!DERIVE_FREQUENCIES[freq]) { problems.push(`series "${id}" adds up "${d.from}", which is ${freq ?? 'of no stated'} frequency; cumulative_sum supports ${Object.keys(DERIVE_FREQUENCIES).join(' and ')}.`); state.set(id, 'failed'); return false; }
+        const src = rowsOf(d.from, j) ?? [];
+        const byD = new Map(src.map((x) => [x.date, x]));
+        const lastDate = src.map((x) => x.date).sort().at(-1);
+        const unit = src.find((x) => x.unit !== undefined)?.unit;
+        let running = null;
+        let brokenAt = null;
+        for (let date = d.start; lastDate !== undefined && date <= lastDate; date = shiftPeriods(date, -1, freq)) {
+          if (brokenAt !== null) { if (byD.has(date)) blanks.push({ series: id, jurisdiction: j, date, reason: `the running total of ${d.from} is blank after ${brokenAt}, which had no usable figure` }); continue; }
+          const r = byD.get(date);
+          if (!r) { brokenAt = date; blanks.push({ series: id, jurisdiction: j, date, reason: `${d.from} has no figure for ${date}, so the running total from ${d.start} stops here` }); continue; }
+          const t = sumText(running === null ? [r.valueText] : [running, r.valueText]);
+          if (t.blank !== undefined) { brokenAt = date; blanks.push({ series: id, jurisdiction: j, date, reason: `${t.blank} (${d.from} ${r.valueText} on ${date})` }); continue; }
+          running = t.text;
+          rows.push({ date, period: r.period, valueText: running, value: Number(running), unit, derivedFrom: `the running total of ${d.from} from ${d.start} to ${date}` });
+        }
+      } else if (d.type === 'straight_line') {
+        const freq = s.frequency;
+        const n = DERIVE_FREQUENCIES[freq] ? periodsBetween(d.start.date, d.end.date, freq) : null;
+        if (!n) { problems.push(`series "${id}" is a straight_line whose start and end dates are not period ends of its ${freq} frequency, or whose end is not after its start.`); state.set(id, 'failed'); return false; }
+        const decimals = d.decimals ?? 0;
+        const a = parseDecimal(String(d.start.value));
+        const b = parseDecimal(String(d.end.value));
+        if (!a || !b) { problems.push(`series "${id}" is a straight_line whose start or end value is not a plain number.`); state.set(id, 'failed'); return false; }
+        const scale = Math.max(a.scale, b.scale);
+        const A = a.n * 10n ** BigInt(scale - a.scale);
+        const B = b.n * 10n ** BigInt(scale - b.scale);
+        for (let k = 1; k <= n; k++) {
+          const date = shiftPeriods(d.start.date, -k, freq);
+          // start + (end - start) x k / n, exactly, then rounded half away from zero to `decimals` places
+          const num = (A * BigInt(n) + (B - A) * BigInt(k)) * 10n ** BigInt(decimals);
+          const text = scaledText(divRound(num, BigInt(n) * 10n ** BigInt(scale)), decimals);
+          rows.push({ date, period: periodLabel(date, freq), valueText: text, value: Number(text), unit: d.unit, derivedFrom: `a straight line from ${d.start.value} on ${d.start.date} to ${d.end.value} on ${d.end.date}, ${k} of ${n} periods` });
+        }
       } else {
         const maps = inputs.map((src) => new Map((rowsOf(src, j) ?? []).map((x) => [x.date, x])));
-        const dates = [...new Set(maps.flatMap((m) => [...m.keys()]))].sort();
+        const fixed = d.type === 'ratio' && d.denominator_date !== undefined; // divide by the denominator's figure at one date
+        const dates = fixed ? [...maps[0].keys()].sort() : [...new Set(maps.flatMap((m) => [...m.keys()]))].sort();
         let unit;
         if (d.type === 'sum') {
           const units = new Set(maps.flatMap((m) => [...m.values()].map((x) => x.unit)).filter((u) => u !== undefined));
@@ -251,13 +371,13 @@ export function computeDerived(seriesList, stored) {
           unit = [...units][0];
         } else unit = d.unit;
         for (const date of dates) {
-          const parts = maps.map((m) => m.get(date));
+          const parts = maps.map((m, i) => m.get(fixed && i === 1 ? d.denominator_date : date));
           const missing = parts.findIndex((p) => p === undefined);
-          if (missing >= 0) { blanks.push({ series: id, jurisdiction: j, date, reason: `${inputs[missing]} has no figure for ${date}` }); continue; }
+          if (missing >= 0) { blanks.push({ series: id, jurisdiction: j, date, reason: `${inputs[missing]} has no figure for ${fixed && missing === 1 ? d.denominator_date : date}` }); continue; }
           const r = d.type === 'sum' ? sumText(parts.map((p) => p.valueText)) : ratioText(parts[0].valueText, parts[1].valueText, d.factor, d.decimals);
           const period = parts[0].period;
           if (r.blank !== undefined) { blanks.push({ series: id, jurisdiction: j, date, reason: `${r.blank} (${inputs.map((n, i) => `${n} ${parts[i].valueText}`).join(', ')})` }); continue; }
-          rows.push({ date, period, valueText: r.text, value: Number(r.text), unit, derivedFrom: inputs.map((n, i) => `${n} ${parts[i].valueText}`).join(d.type === 'sum' ? ' + ' : ' and ') + ` on ${date}` });
+          rows.push({ date, period, valueText: r.text, value: Number(r.text), unit, derivedFrom: inputs.map((n, i) => `${n} ${parts[i].valueText}`).join(d.type === 'sum' ? ' + ' : ' and ') + (fixed ? ` (${d.denominator} on ${d.denominator_date})` : '') + ` on ${date}` });
         }
       }
       if (rows.length > 0) groups.set(`${id}|${j}`, rows.sort(byDate));

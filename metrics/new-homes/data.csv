@@ -1,0 +1,1522 @@
+date,period,series,jurisdiction,value,unit,status
+1984-09-30,1984-Q3,completions,Australia,34967,count,actual
+1984-12-31,1984-Q4,completions,Australia,35652,count,actual
+1985-03-31,1985-Q1,completions,Australia,36519,count,actual
+1985-06-30,1985-Q2,completions,Australia,36235,count,actual
+1985-09-30,1985-Q3,completions,Australia,36996,count,actual
+1985-12-31,1985-Q4,completions,Australia,36547,count,actual
+1986-03-31,1986-Q1,completions,Australia,34378,count,actual
+1986-06-30,1986-Q2,completions,Australia,33450,count,actual
+1986-09-30,1986-Q3,completions,Australia,31854,count,actual
+1986-12-31,1986-Q4,completions,Australia,29555,count,actual
+1987-03-31,1987-Q1,completions,Australia,30569,count,actual
+1987-06-30,1987-Q2,completions,Australia,28869,count,actual
+1987-09-30,1987-Q3,completions,Australia,28276,count,actual
+1987-12-31,1987-Q4,completions,Australia,28944,count,actual
+1988-03-31,1988-Q1,completions,Australia,30256,count,actual
+1988-06-30,1988-Q2,completions,Australia,32203,count,actual
+1988-09-30,1988-Q3,completions,Australia,35006,count,actual
+1988-12-31,1988-Q4,completions,Australia,38650,count,actual
+1989-03-31,1989-Q1,completions,Australia,37087,count,actual
+1989-06-30,1989-Q2,completions,Australia,40975,count,actual
+1989-09-30,1989-Q3,completions,Australia,42778,count,actual
+1989-12-31,1989-Q4,completions,Australia,41158,count,actual
+1990-03-31,1990-Q1,completions,Australia,40388,count,actual
+1990-06-30,1990-Q2,completions,Australia,37712,count,actual
+1990-09-30,1990-Q3,completions,Australia,34687,count,actual
+1990-12-31,1990-Q4,completions,Australia,34699,count,actual
+1991-03-31,1991-Q1,completions,Australia,32852,count,actual
+1991-06-30,1991-Q2,completions,Australia,33367,count,actual
+1991-09-30,1991-Q3,completions,Australia,32412,count,actual
+1991-12-31,1991-Q4,completions,Australia,32327,count,actual
+1992-03-31,1992-Q1,completions,Australia,34847,count,actual
+1992-06-30,1992-Q2,completions,Australia,34772,count,actual
+1992-09-30,1992-Q3,completions,Australia,37445,count,actual
+1992-12-31,1992-Q4,completions,Australia,39127,count,actual
+1993-03-31,1993-Q1,completions,Australia,40057,count,actual
+1993-06-30,1993-Q2,completions,Australia,41368,count,actual
+1993-09-30,1993-Q3,completions,Australia,42987,count,actual
+1993-12-31,1993-Q4,completions,Australia,43319,count,actual
+1994-03-31,1994-Q1,completions,Australia,42230,count,actual
+1994-06-30,1994-Q2,completions,Australia,42070,count,actual
+1994-09-30,1994-Q3,completions,Australia,43890,count,actual
+1994-12-31,1994-Q4,completions,Australia,45057,count,actual
+1995-03-31,1995-Q1,completions,Australia,43151,count,actual
+1995-06-30,1995-Q2,completions,Australia,40903,count,actual
+1995-09-30,1995-Q3,completions,Australia,38575,count,actual
+1995-12-31,1995-Q4,completions,Australia,35597,count,actual
+1996-03-31,1996-Q1,completions,Australia,33413,count,actual
+1996-06-30,1996-Q2,completions,Australia,30918,count,actual
+1996-09-30,1996-Q3,completions,Australia,30180,count,actual
+1996-12-31,1996-Q4,completions,Australia,29069,count,actual
+1997-03-31,1997-Q1,completions,Australia,31117,count,actual
+1997-06-30,1997-Q2,completions,Australia,31593,count,actual
+1997-09-30,1997-Q3,completions,Australia,32624,count,actual
+1997-12-31,1997-Q4,completions,Australia,33921,count,actual
+1998-03-31,1998-Q1,completions,Australia,33506,count,actual
+1998-06-30,1998-Q2,completions,Australia,34975,count,actual
+1998-09-30,1998-Q3,completions,Australia,36769,count,actual
+1998-12-31,1998-Q4,completions,Australia,36215,count,actual
+1999-03-31,1999-Q1,completions,Australia,34743,count,actual
+1999-06-30,1999-Q2,completions,Australia,37801,count,actual
+1999-09-30,1999-Q3,completions,Australia,35058,count,actual
+1999-12-31,1999-Q4,completions,Australia,36050,count,actual
+2000-03-31,2000-Q1,completions,Australia,40025,count,actual
+2000-06-30,2000-Q2,completions,Australia,47779,count,actual
+2000-09-30,2000-Q3,completions,Australia,39344,count,actual
+2000-12-31,2000-Q4,completions,Australia,35533,count,actual
+2001-03-31,2001-Q1,completions,Australia,32054,count,actual
+2001-06-30,2001-Q2,completions,Australia,29394,count,actual
+2001-09-30,2001-Q3,completions,Australia,31030,count,actual
+2001-12-31,2001-Q4,completions,Australia,33067,count,actual
+2002-03-31,2002-Q1,completions,Australia,34067,count,actual
+2002-06-30,2002-Q2,completions,Australia,36977,count,actual
+2002-09-30,2002-Q3,completions,Australia,35747,count,actual
+2002-12-31,2002-Q4,completions,Australia,41149,count,actual
+2003-03-31,2003-Q1,completions,Australia,40515,count,actual
+2003-06-30,2003-Q2,completions,Australia,38761,count,actual
+2003-09-30,2003-Q3,completions,Australia,38600,count,actual
+2003-12-31,2003-Q4,completions,Australia,39238,count,actual
+2004-03-31,2004-Q1,completions,Australia,41010,count,actual
+2004-06-30,2004-Q2,completions,Australia,42117,count,actual
+2004-09-30,2004-Q3,completions,Australia,42717,count,actual
+2004-12-31,2004-Q4,completions,Australia,38156,count,actual
+2005-03-31,2005-Q1,completions,Australia,40376,count,actual
+2005-06-30,2005-Q2,completions,Australia,41983,count,actual
+2005-09-30,2005-Q3,completions,Australia,43726,count,actual
+2005-12-31,2005-Q4,completions,Australia,39312,count,actual
+2006-03-31,2006-Q1,completions,Australia,37279,count,actual
+2006-06-30,2006-Q2,completions,Australia,37552,count,actual
+2006-09-30,2006-Q3,completions,Australia,35525,count,actual
+2006-12-31,2006-Q4,completions,Australia,36661,count,actual
+2007-03-31,2007-Q1,completions,Australia,40720,count,actual
+2007-06-30,2007-Q2,completions,Australia,37774,count,actual
+2007-09-30,2007-Q3,completions,Australia,36941,count,actual
+2007-12-31,2007-Q4,completions,Australia,37813,count,actual
+2008-03-31,2008-Q1,completions,Australia,36142,count,actual
+2008-06-30,2008-Q2,completions,Australia,34452,count,actual
+2008-09-30,2008-Q3,completions,Australia,36687,count,actual
+2008-12-31,2008-Q4,completions,Australia,38808,count,actual
+2009-03-31,2009-Q1,completions,Australia,36162,count,actual
+2009-06-30,2009-Q2,completions,Australia,37846,count,actual
+2009-09-30,2009-Q3,completions,Australia,36618,count,actual
+2009-12-31,2009-Q4,completions,Australia,37402,count,actual
+2010-03-31,2010-Q1,completions,Australia,36016,count,actual
+2010-06-30,2010-Q2,completions,Australia,40356,count,actual
+2010-09-30,2010-Q3,completions,Australia,38391,count,actual
+2010-12-31,2010-Q4,completions,Australia,41932,count,actual
+2011-03-31,2011-Q1,completions,Australia,43032,count,actual
+2011-06-30,2011-Q2,completions,Australia,39173,count,actual
+2011-09-30,2011-Q3,completions,Australia,37936,count,actual
+2011-12-31,2011-Q4,completions,Australia,35467,count,actual
+2012-03-31,2012-Q1,completions,Australia,34477,count,actual
+2012-06-30,2012-Q2,completions,Australia,38039,count,actual
+2012-09-30,2012-Q3,completions,Australia,36050,count,actual
+2012-12-31,2012-Q4,completions,Australia,37190,count,actual
+2013-03-31,2013-Q1,completions,Australia,37061,count,actual
+2013-06-30,2013-Q2,completions,Australia,37460,count,actual
+2013-09-30,2013-Q3,completions,Australia,38791,count,actual
+2013-12-31,2013-Q4,completions,Australia,40159,count,actual
+2014-03-31,2014-Q1,completions,Australia,40116,count,actual
+2014-06-30,2014-Q2,completions,Australia,42992,count,actual
+2014-09-30,2014-Q3,completions,Australia,47327,count,actual
+2014-12-31,2014-Q4,completions,Australia,46514,count,actual
+2015-03-31,2015-Q1,completions,Australia,49836,count,actual
+2015-06-30,2015-Q2,completions,Australia,49261,count,actual
+2015-09-30,2015-Q3,completions,Australia,49770,count,actual
+2015-12-31,2015-Q4,completions,Australia,48638,count,actual
+2016-03-31,2016-Q1,completions,Australia,45522,count,actual
+2016-06-30,2016-Q2,completions,Australia,57018,count,actual
+2016-09-30,2016-Q3,completions,Australia,50887,count,actual
+2016-12-31,2016-Q4,completions,Australia,58789,count,actual
+2017-03-31,2017-Q1,completions,Australia,56856,count,actual
+2017-06-30,2017-Q2,completions,Australia,52697,count,actual
+2017-09-30,2017-Q3,completions,Australia,52746,count,actual
+2017-12-31,2017-Q4,completions,Australia,51791,count,actual
+2018-03-31,2018-Q1,completions,Australia,53481,count,actual
+2018-06-30,2018-Q2,completions,Australia,55104,count,actual
+2018-09-30,2018-Q3,completions,Australia,57205,count,actual
+2018-12-31,2018-Q4,completions,Australia,53698,count,actual
+2019-03-31,2019-Q1,completions,Australia,52324,count,actual
+2019-06-30,2019-Q2,completions,Australia,51665,count,actual
+2019-09-30,2019-Q3,completions,Australia,47962,count,actual
+2019-12-31,2019-Q4,completions,Australia,50764,count,actual
+2020-03-31,2020-Q1,completions,Australia,46986,count,actual
+2020-06-30,2020-Q2,completions,Australia,46140,count,actual
+2020-09-30,2020-Q3,completions,Australia,44163,count,actual
+2020-12-31,2020-Q4,completions,Australia,44437,count,actual
+2021-03-31,2021-Q1,completions,Australia,45318,count,actual
+2021-06-30,2021-Q2,completions,Australia,46197,count,actual
+2021-09-30,2021-Q3,completions,Australia,44518,count,actual
+2021-12-31,2021-Q4,completions,Australia,42914,count,actual
+2022-03-31,2022-Q1,completions,Australia,42403,count,actual
+2022-06-30,2022-Q2,completions,Australia,42965,count,actual
+2022-09-30,2022-Q3,completions,Australia,44247,count,actual
+2022-12-31,2022-Q4,completions,Australia,43935,count,actual
+2023-03-31,2023-Q1,completions,Australia,44504,count,actual
+2023-06-30,2023-Q2,completions,Australia,42160,count,actual
+2023-09-30,2023-Q3,completions,Australia,44178,count,actual
+2023-12-31,2023-Q4,completions,Australia,45883,count,actual
+2024-03-31,2024-Q1,completions,Australia,41563,count,actual
+2024-06-30,2024-Q2,completions,Australia,45993,count,actual
+2024-09-30,2024-Q3,completions,Australia,45499,count,actual
+2024-12-31,2024-Q4,completions,Australia,45436,count,actual
+2025-03-31,2025-Q1,completions,Australia,43637,count,actual
+2025-06-30,2025-Q2,completions,Australia,40699,count,actual
+2025-09-30,2025-Q3,completions,Australia,44738,count,actual
+2025-12-31,2025-Q4,completions,Australia,44048,count,actual
+2026-03-31,2026-Q1,completions,Australia,44592,count,actual
+2026-06-30,2026-Q2,completions,Australia,47168,count,actual
+1984-09-30,1984-Q3,completions,Australian Capital Territory,498,count,actual
+1984-12-31,1984-Q4,completions,Australian Capital Territory,487,count,actual
+1985-03-31,1985-Q1,completions,Australian Capital Territory,586,count,actual
+1985-06-30,1985-Q2,completions,Australian Capital Territory,966,count,actual
+1985-09-30,1985-Q3,completions,Australian Capital Territory,874,count,actual
+1985-12-31,1985-Q4,completions,Australian Capital Territory,836,count,actual
+1986-03-31,1986-Q1,completions,Australian Capital Territory,839,count,actual
+1986-06-30,1986-Q2,completions,Australian Capital Territory,1007,count,actual
+1986-09-30,1986-Q3,completions,Australian Capital Territory,1176,count,actual
+1986-12-31,1986-Q4,completions,Australian Capital Territory,958,count,actual
+1987-03-31,1987-Q1,completions,Australian Capital Territory,810,count,actual
+1987-06-30,1987-Q2,completions,Australian Capital Territory,644,count,actual
+1987-09-30,1987-Q3,completions,Australian Capital Territory,548,count,actual
+1987-12-31,1987-Q4,completions,Australian Capital Territory,562,count,actual
+1988-03-31,1988-Q1,completions,Australian Capital Territory,464,count,actual
+1988-06-30,1988-Q2,completions,Australian Capital Territory,654,count,actual
+1988-09-30,1988-Q3,completions,Australian Capital Territory,675,count,actual
+1988-12-31,1988-Q4,completions,Australian Capital Territory,541,count,actual
+1989-03-31,1989-Q1,completions,Australian Capital Territory,689,count,actual
+1989-06-30,1989-Q2,completions,Australian Capital Territory,840,count,actual
+1989-09-30,1989-Q3,completions,Australian Capital Territory,660,count,actual
+1989-12-31,1989-Q4,completions,Australian Capital Territory,634,count,actual
+1990-03-31,1990-Q1,completions,Australian Capital Territory,521,count,actual
+1990-06-30,1990-Q2,completions,Australian Capital Territory,579,count,actual
+1990-09-30,1990-Q3,completions,Australian Capital Territory,634,count,actual
+1990-12-31,1990-Q4,completions,Australian Capital Territory,850,count,actual
+1991-03-31,1991-Q1,completions,Australian Capital Territory,545,count,actual
+1991-06-30,1991-Q2,completions,Australian Capital Territory,575,count,actual
+1991-09-30,1991-Q3,completions,Australian Capital Territory,718,count,actual
+1991-12-31,1991-Q4,completions,Australian Capital Territory,552,count,actual
+1992-03-31,1992-Q1,completions,Australian Capital Territory,972,count,actual
+1992-06-30,1992-Q2,completions,Australian Capital Territory,923,count,actual
+1992-09-30,1992-Q3,completions,Australian Capital Territory,1132,count,actual
+1992-12-31,1992-Q4,completions,Australian Capital Territory,969,count,actual
+1993-03-31,1993-Q1,completions,Australian Capital Territory,1032,count,actual
+1993-06-30,1993-Q2,completions,Australian Capital Territory,1102,count,actual
+1993-09-30,1993-Q3,completions,Australian Capital Territory,959,count,actual
+1993-12-31,1993-Q4,completions,Australian Capital Territory,928,count,actual
+1994-03-31,1994-Q1,completions,Australian Capital Territory,921,count,actual
+1994-06-30,1994-Q2,completions,Australian Capital Territory,760,count,actual
+1994-09-30,1994-Q3,completions,Australian Capital Territory,1164,count,actual
+1994-12-31,1994-Q4,completions,Australian Capital Territory,1190,count,actual
+1995-03-31,1995-Q1,completions,Australian Capital Territory,954,count,actual
+1995-06-30,1995-Q2,completions,Australian Capital Territory,615,count,actual
+1995-09-30,1995-Q3,completions,Australian Capital Territory,574,count,actual
+1995-12-31,1995-Q4,completions,Australian Capital Territory,600,count,actual
+1996-03-31,1996-Q1,completions,Australian Capital Territory,658,count,actual
+1996-06-30,1996-Q2,completions,Australian Capital Territory,592,count,actual
+1996-09-30,1996-Q3,completions,Australian Capital Territory,476,count,actual
+1996-12-31,1996-Q4,completions,Australian Capital Territory,501,count,actual
+1997-03-31,1997-Q1,completions,Australian Capital Territory,311,count,actual
+1997-06-30,1997-Q2,completions,Australian Capital Territory,728,count,actual
+1997-09-30,1997-Q3,completions,Australian Capital Territory,414,count,actual
+1997-12-31,1997-Q4,completions,Australian Capital Territory,508,count,actual
+1998-03-31,1998-Q1,completions,Australian Capital Territory,342,count,actual
+1998-06-30,1998-Q2,completions,Australian Capital Territory,322,count,actual
+1998-09-30,1998-Q3,completions,Australian Capital Territory,376,count,actual
+1998-12-31,1998-Q4,completions,Australian Capital Territory,347,count,actual
+1999-03-31,1999-Q1,completions,Australian Capital Territory,519,count,actual
+1999-06-30,1999-Q2,completions,Australian Capital Territory,327,count,actual
+1999-09-30,1999-Q3,completions,Australian Capital Territory,479,count,actual
+1999-12-31,1999-Q4,completions,Australian Capital Territory,659,count,actual
+2000-03-31,2000-Q1,completions,Australian Capital Territory,444,count,actual
+2000-06-30,2000-Q2,completions,Australian Capital Territory,606,count,actual
+2000-09-30,2000-Q3,completions,Australian Capital Territory,557,count,actual
+2000-12-31,2000-Q4,completions,Australian Capital Territory,505,count,actual
+2001-03-31,2001-Q1,completions,Australian Capital Territory,458,count,actual
+2001-06-30,2001-Q2,completions,Australian Capital Territory,471,count,actual
+2001-09-30,2001-Q3,completions,Australian Capital Territory,459,count,actual
+2001-12-31,2001-Q4,completions,Australian Capital Territory,474,count,actual
+2002-03-31,2002-Q1,completions,Australian Capital Territory,533,count,actual
+2002-06-30,2002-Q2,completions,Australian Capital Territory,445,count,actual
+2002-09-30,2002-Q3,completions,Australian Capital Territory,391,count,actual
+2002-12-31,2002-Q4,completions,Australian Capital Territory,563,count,actual
+2003-03-31,2003-Q1,completions,Australian Capital Territory,742,count,actual
+2003-06-30,2003-Q2,completions,Australian Capital Territory,729,count,actual
+2003-09-30,2003-Q3,completions,Australian Capital Territory,707,count,actual
+2003-12-31,2003-Q4,completions,Australian Capital Territory,661,count,actual
+2004-03-31,2004-Q1,completions,Australian Capital Territory,603,count,actual
+2004-06-30,2004-Q2,completions,Australian Capital Territory,585,count,actual
+2004-09-30,2004-Q3,completions,Australian Capital Territory,658,count,actual
+2004-12-31,2004-Q4,completions,Australian Capital Territory,484,count,actual
+2005-03-31,2005-Q1,completions,Australian Capital Territory,660,count,actual
+2005-06-30,2005-Q2,completions,Australian Capital Territory,289,count,actual
+2005-09-30,2005-Q3,completions,Australian Capital Territory,631,count,actual
+2005-12-31,2005-Q4,completions,Australian Capital Territory,616,count,actual
+2006-03-31,2006-Q1,completions,Australian Capital Territory,447,count,actual
+2006-06-30,2006-Q2,completions,Australian Capital Territory,689,count,actual
+2006-09-30,2006-Q3,completions,Australian Capital Territory,288,count,actual
+2006-12-31,2006-Q4,completions,Australian Capital Territory,613,count,actual
+2007-03-31,2007-Q1,completions,Australian Capital Territory,586,count,actual
+2007-06-30,2007-Q2,completions,Australian Capital Territory,887,count,actual
+2007-09-30,2007-Q3,completions,Australian Capital Territory,946,count,actual
+2007-12-31,2007-Q4,completions,Australian Capital Territory,498,count,actual
+2008-03-31,2008-Q1,completions,Australian Capital Territory,467,count,actual
+2008-06-30,2008-Q2,completions,Australian Capital Territory,360,count,actual
+2008-09-30,2008-Q3,completions,Australian Capital Territory,581,count,actual
+2008-12-31,2008-Q4,completions,Australian Capital Territory,527,count,actual
+2009-03-31,2009-Q1,completions,Australian Capital Territory,936,count,actual
+2009-06-30,2009-Q2,completions,Australian Capital Territory,559,count,actual
+2009-09-30,2009-Q3,completions,Australian Capital Territory,655,count,actual
+2009-12-31,2009-Q4,completions,Australian Capital Territory,1046,count,actual
+2010-03-31,2010-Q1,completions,Australian Capital Territory,860,count,actual
+2010-06-30,2010-Q2,completions,Australian Capital Territory,716,count,actual
+2010-09-30,2010-Q3,completions,Australian Capital Territory,795,count,actual
+2010-12-31,2010-Q4,completions,Australian Capital Territory,976,count,actual
+2011-03-31,2011-Q1,completions,Australian Capital Territory,1168,count,actual
+2011-06-30,2011-Q2,completions,Australian Capital Territory,995,count,actual
+2011-09-30,2011-Q3,completions,Australian Capital Territory,1224,count,actual
+2011-12-31,2011-Q4,completions,Australian Capital Territory,928,count,actual
+2012-03-31,2012-Q1,completions,Australian Capital Territory,681,count,actual
+2012-06-30,2012-Q2,completions,Australian Capital Territory,1289,count,actual
+2012-09-30,2012-Q3,completions,Australian Capital Territory,1062,count,actual
+2012-12-31,2012-Q4,completions,Australian Capital Territory,1177,count,actual
+2013-03-31,2013-Q1,completions,Australian Capital Territory,1759,count,actual
+2013-06-30,2013-Q2,completions,Australian Capital Territory,1047,count,actual
+2013-09-30,2013-Q3,completions,Australian Capital Territory,1495,count,actual
+2013-12-31,2013-Q4,completions,Australian Capital Territory,855,count,actual
+2014-03-31,2014-Q1,completions,Australian Capital Territory,1262,count,actual
+2014-06-30,2014-Q2,completions,Australian Capital Territory,881,count,actual
+2014-09-30,2014-Q3,completions,Australian Capital Territory,629,count,actual
+2014-12-31,2014-Q4,completions,Australian Capital Territory,1832,count,actual
+2015-03-31,2015-Q1,completions,Australian Capital Territory,911,count,actual
+2015-06-30,2015-Q2,completions,Australian Capital Territory,1342,count,actual
+2015-09-30,2015-Q3,completions,Australian Capital Territory,929,count,actual
+2015-12-31,2015-Q4,completions,Australian Capital Territory,783,count,actual
+2016-03-31,2016-Q1,completions,Australian Capital Territory,750,count,actual
+2016-06-30,2016-Q2,completions,Australian Capital Territory,814,count,actual
+2016-09-30,2016-Q3,completions,Australian Capital Territory,892,count,actual
+2016-12-31,2016-Q4,completions,Australian Capital Territory,1344,count,actual
+2017-03-31,2017-Q1,completions,Australian Capital Territory,928,count,actual
+2017-06-30,2017-Q2,completions,Australian Capital Territory,1164,count,actual
+2017-09-30,2017-Q3,completions,Australian Capital Territory,1533,count,actual
+2017-12-31,2017-Q4,completions,Australian Capital Territory,1062,count,actual
+2018-03-31,2018-Q1,completions,Australian Capital Territory,1111,count,actual
+2018-06-30,2018-Q2,completions,Australian Capital Territory,946,count,actual
+2018-09-30,2018-Q3,completions,Australian Capital Territory,1005,count,actual
+2018-12-31,2018-Q4,completions,Australian Capital Territory,810,count,actual
+2019-03-31,2019-Q1,completions,Australian Capital Territory,1658,count,actual
+2019-06-30,2019-Q2,completions,Australian Capital Territory,1460,count,actual
+2019-09-30,2019-Q3,completions,Australian Capital Territory,879,count,actual
+2019-12-31,2019-Q4,completions,Australian Capital Territory,1407,count,actual
+2020-03-31,2020-Q1,completions,Australian Capital Territory,1920,count,actual
+2020-06-30,2020-Q2,completions,Australian Capital Territory,602,count,actual
+2020-09-30,2020-Q3,completions,Australian Capital Territory,1130,count,actual
+2020-12-31,2020-Q4,completions,Australian Capital Territory,1982,count,actual
+2021-03-31,2021-Q1,completions,Australian Capital Territory,804,count,actual
+2021-06-30,2021-Q2,completions,Australian Capital Territory,892,count,actual
+2021-09-30,2021-Q3,completions,Australian Capital Territory,1180,count,actual
+2021-12-31,2021-Q4,completions,Australian Capital Territory,1127,count,actual
+2022-03-31,2022-Q1,completions,Australian Capital Territory,850,count,actual
+2022-06-30,2022-Q2,completions,Australian Capital Territory,1574,count,actual
+2022-09-30,2022-Q3,completions,Australian Capital Territory,1419,count,actual
+2022-12-31,2022-Q4,completions,Australian Capital Territory,1335,count,actual
+2023-03-31,2023-Q1,completions,Australian Capital Territory,1516,count,actual
+2023-06-30,2023-Q2,completions,Australian Capital Territory,1186,count,actual
+2023-09-30,2023-Q3,completions,Australian Capital Territory,1127,count,actual
+2023-12-31,2023-Q4,completions,Australian Capital Territory,848,count,actual
+2024-03-31,2024-Q1,completions,Australian Capital Territory,996,count,actual
+2024-06-30,2024-Q2,completions,Australian Capital Territory,1163,count,actual
+2024-09-30,2024-Q3,completions,Australian Capital Territory,925,count,actual
+2024-12-31,2024-Q4,completions,Australian Capital Territory,1286,count,actual
+2025-03-31,2025-Q1,completions,Australian Capital Territory,639,count,actual
+2025-06-30,2025-Q2,completions,Australian Capital Territory,1061,count,actual
+2025-09-30,2025-Q3,completions,Australian Capital Territory,972,count,actual
+2025-12-31,2025-Q4,completions,Australian Capital Territory,934,count,actual
+2026-03-31,2026-Q1,completions,Australian Capital Territory,1379,count,actual
+2026-06-30,2026-Q2,completions,Australian Capital Territory,667,count,actual
+1984-09-30,1984-Q3,completions,New South Wales,8815,count,actual
+1984-12-31,1984-Q4,completions,New South Wales,9243,count,actual
+1985-03-31,1985-Q1,completions,New South Wales,9146,count,actual
+1985-06-30,1985-Q2,completions,New South Wales,9092,count,actual
+1985-09-30,1985-Q3,completions,New South Wales,9564,count,actual
+1985-12-31,1985-Q4,completions,New South Wales,9737,count,actual
+1986-03-31,1986-Q1,completions,New South Wales,9095,count,actual
+1986-06-30,1986-Q2,completions,New South Wales,9404,count,actual
+1986-09-30,1986-Q3,completions,New South Wales,8746,count,actual
+1986-12-31,1986-Q4,completions,New South Wales,7657,count,actual
+1987-03-31,1987-Q1,completions,New South Wales,7965,count,actual
+1987-06-30,1987-Q2,completions,New South Wales,6811,count,actual
+1987-09-30,1987-Q3,completions,New South Wales,6762,count,actual
+1987-12-31,1987-Q4,completions,New South Wales,7306,count,actual
+1988-03-31,1988-Q1,completions,New South Wales,8029,count,actual
+1988-06-30,1988-Q2,completions,New South Wales,8340,count,actual
+1988-09-30,1988-Q3,completions,New South Wales,10189,count,actual
+1988-12-31,1988-Q4,completions,New South Wales,10858,count,actual
+1989-03-31,1989-Q1,completions,New South Wales,9532,count,actual
+1989-06-30,1989-Q2,completions,New South Wales,11560,count,actual
+1989-09-30,1989-Q3,completions,New South Wales,11898,count,actual
+1989-12-31,1989-Q4,completions,New South Wales,11210,count,actual
+1990-03-31,1990-Q1,completions,New South Wales,11051,count,actual
+1990-06-30,1990-Q2,completions,New South Wales,10586,count,actual
+1990-09-30,1990-Q3,completions,New South Wales,9413,count,actual
+1990-12-31,1990-Q4,completions,New South Wales,10134,count,actual
+1991-03-31,1991-Q1,completions,New South Wales,10323,count,actual
+1991-06-30,1991-Q2,completions,New South Wales,10419,count,actual
+1991-09-30,1991-Q3,completions,New South Wales,8934,count,actual
+1991-12-31,1991-Q4,completions,New South Wales,9527,count,actual
+1992-03-31,1992-Q1,completions,New South Wales,10195,count,actual
+1992-06-30,1992-Q2,completions,New South Wales,10102,count,actual
+1992-09-30,1992-Q3,completions,New South Wales,11383,count,actual
+1992-12-31,1992-Q4,completions,New South Wales,10985,count,actual
+1993-03-31,1993-Q1,completions,New South Wales,10887,count,actual
+1993-06-30,1993-Q2,completions,New South Wales,10954,count,actual
+1993-09-30,1993-Q3,completions,New South Wales,11483,count,actual
+1993-12-31,1993-Q4,completions,New South Wales,12627,count,actual
+1994-03-31,1994-Q1,completions,New South Wales,12531,count,actual
+1994-06-30,1994-Q2,completions,New South Wales,10521,count,actual
+1994-09-30,1994-Q3,completions,New South Wales,12150,count,actual
+1994-12-31,1994-Q4,completions,New South Wales,12198,count,actual
+1995-03-31,1995-Q1,completions,New South Wales,11338,count,actual
+1995-06-30,1995-Q2,completions,New South Wales,13229,count,actual
+1995-09-30,1995-Q3,completions,New South Wales,13175,count,actual
+1995-12-31,1995-Q4,completions,New South Wales,11389,count,actual
+1996-03-31,1996-Q1,completions,New South Wales,11702,count,actual
+1996-06-30,1996-Q2,completions,New South Wales,10910,count,actual
+1996-09-30,1996-Q3,completions,New South Wales,10726,count,actual
+1996-12-31,1996-Q4,completions,New South Wales,9601,count,actual
+1997-03-31,1997-Q1,completions,New South Wales,10841,count,actual
+1997-06-30,1997-Q2,completions,New South Wales,10075,count,actual
+1997-09-30,1997-Q3,completions,New South Wales,9768,count,actual
+1997-12-31,1997-Q4,completions,New South Wales,11300,count,actual
+1998-03-31,1998-Q1,completions,New South Wales,10318,count,actual
+1998-06-30,1998-Q2,completions,New South Wales,11019,count,actual
+1998-09-30,1998-Q3,completions,New South Wales,11446,count,actual
+1998-12-31,1998-Q4,completions,New South Wales,11863,count,actual
+1999-03-31,1999-Q1,completions,New South Wales,11437,count,actual
+1999-06-30,1999-Q2,completions,New South Wales,12867,count,actual
+1999-09-30,1999-Q3,completions,New South Wales,11723,count,actual
+1999-12-31,1999-Q4,completions,New South Wales,11882,count,actual
+2000-03-31,2000-Q1,completions,New South Wales,13575,count,actual
+2000-06-30,2000-Q2,completions,New South Wales,14375,count,actual
+2000-09-30,2000-Q3,completions,New South Wales,13573,count,actual
+2000-12-31,2000-Q4,completions,New South Wales,11973,count,actual
+2001-03-31,2001-Q1,completions,New South Wales,8945,count,actual
+2001-06-30,2001-Q2,completions,New South Wales,8052,count,actual
+2001-09-30,2001-Q3,completions,New South Wales,9027,count,actual
+2001-12-31,2001-Q4,completions,New South Wales,8251,count,actual
+2002-03-31,2002-Q1,completions,New South Wales,9697,count,actual
+2002-06-30,2002-Q2,completions,New South Wales,9379,count,actual
+2002-09-30,2002-Q3,completions,New South Wales,9441,count,actual
+2002-12-31,2002-Q4,completions,New South Wales,12478,count,actual
+2003-03-31,2003-Q1,completions,New South Wales,11592,count,actual
+2003-06-30,2003-Q2,completions,New South Wales,10867,count,actual
+2003-09-30,2003-Q3,completions,New South Wales,10377,count,actual
+2003-12-31,2003-Q4,completions,New South Wales,10185,count,actual
+2004-03-31,2004-Q1,completions,New South Wales,11501,count,actual
+2004-06-30,2004-Q2,completions,New South Wales,12509,count,actual
+2004-09-30,2004-Q3,completions,New South Wales,11678,count,actual
+2004-12-31,2004-Q4,completions,New South Wales,11167,count,actual
+2005-03-31,2005-Q1,completions,New South Wales,10831,count,actual
+2005-06-30,2005-Q2,completions,New South Wales,11259,count,actual
+2005-09-30,2005-Q3,completions,New South Wales,11868,count,actual
+2005-12-31,2005-Q4,completions,New South Wales,9449,count,actual
+2006-03-31,2006-Q1,completions,New South Wales,7961,count,actual
+2006-06-30,2006-Q2,completions,New South Wales,7793,count,actual
+2006-09-30,2006-Q3,completions,New South Wales,7925,count,actual
+2006-12-31,2006-Q4,completions,New South Wales,7495,count,actual
+2007-03-31,2007-Q1,completions,New South Wales,8023,count,actual
+2007-06-30,2007-Q2,completions,New South Wales,7475,count,actual
+2007-09-30,2007-Q3,completions,New South Wales,6729,count,actual
+2007-12-31,2007-Q4,completions,New South Wales,7289,count,actual
+2008-03-31,2008-Q1,completions,New South Wales,7177,count,actual
+2008-06-30,2008-Q2,completions,New South Wales,5808,count,actual
+2008-09-30,2008-Q3,completions,New South Wales,7188,count,actual
+2008-12-31,2008-Q4,completions,New South Wales,7277,count,actual
+2009-03-31,2009-Q1,completions,New South Wales,6609,count,actual
+2009-06-30,2009-Q2,completions,New South Wales,7880,count,actual
+2009-09-30,2009-Q3,completions,New South Wales,5946,count,actual
+2009-12-31,2009-Q4,completions,New South Wales,7482,count,actual
+2010-03-31,2010-Q1,completions,New South Wales,6240,count,actual
+2010-06-30,2010-Q2,completions,New South Wales,6927,count,actual
+2010-09-30,2010-Q3,completions,New South Wales,7023,count,actual
+2010-12-31,2010-Q4,completions,New South Wales,8427,count,actual
+2011-03-31,2011-Q1,completions,New South Wales,9362,count,actual
+2011-06-30,2011-Q2,completions,New South Wales,7879,count,actual
+2011-09-30,2011-Q3,completions,New South Wales,8172,count,actual
+2011-12-31,2011-Q4,completions,New South Wales,6342,count,actual
+2012-03-31,2012-Q1,completions,New South Wales,6775,count,actual
+2012-06-30,2012-Q2,completions,New South Wales,6997,count,actual
+2012-09-30,2012-Q3,completions,New South Wales,7280,count,actual
+2012-12-31,2012-Q4,completions,New South Wales,8788,count,actual
+2013-03-31,2013-Q1,completions,New South Wales,8133,count,actual
+2013-06-30,2013-Q2,completions,New South Wales,8925,count,actual
+2013-09-30,2013-Q3,completions,New South Wales,9125,count,actual
+2013-12-31,2013-Q4,completions,New South Wales,9977,count,actual
+2014-03-31,2014-Q1,completions,New South Wales,9673,count,actual
+2014-06-30,2014-Q2,completions,New South Wales,10151,count,actual
+2014-09-30,2014-Q3,completions,New South Wales,12314,count,actual
+2014-12-31,2014-Q4,completions,New South Wales,12002,count,actual
+2015-03-31,2015-Q1,completions,New South Wales,11850,count,actual
+2015-06-30,2015-Q2,completions,New South Wales,11363,count,actual
+2015-09-30,2015-Q3,completions,New South Wales,13670,count,actual
+2015-12-31,2015-Q4,completions,New South Wales,11076,count,actual
+2016-03-31,2016-Q1,completions,New South Wales,11821,count,actual
+2016-06-30,2016-Q2,completions,New South Wales,16620,count,actual
+2016-09-30,2016-Q3,completions,New South Wales,14943,count,actual
+2016-12-31,2016-Q4,completions,New South Wales,16898,count,actual
+2017-03-31,2017-Q1,completions,New South Wales,16753,count,actual
+2017-06-30,2017-Q2,completions,New South Wales,15004,count,actual
+2017-09-30,2017-Q3,completions,New South Wales,15087,count,actual
+2017-12-31,2017-Q4,completions,New South Wales,15025,count,actual
+2018-03-31,2018-Q1,completions,New South Wales,18961,count,actual
+2018-06-30,2018-Q2,completions,New South Wales,16214,count,actual
+2018-09-30,2018-Q3,completions,New South Wales,20043,count,actual
+2018-12-31,2018-Q4,completions,New South Wales,19313,count,actual
+2019-03-31,2019-Q1,completions,New South Wales,16687,count,actual
+2019-06-30,2019-Q2,completions,New South Wales,18419,count,actual
+2019-09-30,2019-Q3,completions,New South Wales,15224,count,actual
+2019-12-31,2019-Q4,completions,New South Wales,16254,count,actual
+2020-03-31,2020-Q1,completions,New South Wales,13597,count,actual
+2020-06-30,2020-Q2,completions,New South Wales,14587,count,actual
+2020-09-30,2020-Q3,completions,New South Wales,14202,count,actual
+2020-12-31,2020-Q4,completions,New South Wales,11067,count,actual
+2021-03-31,2021-Q1,completions,New South Wales,13844,count,actual
+2021-06-30,2021-Q2,completions,New South Wales,12567,count,actual
+2021-09-30,2021-Q3,completions,New South Wales,10809,count,actual
+2021-12-31,2021-Q4,completions,New South Wales,12255,count,actual
+2022-03-31,2022-Q1,completions,New South Wales,11508,count,actual
+2022-06-30,2022-Q2,completions,New South Wales,10614,count,actual
+2022-09-30,2022-Q3,completions,New South Wales,12685,count,actual
+2022-12-31,2022-Q4,completions,New South Wales,11780,count,actual
+2023-03-31,2023-Q1,completions,New South Wales,12704,count,actual
+2023-06-30,2023-Q2,completions,New South Wales,11531,count,actual
+2023-09-30,2023-Q3,completions,New South Wales,12106,count,actual
+2023-12-31,2023-Q4,completions,New South Wales,11577,count,actual
+2024-03-31,2024-Q1,completions,New South Wales,10983,count,actual
+2024-06-30,2024-Q2,completions,New South Wales,11937,count,actual
+2024-09-30,2024-Q3,completions,New South Wales,11330,count,actual
+2024-12-31,2024-Q4,completions,New South Wales,11469,count,actual
+2025-03-31,2025-Q1,completions,New South Wales,10561,count,actual
+2025-06-30,2025-Q2,completions,New South Wales,9291,count,actual
+2025-09-30,2025-Q3,completions,New South Wales,13351,count,actual
+2025-12-31,2025-Q4,completions,New South Wales,12346,count,actual
+2026-03-31,2026-Q1,completions,New South Wales,10274,count,actual
+2026-06-30,2026-Q2,completions,New South Wales,13332,count,actual
+1984-09-30,1984-Q3,completions,Northern Territory,713,count,actual
+1984-12-31,1984-Q4,completions,Northern Territory,715,count,actual
+1985-03-31,1985-Q1,completions,Northern Territory,570,count,actual
+1985-06-30,1985-Q2,completions,Northern Territory,451,count,actual
+1985-09-30,1985-Q3,completions,Northern Territory,998,count,actual
+1985-12-31,1985-Q4,completions,Northern Territory,598,count,actual
+1986-03-31,1986-Q1,completions,Northern Territory,467,count,actual
+1986-06-30,1986-Q2,completions,Northern Territory,533,count,actual
+1986-09-30,1986-Q3,completions,Northern Territory,466,count,actual
+1986-12-31,1986-Q4,completions,Northern Territory,443,count,actual
+1987-03-31,1987-Q1,completions,Northern Territory,250,count,actual
+1987-06-30,1987-Q2,completions,Northern Territory,288,count,actual
+1987-09-30,1987-Q3,completions,Northern Territory,286,count,actual
+1987-12-31,1987-Q4,completions,Northern Territory,340,count,actual
+1988-03-31,1988-Q1,completions,Northern Territory,314,count,actual
+1988-06-30,1988-Q2,completions,Northern Territory,292,count,actual
+1988-09-30,1988-Q3,completions,Northern Territory,310,count,actual
+1988-12-31,1988-Q4,completions,Northern Territory,415,count,actual
+1989-03-31,1989-Q1,completions,Northern Territory,288,count,actual
+1989-06-30,1989-Q2,completions,Northern Territory,195,count,actual
+1989-09-30,1989-Q3,completions,Northern Territory,305,count,actual
+1989-12-31,1989-Q4,completions,Northern Territory,306,count,actual
+1990-03-31,1990-Q1,completions,Northern Territory,172,count,actual
+1990-06-30,1990-Q2,completions,Northern Territory,172,count,actual
+1990-09-30,1990-Q3,completions,Northern Territory,119,count,actual
+1990-12-31,1990-Q4,completions,Northern Territory,284,count,actual
+1991-03-31,1991-Q1,completions,Northern Territory,212,count,actual
+1991-06-30,1991-Q2,completions,Northern Territory,296,count,actual
+1991-09-30,1991-Q3,completions,Northern Territory,249,count,actual
+1991-12-31,1991-Q4,completions,Northern Territory,208,count,actual
+1992-03-31,1992-Q1,completions,Northern Territory,341,count,actual
+1992-06-30,1992-Q2,completions,Northern Territory,347,count,actual
+1992-09-30,1992-Q3,completions,Northern Territory,383,count,actual
+1992-12-31,1992-Q4,completions,Northern Territory,339,count,actual
+1993-03-31,1993-Q1,completions,Northern Territory,328,count,actual
+1993-06-30,1993-Q2,completions,Northern Territory,283,count,actual
+1993-09-30,1993-Q3,completions,Northern Territory,303,count,actual
+1993-12-31,1993-Q4,completions,Northern Territory,423,count,actual
+1994-03-31,1994-Q1,completions,Northern Territory,397,count,actual
+1994-06-30,1994-Q2,completions,Northern Territory,334,count,actual
+1994-09-30,1994-Q3,completions,Northern Territory,369,count,actual
+1994-12-31,1994-Q4,completions,Northern Territory,391,count,actual
+1995-03-31,1995-Q1,completions,Northern Territory,343,count,actual
+1995-06-30,1995-Q2,completions,Northern Territory,362,count,actual
+1995-09-30,1995-Q3,completions,Northern Territory,403,count,actual
+1995-12-31,1995-Q4,completions,Northern Territory,357,count,actual
+1996-03-31,1996-Q1,completions,Northern Territory,308,count,actual
+1996-06-30,1996-Q2,completions,Northern Territory,441,count,actual
+1996-09-30,1996-Q3,completions,Northern Territory,294,count,actual
+1996-12-31,1996-Q4,completions,Northern Territory,495,count,actual
+1997-03-31,1997-Q1,completions,Northern Territory,387,count,actual
+1997-06-30,1997-Q2,completions,Northern Territory,433,count,actual
+1997-09-30,1997-Q3,completions,Northern Territory,590,count,actual
+1997-12-31,1997-Q4,completions,Northern Territory,391,count,actual
+1998-03-31,1998-Q1,completions,Northern Territory,542,count,actual
+1998-06-30,1998-Q2,completions,Northern Territory,497,count,actual
+1998-09-30,1998-Q3,completions,Northern Territory,503,count,actual
+1998-12-31,1998-Q4,completions,Northern Territory,605,count,actual
+1999-03-31,1999-Q1,completions,Northern Territory,549,count,actual
+1999-06-30,1999-Q2,completions,Northern Territory,537,count,actual
+1999-09-30,1999-Q3,completions,Northern Territory,553,count,actual
+1999-12-31,1999-Q4,completions,Northern Territory,422,count,actual
+2000-03-31,2000-Q1,completions,Northern Territory,368,count,actual
+2000-06-30,2000-Q2,completions,Northern Territory,447,count,actual
+2000-09-30,2000-Q3,completions,Northern Territory,362,count,actual
+2000-12-31,2000-Q4,completions,Northern Territory,278,count,actual
+2001-03-31,2001-Q1,completions,Northern Territory,266,count,actual
+2001-06-30,2001-Q2,completions,Northern Territory,141,count,actual
+2001-09-30,2001-Q3,completions,Northern Territory,293,count,actual
+2001-12-31,2001-Q4,completions,Northern Territory,287,count,actual
+2002-03-31,2002-Q1,completions,Northern Territory,191,count,actual
+2002-06-30,2002-Q2,completions,Northern Territory,264,count,actual
+2002-09-30,2002-Q3,completions,Northern Territory,191,count,actual
+2002-12-31,2002-Q4,completions,Northern Territory,387,count,actual
+2003-03-31,2003-Q1,completions,Northern Territory,209,count,actual
+2003-06-30,2003-Q2,completions,Northern Territory,234,count,actual
+2003-09-30,2003-Q3,completions,Northern Territory,200,count,actual
+2003-12-31,2003-Q4,completions,Northern Territory,294,count,actual
+2004-03-31,2004-Q1,completions,Northern Territory,237,count,actual
+2004-06-30,2004-Q2,completions,Northern Territory,180,count,actual
+2004-09-30,2004-Q3,completions,Northern Territory,207,count,actual
+2004-12-31,2004-Q4,completions,Northern Territory,193,count,actual
+2005-03-31,2005-Q1,completions,Northern Territory,383,count,actual
+2005-06-30,2005-Q2,completions,Northern Territory,273,count,actual
+2005-09-30,2005-Q3,completions,Northern Territory,267,count,actual
+2005-12-31,2005-Q4,completions,Northern Territory,291,count,actual
+2006-03-31,2006-Q1,completions,Northern Territory,215,count,actual
+2006-06-30,2006-Q2,completions,Northern Territory,353,count,actual
+2006-09-30,2006-Q3,completions,Northern Territory,404,count,actual
+2006-12-31,2006-Q4,completions,Northern Territory,418,count,actual
+2007-03-31,2007-Q1,completions,Northern Territory,296,count,actual
+2007-06-30,2007-Q2,completions,Northern Territory,268,count,actual
+2007-09-30,2007-Q3,completions,Northern Territory,254,count,actual
+2007-12-31,2007-Q4,completions,Northern Territory,289,count,actual
+2008-03-31,2008-Q1,completions,Northern Territory,198,count,actual
+2008-06-30,2008-Q2,completions,Northern Territory,177,count,actual
+2008-09-30,2008-Q3,completions,Northern Territory,208,count,actual
+2008-12-31,2008-Q4,completions,Northern Territory,217,count,actual
+2009-03-31,2009-Q1,completions,Northern Territory,403,count,actual
+2009-06-30,2009-Q2,completions,Northern Territory,487,count,actual
+2009-09-30,2009-Q3,completions,Northern Territory,354,count,actual
+2009-12-31,2009-Q4,completions,Northern Territory,291,count,actual
+2010-03-31,2010-Q1,completions,Northern Territory,240,count,actual
+2010-06-30,2010-Q2,completions,Northern Territory,479,count,actual
+2010-09-30,2010-Q3,completions,Northern Territory,289,count,actual
+2010-12-31,2010-Q4,completions,Northern Territory,406,count,actual
+2011-03-31,2011-Q1,completions,Northern Territory,355,count,actual
+2011-06-30,2011-Q2,completions,Northern Territory,327,count,actual
+2011-09-30,2011-Q3,completions,Northern Territory,319,count,actual
+2011-12-31,2011-Q4,completions,Northern Territory,347,count,actual
+2012-03-31,2012-Q1,completions,Northern Territory,297,count,actual
+2012-06-30,2012-Q2,completions,Northern Territory,486,count,actual
+2012-09-30,2012-Q3,completions,Northern Territory,334,count,actual
+2012-12-31,2012-Q4,completions,Northern Territory,431,count,actual
+2013-03-31,2013-Q1,completions,Northern Territory,421,count,actual
+2013-06-30,2013-Q2,completions,Northern Territory,248,count,actual
+2013-09-30,2013-Q3,completions,Northern Territory,340,count,actual
+2013-12-31,2013-Q4,completions,Northern Territory,593,count,actual
+2014-03-31,2014-Q1,completions,Northern Territory,446,count,actual
+2014-06-30,2014-Q2,completions,Northern Territory,775,count,actual
+2014-09-30,2014-Q3,completions,Northern Territory,708,count,actual
+2014-12-31,2014-Q4,completions,Northern Territory,796,count,actual
+2015-03-31,2015-Q1,completions,Northern Territory,503,count,actual
+2015-06-30,2015-Q2,completions,Northern Territory,376,count,actual
+2015-09-30,2015-Q3,completions,Northern Territory,507,count,actual
+2015-12-31,2015-Q4,completions,Northern Territory,518,count,actual
+2016-03-31,2016-Q1,completions,Northern Territory,366,count,actual
+2016-06-30,2016-Q2,completions,Northern Territory,458,count,actual
+2016-09-30,2016-Q3,completions,Northern Territory,313,count,actual
+2016-12-31,2016-Q4,completions,Northern Territory,312,count,actual
+2017-03-31,2017-Q1,completions,Northern Territory,414,count,actual
+2017-06-30,2017-Q2,completions,Northern Territory,195,count,actual
+2017-09-30,2017-Q3,completions,Northern Territory,202,count,actual
+2017-12-31,2017-Q4,completions,Northern Territory,234,count,actual
+2018-03-31,2018-Q1,completions,Northern Territory,232,count,actual
+2018-06-30,2018-Q2,completions,Northern Territory,210,count,actual
+2018-09-30,2018-Q3,completions,Northern Territory,184,count,actual
+2018-12-31,2018-Q4,completions,Northern Territory,199,count,actual
+2019-03-31,2019-Q1,completions,Northern Territory,270,count,actual
+2019-06-30,2019-Q2,completions,Northern Territory,149,count,actual
+2019-09-30,2019-Q3,completions,Northern Territory,153,count,actual
+2019-12-31,2019-Q4,completions,Northern Territory,107,count,actual
+2020-03-31,2020-Q1,completions,Northern Territory,132,count,actual
+2020-06-30,2020-Q2,completions,Northern Territory,117,count,actual
+2020-09-30,2020-Q3,completions,Northern Territory,145,count,actual
+2020-12-31,2020-Q4,completions,Northern Territory,166,count,actual
+2021-03-31,2021-Q1,completions,Northern Territory,100,count,actual
+2021-06-30,2021-Q2,completions,Northern Territory,173,count,actual
+2021-09-30,2021-Q3,completions,Northern Territory,147,count,actual
+2021-12-31,2021-Q4,completions,Northern Territory,170,count,actual
+2022-03-31,2022-Q1,completions,Northern Territory,171,count,actual
+2022-06-30,2022-Q2,completions,Northern Territory,105,count,actual
+2022-09-30,2022-Q3,completions,Northern Territory,157,count,actual
+2022-12-31,2022-Q4,completions,Northern Territory,117,count,actual
+2023-03-31,2023-Q1,completions,Northern Territory,103,count,actual
+2023-06-30,2023-Q2,completions,Northern Territory,246,count,actual
+2023-09-30,2023-Q3,completions,Northern Territory,170,count,actual
+2023-12-31,2023-Q4,completions,Northern Territory,139,count,actual
+2024-03-31,2024-Q1,completions,Northern Territory,123,count,actual
+2024-06-30,2024-Q2,completions,Northern Territory,86,count,actual
+2024-09-30,2024-Q3,completions,Northern Territory,132,count,actual
+2024-12-31,2024-Q4,completions,Northern Territory,109,count,actual
+2025-03-31,2025-Q1,completions,Northern Territory,142,count,actual
+2025-06-30,2025-Q2,completions,Northern Territory,138,count,actual
+2025-09-30,2025-Q3,completions,Northern Territory,153,count,actual
+2025-12-31,2025-Q4,completions,Northern Territory,149,count,actual
+2026-03-31,2026-Q1,completions,Northern Territory,169,count,actual
+2026-06-30,2026-Q2,completions,Northern Territory,248,count,actual
+1984-09-30,1984-Q3,completions,Queensland,8816,count,actual
+1984-12-31,1984-Q4,completions,Queensland,7445,count,actual
+1985-03-31,1985-Q1,completions,Queensland,7786,count,actual
+1985-06-30,1985-Q2,completions,Queensland,7683,count,actual
+1985-09-30,1985-Q3,completions,Queensland,6973,count,actual
+1985-12-31,1985-Q4,completions,Queensland,7748,count,actual
+1986-03-31,1986-Q1,completions,Queensland,6933,count,actual
+1986-06-30,1986-Q2,completions,Queensland,6270,count,actual
+1986-09-30,1986-Q3,completions,Queensland,5870,count,actual
+1986-12-31,1986-Q4,completions,Queensland,5295,count,actual
+1987-03-31,1987-Q1,completions,Queensland,5004,count,actual
+1987-06-30,1987-Q2,completions,Queensland,5620,count,actual
+1987-09-30,1987-Q3,completions,Queensland,5559,count,actual
+1987-12-31,1987-Q4,completions,Queensland,5770,count,actual
+1988-03-31,1988-Q1,completions,Queensland,6888,count,actual
+1988-06-30,1988-Q2,completions,Queensland,7276,count,actual
+1988-09-30,1988-Q3,completions,Queensland,8701,count,actual
+1988-12-31,1988-Q4,completions,Queensland,10068,count,actual
+1989-03-31,1989-Q1,completions,Queensland,9432,count,actual
+1989-06-30,1989-Q2,completions,Queensland,10732,count,actual
+1989-09-30,1989-Q3,completions,Queensland,11169,count,actual
+1989-12-31,1989-Q4,completions,Queensland,10046,count,actual
+1990-03-31,1990-Q1,completions,Queensland,9950,count,actual
+1990-06-30,1990-Q2,completions,Queensland,8698,count,actual
+1990-09-30,1990-Q3,completions,Queensland,8301,count,actual
+1990-12-31,1990-Q4,completions,Queensland,8296,count,actual
+1991-03-31,1991-Q1,completions,Queensland,7593,count,actual
+1991-06-30,1991-Q2,completions,Queensland,8774,count,actual
+1991-09-30,1991-Q3,completions,Queensland,8911,count,actual
+1991-12-31,1991-Q4,completions,Queensland,8801,count,actual
+1992-03-31,1992-Q1,completions,Queensland,9493,count,actual
+1992-06-30,1992-Q2,completions,Queensland,8903,count,actual
+1992-09-30,1992-Q3,completions,Queensland,9884,count,actual
+1992-12-31,1992-Q4,completions,Queensland,11886,count,actual
+1993-03-31,1993-Q1,completions,Queensland,11529,count,actual
+1993-06-30,1993-Q2,completions,Queensland,12382,count,actual
+1993-09-30,1993-Q3,completions,Queensland,12200,count,actual
+1993-12-31,1993-Q4,completions,Queensland,13111,count,actual
+1994-03-31,1994-Q1,completions,Queensland,11908,count,actual
+1994-06-30,1994-Q2,completions,Queensland,12540,count,actual
+1994-09-30,1994-Q3,completions,Queensland,12742,count,actual
+1994-12-31,1994-Q4,completions,Queensland,12554,count,actual
+1995-03-31,1995-Q1,completions,Queensland,12696,count,actual
+1995-06-30,1995-Q2,completions,Queensland,10490,count,actual
+1995-09-30,1995-Q3,completions,Queensland,9397,count,actual
+1995-12-31,1995-Q4,completions,Queensland,9252,count,actual
+1996-03-31,1996-Q1,completions,Queensland,8416,count,actual
+1996-06-30,1996-Q2,completions,Queensland,8135,count,actual
+1996-09-30,1996-Q3,completions,Queensland,7285,count,actual
+1996-12-31,1996-Q4,completions,Queensland,7367,count,actual
+1997-03-31,1997-Q1,completions,Queensland,7868,count,actual
+1997-06-30,1997-Q2,completions,Queensland,8095,count,actual
+1997-09-30,1997-Q3,completions,Queensland,8469,count,actual
+1997-12-31,1997-Q4,completions,Queensland,8254,count,actual
+1998-03-31,1998-Q1,completions,Queensland,8537,count,actual
+1998-06-30,1998-Q2,completions,Queensland,8484,count,actual
+1998-09-30,1998-Q3,completions,Queensland,9169,count,actual
+1998-12-31,1998-Q4,completions,Queensland,8838,count,actual
+1999-03-31,1999-Q1,completions,Queensland,6906,count,actual
+1999-06-30,1999-Q2,completions,Queensland,7323,count,actual
+1999-09-30,1999-Q3,completions,Queensland,7334,count,actual
+1999-12-31,1999-Q4,completions,Queensland,6843,count,actual
+2000-03-31,2000-Q1,completions,Queensland,8254,count,actual
+2000-06-30,2000-Q2,completions,Queensland,10669,count,actual
+2000-09-30,2000-Q3,completions,Queensland,7459,count,actual
+2000-12-31,2000-Q4,completions,Queensland,6122,count,actual
+2001-03-31,2001-Q1,completions,Queensland,6310,count,actual
+2001-06-30,2001-Q2,completions,Queensland,5114,count,actual
+2001-09-30,2001-Q3,completions,Queensland,6788,count,actual
+2001-12-31,2001-Q4,completions,Queensland,8735,count,actual
+2002-03-31,2002-Q1,completions,Queensland,7679,count,actual
+2002-06-30,2002-Q2,completions,Queensland,8193,count,actual
+2002-09-30,2002-Q3,completions,Queensland,7639,count,actual
+2002-12-31,2002-Q4,completions,Queensland,8523,count,actual
+2003-03-31,2003-Q1,completions,Queensland,10419,count,actual
+2003-06-30,2003-Q2,completions,Queensland,8254,count,actual
+2003-09-30,2003-Q3,completions,Queensland,9806,count,actual
+2003-12-31,2003-Q4,completions,Queensland,9233,count,actual
+2004-03-31,2004-Q1,completions,Queensland,9308,count,actual
+2004-06-30,2004-Q2,completions,Queensland,10062,count,actual
+2004-09-30,2004-Q3,completions,Queensland,10285,count,actual
+2004-12-31,2004-Q4,completions,Queensland,9034,count,actual
+2005-03-31,2005-Q1,completions,Queensland,9694,count,actual
+2005-06-30,2005-Q2,completions,Queensland,10416,count,actual
+2005-09-30,2005-Q3,completions,Queensland,10060,count,actual
+2005-12-31,2005-Q4,completions,Queensland,9608,count,actual
+2006-03-31,2006-Q1,completions,Queensland,9161,count,actual
+2006-06-30,2006-Q2,completions,Queensland,10006,count,actual
+2006-09-30,2006-Q3,completions,Queensland,9068,count,actual
+2006-12-31,2006-Q4,completions,Queensland,9371,count,actual
+2007-03-31,2007-Q1,completions,Queensland,10980,count,actual
+2007-06-30,2007-Q2,completions,Queensland,9556,count,actual
+2007-09-30,2007-Q3,completions,Queensland,8628,count,actual
+2007-12-31,2007-Q4,completions,Queensland,11173,count,actual
+2008-03-31,2008-Q1,completions,Queensland,10115,count,actual
+2008-06-30,2008-Q2,completions,Queensland,10007,count,actual
+2008-09-30,2008-Q3,completions,Queensland,10479,count,actual
+2008-12-31,2008-Q4,completions,Queensland,11126,count,actual
+2009-03-31,2009-Q1,completions,Queensland,9154,count,actual
+2009-06-30,2009-Q2,completions,Queensland,8117,count,actual
+2009-09-30,2009-Q3,completions,Queensland,8833,count,actual
+2009-12-31,2009-Q4,completions,Queensland,8170,count,actual
+2010-03-31,2010-Q1,completions,Queensland,9018,count,actual
+2010-06-30,2010-Q2,completions,Queensland,9126,count,actual
+2010-09-30,2010-Q3,completions,Queensland,8584,count,actual
+2010-12-31,2010-Q4,completions,Queensland,7691,count,actual
+2011-03-31,2011-Q1,completions,Queensland,9077,count,actual
+2011-06-30,2011-Q2,completions,Queensland,7389,count,actual
+2011-09-30,2011-Q3,completions,Queensland,7107,count,actual
+2011-12-31,2011-Q4,completions,Queensland,6566,count,actual
+2012-03-31,2012-Q1,completions,Queensland,5956,count,actual
+2012-06-30,2012-Q2,completions,Queensland,7524,count,actual
+2012-09-30,2012-Q3,completions,Queensland,7430,count,actual
+2012-12-31,2012-Q4,completions,Queensland,7387,count,actual
+2013-03-31,2013-Q1,completions,Queensland,6300,count,actual
+2013-06-30,2013-Q2,completions,Queensland,7706,count,actual
+2013-09-30,2013-Q3,completions,Queensland,7362,count,actual
+2013-12-31,2013-Q4,completions,Queensland,7382,count,actual
+2014-03-31,2014-Q1,completions,Queensland,7974,count,actual
+2014-06-30,2014-Q2,completions,Queensland,7311,count,actual
+2014-09-30,2014-Q3,completions,Queensland,10269,count,actual
+2014-12-31,2014-Q4,completions,Queensland,7739,count,actual
+2015-03-31,2015-Q1,completions,Queensland,11369,count,actual
+2015-06-30,2015-Q2,completions,Queensland,10368,count,actual
+2015-09-30,2015-Q3,completions,Queensland,8627,count,actual
+2015-12-31,2015-Q4,completions,Queensland,9720,count,actual
+2016-03-31,2016-Q1,completions,Queensland,10423,count,actual
+2016-06-30,2016-Q2,completions,Queensland,10237,count,actual
+2016-09-30,2016-Q3,completions,Queensland,11948,count,actual
+2016-12-31,2016-Q4,completions,Queensland,12658,count,actual
+2017-03-31,2017-Q1,completions,Queensland,11697,count,actual
+2017-06-30,2017-Q2,completions,Queensland,12137,count,actual
+2017-09-30,2017-Q3,completions,Queensland,10405,count,actual
+2017-12-31,2017-Q4,completions,Queensland,12560,count,actual
+2018-03-31,2018-Q1,completions,Queensland,10082,count,actual
+2018-06-30,2018-Q2,completions,Queensland,11364,count,actual
+2018-09-30,2018-Q3,completions,Queensland,11729,count,actual
+2018-12-31,2018-Q4,completions,Queensland,9725,count,actual
+2019-03-31,2019-Q1,completions,Queensland,9915,count,actual
+2019-06-30,2019-Q2,completions,Queensland,7658,count,actual
+2019-09-30,2019-Q3,completions,Queensland,9932,count,actual
+2019-12-31,2019-Q4,completions,Queensland,8404,count,actual
+2020-03-31,2020-Q1,completions,Queensland,8530,count,actual
+2020-06-30,2020-Q2,completions,Queensland,8474,count,actual
+2020-09-30,2020-Q3,completions,Queensland,7010,count,actual
+2020-12-31,2020-Q4,completions,Queensland,7343,count,actual
+2021-03-31,2021-Q1,completions,Queensland,7488,count,actual
+2021-06-30,2021-Q2,completions,Queensland,7847,count,actual
+2021-09-30,2021-Q3,completions,Queensland,8387,count,actual
+2021-12-31,2021-Q4,completions,Queensland,8044,count,actual
+2022-03-31,2022-Q1,completions,Queensland,9369,count,actual
+2022-06-30,2022-Q2,completions,Queensland,9115,count,actual
+2022-09-30,2022-Q3,completions,Queensland,8104,count,actual
+2022-12-31,2022-Q4,completions,Queensland,8191,count,actual
+2023-03-31,2023-Q1,completions,Queensland,7537,count,actual
+2023-06-30,2023-Q2,completions,Queensland,8850,count,actual
+2023-09-30,2023-Q3,completions,Queensland,8602,count,actual
+2023-12-31,2023-Q4,completions,Queensland,9759,count,actual
+2024-03-31,2024-Q1,completions,Queensland,6753,count,actual
+2024-06-30,2024-Q2,completions,Queensland,7809,count,actual
+2024-09-30,2024-Q3,completions,Queensland,8327,count,actual
+2024-12-31,2024-Q4,completions,Queensland,8750,count,actual
+2025-03-31,2025-Q1,completions,Queensland,8932,count,actual
+2025-06-30,2025-Q2,completions,Queensland,7907,count,actual
+2025-09-30,2025-Q3,completions,Queensland,8342,count,actual
+2025-12-31,2025-Q4,completions,Queensland,7920,count,actual
+2026-03-31,2026-Q1,completions,Queensland,8967,count,actual
+2026-06-30,2026-Q2,completions,Queensland,9549,count,actual
+1984-09-30,1984-Q3,completions,South Australia,3565,count,actual
+1984-12-31,1984-Q4,completions,South Australia,3114,count,actual
+1985-03-31,1985-Q1,completions,South Australia,3261,count,actual
+1985-06-30,1985-Q2,completions,South Australia,3320,count,actual
+1985-09-30,1985-Q3,completions,South Australia,3383,count,actual
+1985-12-31,1985-Q4,completions,South Australia,3405,count,actual
+1986-03-31,1986-Q1,completions,South Australia,3008,count,actual
+1986-06-30,1986-Q2,completions,South Australia,2561,count,actual
+1986-09-30,1986-Q3,completions,South Australia,2308,count,actual
+1986-12-31,1986-Q4,completions,South Australia,2640,count,actual
+1987-03-31,1987-Q1,completions,South Australia,2128,count,actual
+1987-06-30,1987-Q2,completions,South Australia,2402,count,actual
+1987-09-30,1987-Q3,completions,South Australia,2313,count,actual
+1987-12-31,1987-Q4,completions,South Australia,1968,count,actual
+1988-03-31,1988-Q1,completions,South Australia,1964,count,actual
+1988-06-30,1988-Q2,completions,South Australia,2159,count,actual
+1988-09-30,1988-Q3,completions,South Australia,2165,count,actual
+1988-12-31,1988-Q4,completions,South Australia,2421,count,actual
+1989-03-31,1989-Q1,completions,South Australia,2189,count,actual
+1989-06-30,1989-Q2,completions,South Australia,2413,count,actual
+1989-09-30,1989-Q3,completions,South Australia,2525,count,actual
+1989-12-31,1989-Q4,completions,South Australia,2564,count,actual
+1990-03-31,1990-Q1,completions,South Australia,2568,count,actual
+1990-06-30,1990-Q2,completions,South Australia,2930,count,actual
+1990-09-30,1990-Q3,completions,South Australia,2836,count,actual
+1990-12-31,1990-Q4,completions,South Australia,3102,count,actual
+1991-03-31,1991-Q1,completions,South Australia,3012,count,actual
+1991-06-30,1991-Q2,completions,South Australia,2946,count,actual
+1991-09-30,1991-Q3,completions,South Australia,2959,count,actual
+1991-12-31,1991-Q4,completions,South Australia,2714,count,actual
+1992-03-31,1992-Q1,completions,South Australia,2763,count,actual
+1992-06-30,1992-Q2,completions,South Australia,2702,count,actual
+1992-09-30,1992-Q3,completions,South Australia,2392,count,actual
+1992-12-31,1992-Q4,completions,South Australia,2723,count,actual
+1993-03-31,1993-Q1,completions,South Australia,2904,count,actual
+1993-06-30,1993-Q2,completions,South Australia,2646,count,actual
+1993-09-30,1993-Q3,completions,South Australia,3124,count,actual
+1993-12-31,1993-Q4,completions,South Australia,2871,count,actual
+1994-03-31,1994-Q1,completions,South Australia,2838,count,actual
+1994-06-30,1994-Q2,completions,South Australia,3067,count,actual
+1994-09-30,1994-Q3,completions,South Australia,2913,count,actual
+1994-12-31,1994-Q4,completions,South Australia,3054,count,actual
+1995-03-31,1995-Q1,completions,South Australia,2633,count,actual
+1995-06-30,1995-Q2,completions,South Australia,2484,count,actual
+1995-09-30,1995-Q3,completions,South Australia,1911,count,actual
+1995-12-31,1995-Q4,completions,South Australia,1650,count,actual
+1996-03-31,1996-Q1,completions,South Australia,1521,count,actual
+1996-06-30,1996-Q2,completions,South Australia,1472,count,actual
+1996-09-30,1996-Q3,completions,South Australia,1376,count,actual
+1996-12-31,1996-Q4,completions,South Australia,1141,count,actual
+1997-03-31,1997-Q1,completions,South Australia,1342,count,actual
+1997-06-30,1997-Q2,completions,South Australia,1449,count,actual
+1997-09-30,1997-Q3,completions,South Australia,1639,count,actual
+1997-12-31,1997-Q4,completions,South Australia,1755,count,actual
+1998-03-31,1998-Q1,completions,South Australia,1515,count,actual
+1998-06-30,1998-Q2,completions,South Australia,1517,count,actual
+1998-09-30,1998-Q3,completions,South Australia,1845,count,actual
+1998-12-31,1998-Q4,completions,South Australia,1750,count,actual
+1999-03-31,1999-Q1,completions,South Australia,1931,count,actual
+1999-06-30,1999-Q2,completions,South Australia,1641,count,actual
+1999-09-30,1999-Q3,completions,South Australia,1783,count,actual
+1999-12-31,1999-Q4,completions,South Australia,1859,count,actual
+2000-03-31,2000-Q1,completions,South Australia,1989,count,actual
+2000-06-30,2000-Q2,completions,South Australia,2434,count,actual
+2000-09-30,2000-Q3,completions,South Australia,1890,count,actual
+2000-12-31,2000-Q4,completions,South Australia,2069,count,actual
+2001-03-31,2001-Q1,completions,South Australia,1899,count,actual
+2001-06-30,2001-Q2,completions,South Australia,1790,count,actual
+2001-09-30,2001-Q3,completions,South Australia,1622,count,actual
+2001-12-31,2001-Q4,completions,South Australia,1708,count,actual
+2002-03-31,2002-Q1,completions,South Australia,1967,count,actual
+2002-06-30,2002-Q2,completions,South Australia,2235,count,actual
+2002-09-30,2002-Q3,completions,South Australia,2228,count,actual
+2002-12-31,2002-Q4,completions,South Australia,2313,count,actual
+2003-03-31,2003-Q1,completions,South Australia,2091,count,actual
+2003-06-30,2003-Q2,completions,South Australia,2494,count,actual
+2003-09-30,2003-Q3,completions,South Australia,2319,count,actual
+2003-12-31,2003-Q4,completions,South Australia,2408,count,actual
+2004-03-31,2004-Q1,completions,South Australia,2784,count,actual
+2004-06-30,2004-Q2,completions,South Australia,2472,count,actual
+2004-09-30,2004-Q3,completions,South Australia,2584,count,actual
+2004-12-31,2004-Q4,completions,South Australia,2693,count,actual
+2005-03-31,2005-Q1,completions,South Australia,2544,count,actual
+2005-06-30,2005-Q2,completions,South Australia,2698,count,actual
+2005-09-30,2005-Q3,completions,South Australia,2705,count,actual
+2005-12-31,2005-Q4,completions,South Australia,2996,count,actual
+2006-03-31,2006-Q1,completions,South Australia,2629,count,actual
+2006-06-30,2006-Q2,completions,South Australia,2659,count,actual
+2006-09-30,2006-Q3,completions,South Australia,2753,count,actual
+2006-12-31,2006-Q4,completions,South Australia,2489,count,actual
+2007-03-31,2007-Q1,completions,South Australia,2636,count,actual
+2007-06-30,2007-Q2,completions,South Australia,2410,count,actual
+2007-09-30,2007-Q3,completions,South Australia,2955,count,actual
+2007-12-31,2007-Q4,completions,South Australia,2761,count,actual
+2008-03-31,2008-Q1,completions,South Australia,2786,count,actual
+2008-06-30,2008-Q2,completions,South Australia,2975,count,actual
+2008-09-30,2008-Q3,completions,South Australia,2899,count,actual
+2008-12-31,2008-Q4,completions,South Australia,2762,count,actual
+2009-03-31,2009-Q1,completions,South Australia,2994,count,actual
+2009-06-30,2009-Q2,completions,South Australia,2636,count,actual
+2009-09-30,2009-Q3,completions,South Australia,3122,count,actual
+2009-12-31,2009-Q4,completions,South Australia,2986,count,actual
+2010-03-31,2010-Q1,completions,South Australia,3136,count,actual
+2010-06-30,2010-Q2,completions,South Australia,3131,count,actual
+2010-09-30,2010-Q3,completions,South Australia,2708,count,actual
+2010-12-31,2010-Q4,completions,South Australia,3238,count,actual
+2011-03-31,2011-Q1,completions,South Australia,2911,count,actual
+2011-06-30,2011-Q2,completions,South Australia,3295,count,actual
+2011-09-30,2011-Q3,completions,South Australia,2739,count,actual
+2011-12-31,2011-Q4,completions,South Australia,2535,count,actual
+2012-03-31,2012-Q1,completions,South Australia,2379,count,actual
+2012-06-30,2012-Q2,completions,South Australia,2517,count,actual
+2012-09-30,2012-Q3,completions,South Australia,2256,count,actual
+2012-12-31,2012-Q4,completions,South Australia,2060,count,actual
+2013-03-31,2013-Q1,completions,South Australia,1912,count,actual
+2013-06-30,2013-Q2,completions,South Australia,2154,count,actual
+2013-09-30,2013-Q3,completions,South Australia,2355,count,actual
+2013-12-31,2013-Q4,completions,South Australia,2187,count,actual
+2014-03-31,2014-Q1,completions,South Australia,2242,count,actual
+2014-06-30,2014-Q2,completions,South Australia,2281,count,actual
+2014-09-30,2014-Q3,completions,South Australia,3118,count,actual
+2014-12-31,2014-Q4,completions,South Australia,2704,count,actual
+2015-03-31,2015-Q1,completions,South Australia,2850,count,actual
+2015-06-30,2015-Q2,completions,South Australia,2997,count,actual
+2015-09-30,2015-Q3,completions,South Australia,2647,count,actual
+2015-12-31,2015-Q4,completions,South Australia,2454,count,actual
+2016-03-31,2016-Q1,completions,South Australia,2472,count,actual
+2016-06-30,2016-Q2,completions,South Australia,2460,count,actual
+2016-09-30,2016-Q3,completions,South Australia,2526,count,actual
+2016-12-31,2016-Q4,completions,South Australia,2452,count,actual
+2017-03-31,2017-Q1,completions,South Australia,2821,count,actual
+2017-06-30,2017-Q2,completions,South Australia,2120,count,actual
+2017-09-30,2017-Q3,completions,South Australia,2539,count,actual
+2017-12-31,2017-Q4,completions,South Australia,2837,count,actual
+2018-03-31,2018-Q1,completions,South Australia,2565,count,actual
+2018-06-30,2018-Q2,completions,South Australia,2786,count,actual
+2018-09-30,2018-Q3,completions,South Australia,2827,count,actual
+2018-12-31,2018-Q4,completions,South Australia,3550,count,actual
+2019-03-31,2019-Q1,completions,South Australia,2783,count,actual
+2019-06-30,2019-Q2,completions,South Australia,2845,count,actual
+2019-09-30,2019-Q3,completions,South Australia,2157,count,actual
+2019-12-31,2019-Q4,completions,South Australia,2229,count,actual
+2020-03-31,2020-Q1,completions,South Australia,2655,count,actual
+2020-06-30,2020-Q2,completions,South Australia,2249,count,actual
+2020-09-30,2020-Q3,completions,South Australia,2942,count,actual
+2020-12-31,2020-Q4,completions,South Australia,2603,count,actual
+2021-03-31,2021-Q1,completions,South Australia,3111,count,actual
+2021-06-30,2021-Q2,completions,South Australia,2469,count,actual
+2021-09-30,2021-Q3,completions,South Australia,2630,count,actual
+2021-12-31,2021-Q4,completions,South Australia,2578,count,actual
+2022-03-31,2022-Q1,completions,South Australia,2372,count,actual
+2022-06-30,2022-Q2,completions,South Australia,3454,count,actual
+2022-09-30,2022-Q3,completions,South Australia,3575,count,actual
+2022-12-31,2022-Q4,completions,South Australia,2738,count,actual
+2023-03-31,2023-Q1,completions,South Australia,2733,count,actual
+2023-06-30,2023-Q2,completions,South Australia,2590,count,actual
+2023-09-30,2023-Q3,completions,South Australia,2421,count,actual
+2023-12-31,2023-Q4,completions,South Australia,3012,count,actual
+2024-03-31,2024-Q1,completions,South Australia,2848,count,actual
+2024-06-30,2024-Q2,completions,South Australia,2879,count,actual
+2024-09-30,2024-Q3,completions,South Australia,3147,count,actual
+2024-12-31,2024-Q4,completions,South Australia,3032,count,actual
+2025-03-31,2025-Q1,completions,South Australia,3066,count,actual
+2025-06-30,2025-Q2,completions,South Australia,3642,count,actual
+2025-09-30,2025-Q3,completions,South Australia,3091,count,actual
+2025-12-31,2025-Q4,completions,South Australia,3704,count,actual
+2026-03-31,2026-Q1,completions,South Australia,3831,count,actual
+2026-06-30,2026-Q2,completions,South Australia,3112,count,actual
+1984-09-30,1984-Q3,completions,Tasmania,889,count,actual
+1984-12-31,1984-Q4,completions,Tasmania,1001,count,actual
+1985-03-31,1985-Q1,completions,Tasmania,801,count,actual
+1985-06-30,1985-Q2,completions,Tasmania,985,count,actual
+1985-09-30,1985-Q3,completions,Tasmania,959,count,actual
+1985-12-31,1985-Q4,completions,Tasmania,875,count,actual
+1986-03-31,1986-Q1,completions,Tasmania,961,count,actual
+1986-06-30,1986-Q2,completions,Tasmania,853,count,actual
+1986-09-30,1986-Q3,completions,Tasmania,894,count,actual
+1986-12-31,1986-Q4,completions,Tasmania,803,count,actual
+1987-03-31,1987-Q1,completions,Tasmania,847,count,actual
+1987-06-30,1987-Q2,completions,Tasmania,807,count,actual
+1987-09-30,1987-Q3,completions,Tasmania,806,count,actual
+1987-12-31,1987-Q4,completions,Tasmania,812,count,actual
+1988-03-31,1988-Q1,completions,Tasmania,839,count,actual
+1988-06-30,1988-Q2,completions,Tasmania,897,count,actual
+1988-09-30,1988-Q3,completions,Tasmania,717,count,actual
+1988-12-31,1988-Q4,completions,Tasmania,832,count,actual
+1989-03-31,1989-Q1,completions,Tasmania,785,count,actual
+1989-06-30,1989-Q2,completions,Tasmania,806,count,actual
+1989-09-30,1989-Q3,completions,Tasmania,853,count,actual
+1989-12-31,1989-Q4,completions,Tasmania,910,count,actual
+1990-03-31,1990-Q1,completions,Tasmania,955,count,actual
+1990-06-30,1990-Q2,completions,Tasmania,854,count,actual
+1990-09-30,1990-Q3,completions,Tasmania,857,count,actual
+1990-12-31,1990-Q4,completions,Tasmania,848,count,actual
+1991-03-31,1991-Q1,completions,Tasmania,751,count,actual
+1991-06-30,1991-Q2,completions,Tasmania,835,count,actual
+1991-09-30,1991-Q3,completions,Tasmania,870,count,actual
+1991-12-31,1991-Q4,completions,Tasmania,824,count,actual
+1992-03-31,1992-Q1,completions,Tasmania,850,count,actual
+1992-06-30,1992-Q2,completions,Tasmania,952,count,actual
+1992-09-30,1992-Q3,completions,Tasmania,1080,count,actual
+1992-12-31,1992-Q4,completions,Tasmania,1028,count,actual
+1993-03-31,1993-Q1,completions,Tasmania,1029,count,actual
+1993-06-30,1993-Q2,completions,Tasmania,1003,count,actual
+1993-09-30,1993-Q3,completions,Tasmania,1002,count,actual
+1993-12-31,1993-Q4,completions,Tasmania,985,count,actual
+1994-03-31,1994-Q1,completions,Tasmania,906,count,actual
+1994-06-30,1994-Q2,completions,Tasmania,971,count,actual
+1994-09-30,1994-Q3,completions,Tasmania,906,count,actual
+1994-12-31,1994-Q4,completions,Tasmania,903,count,actual
+1995-03-31,1995-Q1,completions,Tasmania,889,count,actual
+1995-06-30,1995-Q2,completions,Tasmania,763,count,actual
+1995-09-30,1995-Q3,completions,Tasmania,700,count,actual
+1995-12-31,1995-Q4,completions,Tasmania,646,count,actual
+1996-03-31,1996-Q1,completions,Tasmania,753,count,actual
+1996-06-30,1996-Q2,completions,Tasmania,564,count,actual
+1996-09-30,1996-Q3,completions,Tasmania,567,count,actual
+1996-12-31,1996-Q4,completions,Tasmania,568,count,actual
+1997-03-31,1997-Q1,completions,Tasmania,448,count,actual
+1997-06-30,1997-Q2,completions,Tasmania,610,count,actual
+1997-09-30,1997-Q3,completions,Tasmania,480,count,actual
+1997-12-31,1997-Q4,completions,Tasmania,523,count,actual
+1998-03-31,1998-Q1,completions,Tasmania,471,count,actual
+1998-06-30,1998-Q2,completions,Tasmania,439,count,actual
+1998-09-30,1998-Q3,completions,Tasmania,410,count,actual
+1998-12-31,1998-Q4,completions,Tasmania,373,count,actual
+1999-03-31,1999-Q1,completions,Tasmania,389,count,actual
+1999-06-30,1999-Q2,completions,Tasmania,351,count,actual
+1999-09-30,1999-Q3,completions,Tasmania,375,count,actual
+1999-12-31,1999-Q4,completions,Tasmania,376,count,actual
+2000-03-31,2000-Q1,completions,Tasmania,385,count,actual
+2000-06-30,2000-Q2,completions,Tasmania,560,count,actual
+2000-09-30,2000-Q3,completions,Tasmania,410,count,actual
+2000-12-31,2000-Q4,completions,Tasmania,333,count,actual
+2001-03-31,2001-Q1,completions,Tasmania,313,count,actual
+2001-06-30,2001-Q2,completions,Tasmania,325,count,actual
+2001-09-30,2001-Q3,completions,Tasmania,296,count,actual
+2001-12-31,2001-Q4,completions,Tasmania,349,count,actual
+2002-03-31,2002-Q1,completions,Tasmania,342,count,actual
+2002-06-30,2002-Q2,completions,Tasmania,478,count,actual
+2002-09-30,2002-Q3,completions,Tasmania,464,count,actual
+2002-12-31,2002-Q4,completions,Tasmania,474,count,actual
+2003-03-31,2003-Q1,completions,Tasmania,545,count,actual
+2003-06-30,2003-Q2,completions,Tasmania,419,count,actual
+2003-09-30,2003-Q3,completions,Tasmania,453,count,actual
+2003-12-31,2003-Q4,completions,Tasmania,608,count,actual
+2004-03-31,2004-Q1,completions,Tasmania,599,count,actual
+2004-06-30,2004-Q2,completions,Tasmania,616,count,actual
+2004-09-30,2004-Q3,completions,Tasmania,686,count,actual
+2004-12-31,2004-Q4,completions,Tasmania,687,count,actual
+2005-03-31,2005-Q1,completions,Tasmania,684,count,actual
+2005-06-30,2005-Q2,completions,Tasmania,612,count,actual
+2005-09-30,2005-Q3,completions,Tasmania,795,count,actual
+2005-12-31,2005-Q4,completions,Tasmania,703,count,actual
+2006-03-31,2006-Q1,completions,Tasmania,575,count,actual
+2006-06-30,2006-Q2,completions,Tasmania,695,count,actual
+2006-09-30,2006-Q3,completions,Tasmania,621,count,actual
+2006-12-31,2006-Q4,completions,Tasmania,566,count,actual
+2007-03-31,2007-Q1,completions,Tasmania,661,count,actual
+2007-06-30,2007-Q2,completions,Tasmania,691,count,actual
+2007-09-30,2007-Q3,completions,Tasmania,706,count,actual
+2007-12-31,2007-Q4,completions,Tasmania,663,count,actual
+2008-03-31,2008-Q1,completions,Tasmania,678,count,actual
+2008-06-30,2008-Q2,completions,Tasmania,761,count,actual
+2008-09-30,2008-Q3,completions,Tasmania,687,count,actual
+2008-12-31,2008-Q4,completions,Tasmania,717,count,actual
+2009-03-31,2009-Q1,completions,Tasmania,731,count,actual
+2009-06-30,2009-Q2,completions,Tasmania,694,count,actual
+2009-09-30,2009-Q3,completions,Tasmania,711,count,actual
+2009-12-31,2009-Q4,completions,Tasmania,699,count,actual
+2010-03-31,2010-Q1,completions,Tasmania,674,count,actual
+2010-06-30,2010-Q2,completions,Tasmania,747,count,actual
+2010-09-30,2010-Q3,completions,Tasmania,910,count,actual
+2010-12-31,2010-Q4,completions,Tasmania,766,count,actual
+2011-03-31,2011-Q1,completions,Tasmania,732,count,actual
+2011-06-30,2011-Q2,completions,Tasmania,827,count,actual
+2011-09-30,2011-Q3,completions,Tasmania,764,count,actual
+2011-12-31,2011-Q4,completions,Tasmania,642,count,actual
+2012-03-31,2012-Q1,completions,Tasmania,663,count,actual
+2012-06-30,2012-Q2,completions,Tasmania,575,count,actual
+2012-09-30,2012-Q3,completions,Tasmania,515,count,actual
+2012-12-31,2012-Q4,completions,Tasmania,698,count,actual
+2013-03-31,2013-Q1,completions,Tasmania,524,count,actual
+2013-06-30,2013-Q2,completions,Tasmania,445,count,actual
+2013-09-30,2013-Q3,completions,Tasmania,505,count,actual
+2013-12-31,2013-Q4,completions,Tasmania,439,count,actual
+2014-03-31,2014-Q1,completions,Tasmania,461,count,actual
+2014-06-30,2014-Q2,completions,Tasmania,522,count,actual
+2014-09-30,2014-Q3,completions,Tasmania,499,count,actual
+2014-12-31,2014-Q4,completions,Tasmania,598,count,actual
+2015-03-31,2015-Q1,completions,Tasmania,713,count,actual
+2015-06-30,2015-Q2,completions,Tasmania,672,count,actual
+2015-09-30,2015-Q3,completions,Tasmania,618,count,actual
+2015-12-31,2015-Q4,completions,Tasmania,787,count,actual
+2016-03-31,2016-Q1,completions,Tasmania,593,count,actual
+2016-06-30,2016-Q2,completions,Tasmania,655,count,actual
+2016-09-30,2016-Q3,completions,Tasmania,586,count,actual
+2016-12-31,2016-Q4,completions,Tasmania,591,count,actual
+2017-03-31,2017-Q1,completions,Tasmania,526,count,actual
+2017-06-30,2017-Q2,completions,Tasmania,450,count,actual
+2017-09-30,2017-Q3,completions,Tasmania,567,count,actual
+2017-12-31,2017-Q4,completions,Tasmania,533,count,actual
+2018-03-31,2018-Q1,completions,Tasmania,572,count,actual
+2018-06-30,2018-Q2,completions,Tasmania,668,count,actual
+2018-09-30,2018-Q3,completions,Tasmania,737,count,actual
+2018-12-31,2018-Q4,completions,Tasmania,660,count,actual
+2019-03-31,2019-Q1,completions,Tasmania,658,count,actual
+2019-06-30,2019-Q2,completions,Tasmania,793,count,actual
+2019-09-30,2019-Q3,completions,Tasmania,657,count,actual
+2019-12-31,2019-Q4,completions,Tasmania,639,count,actual
+2020-03-31,2020-Q1,completions,Tasmania,691,count,actual
+2020-06-30,2020-Q2,completions,Tasmania,810,count,actual
+2020-09-30,2020-Q3,completions,Tasmania,790,count,actual
+2020-12-31,2020-Q4,completions,Tasmania,822,count,actual
+2021-03-31,2021-Q1,completions,Tasmania,727,count,actual
+2021-06-30,2021-Q2,completions,Tasmania,720,count,actual
+2021-09-30,2021-Q3,completions,Tasmania,759,count,actual
+2021-12-31,2021-Q4,completions,Tasmania,1008,count,actual
+2022-03-31,2022-Q1,completions,Tasmania,1051,count,actual
+2022-06-30,2022-Q2,completions,Tasmania,784,count,actual
+2022-09-30,2022-Q3,completions,Tasmania,747,count,actual
+2022-12-31,2022-Q4,completions,Tasmania,681,count,actual
+2023-03-31,2023-Q1,completions,Tasmania,777,count,actual
+2023-06-30,2023-Q2,completions,Tasmania,1054,count,actual
+2023-09-30,2023-Q3,completions,Tasmania,725,count,actual
+2023-12-31,2023-Q4,completions,Tasmania,729,count,actual
+2024-03-31,2024-Q1,completions,Tasmania,786,count,actual
+2024-06-30,2024-Q2,completions,Tasmania,680,count,actual
+2024-09-30,2024-Q3,completions,Tasmania,670,count,actual
+2024-12-31,2024-Q4,completions,Tasmania,677,count,actual
+2025-03-31,2025-Q1,completions,Tasmania,596,count,actual
+2025-06-30,2025-Q2,completions,Tasmania,552,count,actual
+2025-09-30,2025-Q3,completions,Tasmania,603,count,actual
+2025-12-31,2025-Q4,completions,Tasmania,571,count,actual
+2026-03-31,2026-Q1,completions,Tasmania,567,count,actual
+2026-06-30,2026-Q2,completions,Tasmania,606,count,actual
+1984-09-30,1984-Q3,completions,Victoria,7591,count,actual
+1984-12-31,1984-Q4,completions,Victoria,9440,count,actual
+1985-03-31,1985-Q1,completions,Victoria,9734,count,actual
+1985-06-30,1985-Q2,completions,Victoria,8901,count,actual
+1985-09-30,1985-Q3,completions,Victoria,9961,count,actual
+1985-12-31,1985-Q4,completions,Victoria,9404,count,actual
+1986-03-31,1986-Q1,completions,Victoria,8472,count,actual
+1986-06-30,1986-Q2,completions,Victoria,8521,count,actual
+1986-09-30,1986-Q3,completions,Victoria,8480,count,actual
+1986-12-31,1986-Q4,completions,Victoria,8309,count,actual
+1987-03-31,1987-Q1,completions,Victoria,9002,count,actual
+1987-06-30,1987-Q2,completions,Victoria,8177,count,actual
+1987-09-30,1987-Q3,completions,Victoria,8126,count,actual
+1987-12-31,1987-Q4,completions,Victoria,7999,count,actual
+1988-03-31,1988-Q1,completions,Victoria,7618,count,actual
+1988-06-30,1988-Q2,completions,Victoria,8789,count,actual
+1988-09-30,1988-Q3,completions,Victoria,8286,count,actual
+1988-12-31,1988-Q4,completions,Victoria,8559,count,actual
+1989-03-31,1989-Q1,completions,Victoria,9110,count,actual
+1989-06-30,1989-Q2,completions,Victoria,9138,count,actual
+1989-09-30,1989-Q3,completions,Victoria,8926,count,actual
+1989-12-31,1989-Q4,completions,Victoria,8876,count,actual
+1990-03-31,1990-Q1,completions,Victoria,8202,count,actual
+1990-06-30,1990-Q2,completions,Victoria,8411,count,actual
+1990-09-30,1990-Q3,completions,Victoria,7851,count,actual
+1990-12-31,1990-Q4,completions,Victoria,7773,count,actual
+1991-03-31,1991-Q1,completions,Victoria,6357,count,actual
+1991-06-30,1991-Q2,completions,Victoria,6091,count,actual
+1991-09-30,1991-Q3,completions,Victoria,5975,count,actual
+1991-12-31,1991-Q4,completions,Victoria,6009,count,actual
+1992-03-31,1992-Q1,completions,Victoria,6362,count,actual
+1992-06-30,1992-Q2,completions,Victoria,7015,count,actual
+1992-09-30,1992-Q3,completions,Victoria,6652,count,actual
+1992-12-31,1992-Q4,completions,Victoria,6473,count,actual
+1993-03-31,1993-Q1,completions,Victoria,7527,count,actual
+1993-06-30,1993-Q2,completions,Victoria,7175,count,actual
+1993-09-30,1993-Q3,completions,Victoria,8193,count,actual
+1993-12-31,1993-Q4,completions,Victoria,7217,count,actual
+1994-03-31,1994-Q1,completions,Victoria,7531,count,actual
+1994-06-30,1994-Q2,completions,Victoria,7810,count,actual
+1994-09-30,1994-Q3,completions,Victoria,7663,count,actual
+1994-12-31,1994-Q4,completions,Victoria,8598,count,actual
+1995-03-31,1995-Q1,completions,Victoria,7797,count,actual
+1995-06-30,1995-Q2,completions,Victoria,7032,count,actual
+1995-09-30,1995-Q3,completions,Victoria,7144,count,actual
+1995-12-31,1995-Q4,completions,Victoria,7185,count,actual
+1996-03-31,1996-Q1,completions,Victoria,6062,count,actual
+1996-06-30,1996-Q2,completions,Victoria,5188,count,actual
+1996-09-30,1996-Q3,completions,Victoria,5642,count,actual
+1996-12-31,1996-Q4,completions,Victoria,5911,count,actual
+1997-03-31,1997-Q1,completions,Victoria,6570,count,actual
+1997-06-30,1997-Q2,completions,Victoria,6489,count,actual
+1997-09-30,1997-Q3,completions,Victoria,7295,count,actual
+1997-12-31,1997-Q4,completions,Victoria,7080,count,actual
+1998-03-31,1998-Q1,completions,Victoria,7935,count,actual
+1998-06-30,1998-Q2,completions,Victoria,8160,count,actual
+1998-09-30,1998-Q3,completions,Victoria,8648,count,actual
+1998-12-31,1998-Q4,completions,Victoria,8534,count,actual
+1999-03-31,1999-Q1,completions,Victoria,8631,count,actual
+1999-06-30,1999-Q2,completions,Victoria,9447,count,actual
+1999-09-30,1999-Q3,completions,Victoria,8620,count,actual
+1999-12-31,1999-Q4,completions,Victoria,9813,count,actual
+2000-03-31,2000-Q1,completions,Victoria,10240,count,actual
+2000-06-30,2000-Q2,completions,Victoria,11917,count,actual
+2000-09-30,2000-Q3,completions,Victoria,10770,count,actual
+2000-12-31,2000-Q4,completions,Victoria,9522,count,actual
+2001-03-31,2001-Q1,completions,Victoria,9651,count,actual
+2001-06-30,2001-Q2,completions,Victoria,9218,count,actual
+2001-09-30,2001-Q3,completions,Victoria,8726,count,actual
+2001-12-31,2001-Q4,completions,Victoria,9426,count,actual
+2002-03-31,2002-Q1,completions,Victoria,9696,count,actual
+2002-06-30,2002-Q2,completions,Victoria,10499,count,actual
+2002-09-30,2002-Q3,completions,Victoria,11329,count,actual
+2002-12-31,2002-Q4,completions,Victoria,11570,count,actual
+2003-03-31,2003-Q1,completions,Victoria,10311,count,actual
+2003-06-30,2003-Q2,completions,Victoria,10635,count,actual
+2003-09-30,2003-Q3,completions,Victoria,10160,count,actual
+2003-12-31,2003-Q4,completions,Victoria,11749,count,actual
+2004-03-31,2004-Q1,completions,Victoria,11267,count,actual
+2004-06-30,2004-Q2,completions,Victoria,10379,count,actual
+2004-09-30,2004-Q3,completions,Victoria,11445,count,actual
+2004-12-31,2004-Q4,completions,Victoria,10146,count,actual
+2005-03-31,2005-Q1,completions,Victoria,10844,count,actual
+2005-06-30,2005-Q2,completions,Victoria,10658,count,actual
+2005-09-30,2005-Q3,completions,Victoria,12081,count,actual
+2005-12-31,2005-Q4,completions,Victoria,10462,count,actual
+2006-03-31,2006-Q1,completions,Victoria,10226,count,actual
+2006-06-30,2006-Q2,completions,Victoria,9938,count,actual
+2006-09-30,2006-Q3,completions,Victoria,8346,count,actual
+2006-12-31,2006-Q4,completions,Victoria,10094,count,actual
+2007-03-31,2007-Q1,completions,Victoria,11080,count,actual
+2007-06-30,2007-Q2,completions,Victoria,9701,count,actual
+2007-09-30,2007-Q3,completions,Victoria,10021,count,actual
+2007-12-31,2007-Q4,completions,Victoria,9148,count,actual
+2008-03-31,2008-Q1,completions,Victoria,8866,count,actual
+2008-06-30,2008-Q2,completions,Victoria,9191,count,actual
+2008-09-30,2008-Q3,completions,Victoria,9226,count,actual
+2008-12-31,2008-Q4,completions,Victoria,10218,count,actual
+2009-03-31,2009-Q1,completions,Victoria,10125,count,actual
+2009-06-30,2009-Q2,completions,Victoria,11962,count,actual
+2009-09-30,2009-Q3,completions,Victoria,11000,count,actual
+2009-12-31,2009-Q4,completions,Victoria,11096,count,actual
+2010-03-31,2010-Q1,completions,Victoria,9913,count,actual
+2010-06-30,2010-Q2,completions,Victoria,14076,count,actual
+2010-09-30,2010-Q3,completions,Victoria,12349,count,actual
+2010-12-31,2010-Q4,completions,Victoria,14294,count,actual
+2011-03-31,2011-Q1,completions,Victoria,12251,count,actual
+2011-06-30,2011-Q2,completions,Victoria,12143,count,actual
+2011-09-30,2011-Q3,completions,Victoria,13128,count,actual
+2011-12-31,2011-Q4,completions,Victoria,13069,count,actual
+2012-03-31,2012-Q1,completions,Victoria,12546,count,actual
+2012-06-30,2012-Q2,completions,Victoria,13256,count,actual
+2012-09-30,2012-Q3,completions,Victoria,12307,count,actual
+2012-12-31,2012-Q4,completions,Victoria,12119,count,actual
+2013-03-31,2013-Q1,completions,Victoria,13353,count,actual
+2013-06-30,2013-Q2,completions,Victoria,12234,count,actual
+2013-09-30,2013-Q3,completions,Victoria,12635,count,actual
+2013-12-31,2013-Q4,completions,Victoria,11863,count,actual
+2014-03-31,2014-Q1,completions,Victoria,12685,count,actual
+2014-06-30,2014-Q2,completions,Victoria,13262,count,actual
+2014-09-30,2014-Q3,completions,Victoria,13496,count,actual
+2014-12-31,2014-Q4,completions,Victoria,13989,count,actual
+2015-03-31,2015-Q1,completions,Victoria,15054,count,actual
+2015-06-30,2015-Q2,completions,Victoria,13319,count,actual
+2015-09-30,2015-Q3,completions,Victoria,14977,count,actual
+2015-12-31,2015-Q4,completions,Victoria,14435,count,actual
+2016-03-31,2016-Q1,completions,Victoria,11854,count,actual
+2016-06-30,2016-Q2,completions,Victoria,17230,count,actual
+2016-09-30,2016-Q3,completions,Victoria,13768,count,actual
+2016-12-31,2016-Q4,completions,Victoria,17621,count,actual
+2017-03-31,2017-Q1,completions,Victoria,18444,count,actual
+2017-06-30,2017-Q2,completions,Victoria,16038,count,actual
+2017-09-30,2017-Q3,completions,Victoria,17869,count,actual
+2017-12-31,2017-Q4,completions,Victoria,15236,count,actual
+2018-03-31,2018-Q1,completions,Victoria,15019,count,actual
+2018-06-30,2018-Q2,completions,Victoria,17766,count,actual
+2018-09-30,2018-Q3,completions,Victoria,16918,count,actual
+2018-12-31,2018-Q4,completions,Victoria,15056,count,actual
+2019-03-31,2019-Q1,completions,Victoria,16443,count,actual
+2019-06-30,2019-Q2,completions,Victoria,15867,count,actual
+2019-09-30,2019-Q3,completions,Victoria,15791,count,actual
+2019-12-31,2019-Q4,completions,Victoria,17231,count,actual
+2020-03-31,2020-Q1,completions,Victoria,15414,count,actual
+2020-06-30,2020-Q2,completions,Victoria,15971,count,actual
+2020-09-30,2020-Q3,completions,Victoria,14992,count,actual
+2020-12-31,2020-Q4,completions,Victoria,17024,count,actual
+2021-03-31,2021-Q1,completions,Victoria,16349,count,actual
+2021-06-30,2021-Q2,completions,Victoria,17138,count,actual
+2021-09-30,2021-Q3,completions,Victoria,17417,count,actual
+2021-12-31,2021-Q4,completions,Victoria,14369,count,actual
+2022-03-31,2022-Q1,completions,Victoria,13488,count,actual
+2022-06-30,2022-Q2,completions,Victoria,13787,count,actual
+2022-09-30,2022-Q3,completions,Victoria,14886,count,actual
+2022-12-31,2022-Q4,completions,Victoria,14765,count,actual
+2023-03-31,2023-Q1,completions,Victoria,14989,count,actual
+2023-06-30,2023-Q2,completions,Victoria,12633,count,actual
+2023-09-30,2023-Q3,completions,Victoria,14441,count,actual
+2023-12-31,2023-Q4,completions,Victoria,15110,count,actual
+2024-03-31,2024-Q1,completions,Victoria,14513,count,actual
+2024-06-30,2024-Q2,completions,Victoria,16926,count,actual
+2024-09-30,2024-Q3,completions,Victoria,15592,count,actual
+2024-12-31,2024-Q4,completions,Victoria,14044,count,actual
+2025-03-31,2025-Q1,completions,Victoria,13888,count,actual
+2025-06-30,2025-Q2,completions,Victoria,12772,count,actual
+2025-09-30,2025-Q3,completions,Victoria,13731,count,actual
+2025-12-31,2025-Q4,completions,Victoria,13858,count,actual
+2026-03-31,2026-Q1,completions,Victoria,14523,count,actual
+2026-06-30,2026-Q2,completions,Victoria,14191,count,actual
+1984-09-30,1984-Q3,completions,Western Australia,4482,count,actual
+1984-12-31,1984-Q4,completions,Western Australia,4411,count,actual
+1985-03-31,1985-Q1,completions,Western Australia,4401,count,actual
+1985-06-30,1985-Q2,completions,Western Australia,4562,count,actual
+1985-09-30,1985-Q3,completions,Western Australia,4472,count,actual
+1985-12-31,1985-Q4,completions,Western Australia,4067,count,actual
+1986-03-31,1986-Q1,completions,Western Australia,4215,count,actual
+1986-06-30,1986-Q2,completions,Western Australia,4267,count,actual
+1986-09-30,1986-Q3,completions,Western Australia,4185,count,actual
+1986-12-31,1986-Q4,completions,Western Australia,3592,count,actual
+1987-03-31,1987-Q1,completions,Western Australia,4365,count,actual
+1987-06-30,1987-Q2,completions,Western Australia,4090,count,actual
+1987-09-30,1987-Q3,completions,Western Australia,4022,count,actual
+1987-12-31,1987-Q4,completions,Western Australia,4331,count,actual
+1988-03-31,1988-Q1,completions,Western Australia,4012,count,actual
+1988-06-30,1988-Q2,completions,Western Australia,3704,count,actual
+1988-09-30,1988-Q3,completions,Western Australia,3923,count,actual
+1988-12-31,1988-Q4,completions,Western Australia,5130,count,actual
+1989-03-31,1989-Q1,completions,Western Australia,4734,count,actual
+1989-06-30,1989-Q2,completions,Western Australia,5663,count,actual
+1989-09-30,1989-Q3,completions,Western Australia,6298,count,actual
+1989-12-31,1989-Q4,completions,Western Australia,6773,count,actual
+1990-03-31,1990-Q1,completions,Western Australia,6584,count,actual
+1990-06-30,1990-Q2,completions,Western Australia,5587,count,actual
+1990-09-30,1990-Q3,completions,Western Australia,4514,count,actual
+1990-12-31,1990-Q4,completions,Western Australia,3626,count,actual
+1991-03-31,1991-Q1,completions,Western Australia,3887,count,actual
+1991-06-30,1991-Q2,completions,Western Australia,3567,count,actual
+1991-09-30,1991-Q3,completions,Western Australia,3468,count,actual
+1991-12-31,1991-Q4,completions,Western Australia,3799,count,actual
+1992-03-31,1992-Q1,completions,Western Australia,3881,count,actual
+1992-06-30,1992-Q2,completions,Western Australia,3843,count,actual
+1992-09-30,1992-Q3,completions,Western Australia,4251,count,actual
+1992-12-31,1992-Q4,completions,Western Australia,4905,count,actual
+1993-03-31,1993-Q1,completions,Western Australia,4744,count,actual
+1993-06-30,1993-Q2,completions,Western Australia,5899,count,actual
+1993-09-30,1993-Q3,completions,Western Australia,5614,count,actual
+1993-12-31,1993-Q4,completions,Western Australia,5199,count,actual
+1994-03-31,1994-Q1,completions,Western Australia,5215,count,actual
+1994-06-30,1994-Q2,completions,Western Australia,5985,count,actual
+1994-09-30,1994-Q3,completions,Western Australia,6035,count,actual
+1994-12-31,1994-Q4,completions,Western Australia,6094,count,actual
+1995-03-31,1995-Q1,completions,Western Australia,6531,count,actual
+1995-06-30,1995-Q2,completions,Western Australia,5693,count,actual
+1995-09-30,1995-Q3,completions,Western Australia,5267,count,actual
+1995-12-31,1995-Q4,completions,Western Australia,4651,count,actual
+1996-03-31,1996-Q1,completions,Western Australia,4186,count,actual
+1996-06-30,1996-Q2,completions,Western Australia,3482,count,actual
+1996-09-30,1996-Q3,completions,Western Australia,3727,count,actual
+1996-12-31,1996-Q4,completions,Western Australia,3547,count,actual
+1997-03-31,1997-Q1,completions,Western Australia,3456,count,actual
+1997-06-30,1997-Q2,completions,Western Australia,3671,count,actual
+1997-09-30,1997-Q3,completions,Western Australia,3834,count,actual
+1997-12-31,1997-Q4,completions,Western Australia,4184,count,actual
+1998-03-31,1998-Q1,completions,Western Australia,4003,count,actual
+1998-06-30,1998-Q2,completions,Western Australia,4233,count,actual
+1998-09-30,1998-Q3,completions,Western Australia,4364,count,actual
+1998-12-31,1998-Q4,completions,Western Australia,4082,count,actual
+1999-03-31,1999-Q1,completions,Western Australia,4827,count,actual
+1999-06-30,1999-Q2,completions,Western Australia,4551,count,actual
+1999-09-30,1999-Q3,completions,Western Australia,4302,count,actual
+1999-12-31,1999-Q4,completions,Western Australia,4308,count,actual
+2000-03-31,2000-Q1,completions,Western Australia,5289,count,actual
+2000-06-30,2000-Q2,completions,Western Australia,5851,count,actual
+2000-09-30,2000-Q3,completions,Western Australia,4591,count,actual
+2000-12-31,2000-Q4,completions,Western Australia,4801,count,actual
+2001-03-31,2001-Q1,completions,Western Australia,4593,count,actual
+2001-06-30,2001-Q2,completions,Western Australia,3653,count,actual
+2001-09-30,2001-Q3,completions,Western Australia,3982,count,actual
+2001-12-31,2001-Q4,completions,Western Australia,4097,count,actual
+2002-03-31,2002-Q1,completions,Western Australia,4263,count,actual
+2002-06-30,2002-Q2,completions,Western Australia,4861,count,actual
+2002-09-30,2002-Q3,completions,Western Australia,4123,count,actual
+2002-12-31,2002-Q4,completions,Western Australia,5168,count,actual
+2003-03-31,2003-Q1,completions,Western Australia,4770,count,actual
+2003-06-30,2003-Q2,completions,Western Australia,4461,count,actual
+2003-09-30,2003-Q3,completions,Western Australia,4586,count,actual
+2003-12-31,2003-Q4,completions,Western Australia,4505,count,actual
+2004-03-31,2004-Q1,completions,Western Australia,4708,count,actual
+2004-06-30,2004-Q2,completions,Western Australia,4805,count,actual
+2004-09-30,2004-Q3,completions,Western Australia,5111,count,actual
+2004-12-31,2004-Q4,completions,Western Australia,4142,count,actual
+2005-03-31,2005-Q1,completions,Western Australia,4529,count,actual
+2005-06-30,2005-Q2,completions,Western Australia,5648,count,actual
+2005-09-30,2005-Q3,completions,Western Australia,5076,count,actual
+2005-12-31,2005-Q4,completions,Western Australia,5622,count,actual
+2006-03-31,2006-Q1,completions,Western Australia,5905,count,actual
+2006-06-30,2006-Q2,completions,Western Australia,5306,count,actual
+2006-09-30,2006-Q3,completions,Western Australia,5950,count,actual
+2006-12-31,2006-Q4,completions,Western Australia,6048,count,actual
+2007-03-31,2007-Q1,completions,Western Australia,6198,count,actual
+2007-06-30,2007-Q2,completions,Western Australia,6797,count,actual
+2007-09-30,2007-Q3,completions,Western Australia,6315,count,actual
+2007-12-31,2007-Q4,completions,Western Australia,6364,count,actual
+2008-03-31,2008-Q1,completions,Western Australia,5364,count,actual
+2008-06-30,2008-Q2,completions,Western Australia,5428,count,actual
+2008-09-30,2008-Q3,completions,Western Australia,5071,count,actual
+2008-12-31,2008-Q4,completions,Western Australia,6180,count,actual
+2009-03-31,2009-Q1,completions,Western Australia,5037,count,actual
+2009-06-30,2009-Q2,completions,Western Australia,5876,count,actual
+2009-09-30,2009-Q3,completions,Western Australia,5772,count,actual
+2009-12-31,2009-Q4,completions,Western Australia,5740,count,actual
+2010-03-31,2010-Q1,completions,Western Australia,5918,count,actual
+2010-06-30,2010-Q2,completions,Western Australia,5134,count,actual
+2010-09-30,2010-Q3,completions,Western Australia,5809,count,actual
+2010-12-31,2010-Q4,completions,Western Australia,5762,count,actual
+2011-03-31,2011-Q1,completions,Western Australia,6668,count,actual
+2011-06-30,2011-Q2,completions,Western Australia,6413,count,actual
+2011-09-30,2011-Q3,completions,Western Australia,4814,count,actual
+2011-12-31,2011-Q4,completions,Western Australia,4879,count,actual
+2012-03-31,2012-Q1,completions,Western Australia,5131,count,actual
+2012-06-30,2012-Q2,completions,Western Australia,5120,count,actual
+2012-09-30,2012-Q3,completions,Western Australia,5155,count,actual
+2012-12-31,2012-Q4,completions,Western Australia,4356,count,actual
+2013-03-31,2013-Q1,completions,Western Australia,4629,count,actual
+2013-06-30,2013-Q2,completions,Western Australia,4572,count,actual
+2013-09-30,2013-Q3,completions,Western Australia,5390,count,actual
+2013-12-31,2013-Q4,completions,Western Australia,6800,count,actual
+2014-03-31,2014-Q1,completions,Western Australia,5689,count,actual
+2014-06-30,2014-Q2,completions,Western Australia,7202,count,actual
+2014-09-30,2014-Q3,completions,Western Australia,6830,count,actual
+2014-12-31,2014-Q4,completions,Western Australia,6817,count,actual
+2015-03-31,2015-Q1,completions,Western Australia,7221,count,actual
+2015-06-30,2015-Q2,completions,Western Australia,7782,count,actual
+2015-09-30,2015-Q3,completions,Western Australia,8374,count,actual
+2015-12-31,2015-Q4,completions,Western Australia,8709,count,actual
+2016-03-31,2016-Q1,completions,Western Australia,7278,count,actual
+2016-06-30,2016-Q2,completions,Western Australia,8092,count,actual
+2016-09-30,2016-Q3,completions,Western Australia,6560,count,actual
+2016-12-31,2016-Q4,completions,Western Australia,6570,count,actual
+2017-03-31,2017-Q1,completions,Western Australia,5867,count,actual
+2017-06-30,2017-Q2,completions,Western Australia,4814,count,actual
+2017-09-30,2017-Q3,completions,Western Australia,5252,count,actual
+2017-12-31,2017-Q4,completions,Western Australia,4076,count,actual
+2018-03-31,2018-Q1,completions,Western Australia,4997,count,actual
+2018-06-30,2018-Q2,completions,Western Australia,4435,count,actual
+2018-09-30,2018-Q3,completions,Western Australia,4394,count,actual
+2018-12-31,2018-Q4,completions,Western Australia,4280,count,actual
+2019-03-31,2019-Q1,completions,Western Australia,3941,count,actual
+2019-06-30,2019-Q2,completions,Western Australia,4151,count,actual
+2019-09-30,2019-Q3,completions,Western Australia,3406,count,actual
+2019-12-31,2019-Q4,completions,Western Australia,4081,count,actual
+2020-03-31,2020-Q1,completions,Western Australia,3979,count,actual
+2020-06-30,2020-Q2,completions,Western Australia,3153,count,actual
+2020-09-30,2020-Q3,completions,Western Australia,3492,count,actual
+2020-12-31,2020-Q4,completions,Western Australia,2965,count,actual
+2021-03-31,2021-Q1,completions,Western Australia,3408,count,actual
+2021-06-30,2021-Q2,completions,Western Australia,3844,count,actual
+2021-09-30,2021-Q3,completions,Western Australia,3510,count,actual
+2021-12-31,2021-Q4,completions,Western Australia,3159,count,actual
+2022-03-31,2022-Q1,completions,Western Australia,3543,count,actual
+2022-06-30,2022-Q2,completions,Western Australia,3577,count,actual
+2022-09-30,2022-Q3,completions,Western Australia,2992,count,actual
+2022-12-31,2022-Q4,completions,Western Australia,3965,count,actual
+2023-03-31,2023-Q1,completions,Western Australia,4286,count,actual
+2023-06-30,2023-Q2,completions,Western Australia,4045,count,actual
+2023-09-30,2023-Q3,completions,Western Australia,4732,count,actual
+2023-12-31,2023-Q4,completions,Western Australia,4408,count,actual
+2024-03-31,2024-Q1,completions,Western Australia,4364,count,actual
+2024-06-30,2024-Q2,completions,Western Australia,4585,count,actual
+2024-09-30,2024-Q3,completions,Western Australia,5680,count,actual
+2024-12-31,2024-Q4,completions,Western Australia,5946,count,actual
+2025-03-31,2025-Q1,completions,Western Australia,5648,count,actual
+2025-06-30,2025-Q2,completions,Western Australia,5277,count,actual
+2025-09-30,2025-Q3,completions,Western Australia,5133,count,actual
+2025-12-31,2025-Q4,completions,Western Australia,4555,count,actual
+2026-03-31,2026-Q1,completions,Western Australia,5136,count,actual
+2026-06-30,2026-Q2,completions,Western Australia,4814,count,actual
+2024-06-30,2024,population_june_2024,Australia,27194286,count,actual
+2024-06-30,2024,population_june_2024,Australian Capital Territory,478430,count,actual
+2024-06-30,2024,population_june_2024,New South Wales,8492050,count,actual
+2024-06-30,2024,population_june_2024,Northern Territory,260884,count,actual
+2024-06-30,2024,population_june_2024,Queensland,5571890,count,actual
+2024-06-30,2024,population_june_2024,South Australia,1882164,count,actual
+2024-06-30,2024,population_june_2024,Tasmania,574765,count,actual
+2024-06-30,2024,population_june_2024,Victoria,6950961,count,actual
+2024-06-30,2024,population_june_2024,Western Australia,2978147,count,actual
